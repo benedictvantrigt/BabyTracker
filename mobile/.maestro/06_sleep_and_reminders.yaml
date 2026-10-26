@@ -4,7 +4,7 @@ name: Sleep timer, and leaves reminders scheduled for the alarm check
 - runFlow: subflows/onboard.yaml
 # Daytime feed reminders on, so a feed reminder is scheduled whatever the CI clock says.
 - tapOn: 'Settings'
-- assertVisible: 'Awake window'
+- assertVisible: 'THIS PHONE'
 - scrollUntilVisible:
     element:
       id: 'toggle-feed-day'

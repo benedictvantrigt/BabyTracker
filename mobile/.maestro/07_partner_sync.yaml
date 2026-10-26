@@ -1,7 +1,6 @@
 appId: com.babytracker.app
 name: Join a partner's family and sync both ways
-env:
-  INVITE: ''
+# INVITE comes from the test runner (-e INVITE=...); a default here would override it.
 ---
 - launchApp:
     clearState: true
