@@ -12,9 +12,10 @@ export function formatClock(ms: number): string {
   return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
-/** "1h 05m", "42m", "<1m". */
+/** "1h 05m", "42m", "<1m", or "0m" for nothing. */
 export function formatDuration(ms: number): string {
-  const totalMinutes = Math.floor(Math.max(0, ms) / MINUTE);
+  if (ms <= 0) return '0m';
+  const totalMinutes = Math.floor(ms / MINUTE);
   if (totalMinutes < 1) return '<1m';
   const h = Math.floor(totalMinutes / 60);
   const m = totalMinutes % 60;

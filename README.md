@@ -41,3 +41,14 @@ On a phone:
   is not available inside Expo Go.
 - **Installable APK:** `npx eas-cli@latest build -p android --profile preview` (free Expo account),
   or `npx expo run:android` with Android Studio installed.
+
+## Automated Android tests
+
+Every push that touches `mobile/` runs `.github/workflows/android-e2e.yml`:
+
+1. typecheck, lint and unit tests;
+2. builds a release APK and runs the Maestro flows in `mobile/.maestro/` on an Android emulator;
+3. checks that the app registered its reminder alarms and the ongoing timer notification;
+4. pushes a summary, screenshots and logs to the `e2e-results` branch;
+5. when everything passes, publishes the APK as the `android-latest` pre-release
+   (open the release on the phone, download `babytracker.apk`, install).

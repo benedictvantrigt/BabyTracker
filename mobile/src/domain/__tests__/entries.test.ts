@@ -101,6 +101,7 @@ describe('labels and grouping', () => {
 
 describe('time formatting', () => {
   it('formats durations and stopwatches', () => {
+    expect(formatDuration(0)).toBe('0m');
     expect(formatDuration(30_000)).toBe('<1m');
     expect(formatDuration(42 * MINUTE)).toBe('42m');
     expect(formatDuration(HOUR + 5 * MINUTE)).toBe('1h 05m');
