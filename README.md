@@ -8,6 +8,7 @@ through a small end-to-end encrypted relay is planned for a later phase.
 - Feeding (breast left/right/both, bottle with ml, formula/solids), sleep (nap/night), diapers (wet/solid/colour)
 - One-tap timers: tap Left/Right to start a feed, switching sides stops the other side; Start/Stop sleep
 - Today screen: running timers, time since last feed/diaper/sleep, next nap and feed, today's totals, undo
+- Customizable Today screen: show, hide and reorder cards (e.g. diapers first in the newborn weeks, sleep later)
 - Timeline grouped by day; tap any entry to edit or delete
 - Reminders, scheduled on the phone from the log:
   - nap reminder when the awake window has passed (daytime only)

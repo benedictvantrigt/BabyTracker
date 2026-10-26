@@ -1,3 +1,4 @@
+import { normalizeDashboard } from '@/domain/dashboard';
 import { validateEntry } from '@/domain/entries';
 import {
   DEFAULT_SETTINGS,
@@ -278,6 +279,7 @@ export class Repo {
       if (key in DEFAULT_SETTINGS)
         (settings as unknown as Record<string, unknown>)[key] = JSON.parse(value);
     }
+    settings.dashboardCards = normalizeDashboard(settings.dashboardCards);
     return settings;
   }
 

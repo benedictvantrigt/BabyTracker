@@ -1,35 +1,16 @@
 import { router } from 'expo-router';
-import { useCallback, useEffect, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { Button, Card, DateTimeField, Field, Icon, KIND_ICON } from '@/components/ui';
+import { DASHBOARD_CARD_COMPONENTS, type DashboardCardProps } from '@/components/dashboard-cards';
+import { Button, Card, DateTimeField, Field, Icon } from '@/components/ui';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useAction, useAppData, useEntries, useNow } from '@/data/app-data';
-import {
-  KIND_LABEL,
-  entryTitle,
-  feedingLabel,
-  isNapStart,
-  lastCompletedSleep,
-  latest,
-  runningEntries,
-  summarizeDay,
-} from '@/domain/entries';
-import { nextFeedAt, nextNapAt } from '@/domain/reminders';
-import {
-  DAY,
-  formatAge,
-  formatAgo,
-  formatClock,
-  formatDuration,
-  formatStopwatch,
-  startOfLocalDay,
-  toIsoDate,
-} from '@/domain/time';
-import type { Child, DiaperData, Entry, FeedingMethod } from '@/domain/types';
+import { DAY, formatAge, startOfLocalDay, toIsoDate } from '@/domain/time';
+import type { Child, Entry } from '@/domain/types';
 import { useTheme } from '@/hooks/use-theme';
 import { requestNotificationPermission } from '@/notifications/scheduler';
 
@@ -104,7 +85,6 @@ interface UndoState {
 
 function Dashboard({ child }: { child: Child }) {
   const { repo, settings } = useAppData();
-  const theme = useTheme();
   const now = useNow(1000);
   // Yesterday onwards covers "last of each" and today's totals; only changes at midnight.
   const { entries } = useEntries(child.id, startOfLocalDay(now) - DAY);
@@ -122,146 +102,39 @@ function Dashboard({ child }: { child: Child }) {
     [],
   );
 
-  const running = runningEntries(entries);
-  const sleeping = running.find((e) => e.kind === 'sleep');
-  const lastSleep = lastCompletedSleep(entries);
-  const lastFeed = latest(entries, 'feeding');
-  const lastDiaper = latest(entries, 'diaper');
-  const napAt = nextNapAt(entries, settings);
-  const feedAt = nextFeedAt(entries, settings);
-  const today = summarizeDay(entries, now);
-
-  const startFeed = (method: FeedingMethod) =>
-    run(async () => {
-      const e = await repo.startTimer(child.id, 'feeding', { type: 'breast_milk', method });
-      logged(e, `Feeding (${method}) started`);
-    });
-  const logDiaper = (data: DiaperData, label: string) =>
-    run(async () => {
-      const t = Date.now();
-      const e = await repo.addEntry(child.id, { kind: 'diaper', start: t, end: t, data });
-      logged(e, `Diaper logged: ${label}`);
-    });
-  const startSleep = () =>
-    run(async () => {
-      const e = await repo.startTimer(child.id, 'sleep', { nap: isNapStart(Date.now(), settings) });
-      logged(e, 'Sleep started');
-    });
+  const { textSecondary } = useTheme();
+  const cardProps: DashboardCardProps = { child, settings, entries, now, repo, run, logged };
 
   return (
     <View style={styles.fill}>
       <ScrollView contentContainerStyle={[styles.content, styles.section]}>
-        <View>
-          <ThemedText type="subtitle">{child.name}</ThemedText>
-          {child.birthDate && (
-            <ThemedText themeColor="textSecondary">{formatAge(child.birthDate, now)}</ThemedText>
-          )}
+        <View style={styles.header}>
+          <View style={styles.grow}>
+            <ThemedText type="subtitle">{child.name}</ThemedText>
+            {child.birthDate && (
+              <ThemedText themeColor="textSecondary">{formatAge(child.birthDate, now)}</ThemedText>
+            )}
+          </View>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Customize dashboard"
+            onPress={() => router.push('/dashboard')}
+            hitSlop={12}>
+            <Icon name={{ ios: 'slider.horizontal.3', android: 'tune' }} color={textSecondary} />
+          </Pressable>
         </View>
 
-        {running.map((e) => (
-          <RunningTimer
-            key={e.id}
-            entry={e}
-            now={now}
-            onStop={() => run(() => repo.stopEntry(e.id))}
-          />
-        ))}
+        {settings.dashboardCards.map((id) => {
+          const CardComponent = DASHBOARD_CARD_COMPONENTS[id];
+          return <CardComponent key={id} {...cardProps} />;
+        })}
 
-        <KindCard kind="sleep" onAdd={() => router.push('/entry/sleep')}>
-          <ThemedText>
-            {sleeping
-              ? `Asleep since ${formatClock(sleeping.start)}`
-              : lastSleep?.end != null
-                ? `Awake ${formatDuration(now - lastSleep.end)} (since ${formatClock(lastSleep.end)})`
-                : 'No sleep logged yet'}
-          </ThemedText>
-          {!sleeping && napAt && (
-            <ThemedText type="small" themeColor="textSecondary">
-              {napAt > now
-                ? `Nap due at ${formatClock(napAt)}`
-                : `Nap was due ${formatAgo(napAt, now)}`}
-            </ThemedText>
-          )}
-          {!sleeping && (
-            <Button
-              label="Start sleep"
-              variant="primary"
-              color={theme.sleep}
-              onPress={startSleep}
-            />
-          )}
-        </KindCard>
-
-        <KindCard kind="feeding" onAdd={() => router.push('/entry/feeding')}>
-          <ThemedText>
-            {lastFeed
-              ? `Last: ${feedingLabel(lastFeed.data)}, ${formatAgo(lastFeed.start, now)}`
-              : 'No feeding logged yet'}
-          </ThemedText>
-          {feedAt && (
-            <ThemedText type="small" themeColor="textSecondary">
-              Next due at {formatClock(feedAt)}
-            </ThemedText>
-          )}
-          <View style={styles.buttonRow}>
-            <Button label="Left" style={styles.grow} onPress={() => startFeed('left')} />
-            <Button label="Right" style={styles.grow} onPress={() => startFeed('right')} />
-            <Button
-              label="Bottle"
-              style={styles.grow}
-              onPress={() =>
-                router.push({
-                  pathname: '/entry/[kind]',
-                  params: { kind: 'feeding', method: 'bottle' },
-                })
-              }
-            />
-          </View>
-        </KindCard>
-
-        <KindCard kind="diaper" onAdd={() => router.push('/entry/diaper')}>
-          <ThemedText>
-            {lastDiaper
-              ? `Last change ${formatAgo(lastDiaper.start, now)}`
-              : 'No diaper change logged yet'}
-          </ThemedText>
-          <View style={styles.buttonRow}>
-            <Button
-              label="Wet"
-              style={styles.grow}
-              onPress={() => logDiaper({ wet: true, solid: false }, 'wet')}
-            />
-            <Button
-              label="Solid"
-              style={styles.grow}
-              onPress={() => logDiaper({ wet: false, solid: true }, 'solid')}
-            />
-            <Button
-              label="Both"
-              style={styles.grow}
-              onPress={() => logDiaper({ wet: true, solid: true }, 'wet + solid')}
-            />
-          </View>
-        </KindCard>
-
-        <Card>
-          <ThemedText type="smallBold" themeColor="textSecondary">
-            TODAY
-          </ThemedText>
-          <View style={styles.statsRow}>
-            <Stat
-              label="Feeds"
-              value={String(today.feedings)}
-              sub={today.bottleMl ? `${today.bottleMl} ml` : undefined}
-            />
-            <Stat
-              label="Diapers"
-              value={String(today.diapers)}
-              sub={`${today.wet} wet · ${today.solid} solid`}
-            />
-            <Stat label="Sleep" value={formatDuration(today.sleepMs)} sub={`${today.naps} naps`} />
-          </View>
-        </Card>
+        {settings.dashboardCards.length === 0 && (
+          <Card>
+            <ThemedText themeColor="textSecondary">All cards are hidden.</ThemedText>
+            <Button label="Customize dashboard" onPress={() => router.push('/dashboard')} />
+          </Card>
+        )}
       </ScrollView>
 
       {undo && (
@@ -273,93 +146,6 @@ function Dashboard({ child }: { child: Child }) {
             run(() => repo.deleteEntry(id));
           }}
         />
-      )}
-    </View>
-  );
-}
-
-function useKindColor(kind: Entry['kind']): string {
-  return useTheme()[kind];
-}
-
-function KindCard({
-  kind,
-  onAdd,
-  children,
-}: {
-  kind: Entry['kind'];
-  onAdd: () => void;
-  children: ReactNode;
-}) {
-  const color = useKindColor(kind);
-  return (
-    <Card>
-      <View style={styles.cardHeader}>
-        <Icon name={KIND_ICON[kind]} color={color} />
-        <ThemedText type="smallBold" style={[styles.grow, { color }]}>
-          {KIND_LABEL[kind].toUpperCase()}
-        </ThemedText>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={`Add ${KIND_LABEL[kind]} entry`}
-          onPress={onAdd}
-          hitSlop={12}>
-          <ThemedText type="smallBold" themeColor="textSecondary">
-            + Add
-          </ThemedText>
-        </Pressable>
-      </View>
-      {children}
-    </Card>
-  );
-}
-
-function RunningTimer({ entry, now, onStop }: { entry: Entry; now: number; onStop: () => void }) {
-  const theme = useTheme();
-  const color = theme[entry.kind];
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={`Edit ${entryTitle(entry)}`}
-      onPress={() =>
-        router.push({ pathname: '/entry/[kind]', params: { kind: entry.kind, id: entry.id } })
-      }>
-      <Card style={[styles.running, { borderColor: color }]}>
-        <View style={styles.cardHeader}>
-          <Icon name={KIND_ICON[entry.kind]} color={color} />
-          <View style={styles.grow}>
-            <ThemedText type="smallBold">{entryTitle(entry)}</ThemedText>
-            <ThemedText type="small" themeColor="textSecondary">
-              Since {formatClock(entry.start)}
-            </ThemedText>
-          </View>
-          <ThemedText style={styles.stopwatch}>{formatStopwatch(now - entry.start)}</ThemedText>
-        </View>
-        <Button
-          label="Stop"
-          variant="primary"
-          color={color}
-          icon={{ ios: 'stop.fill', android: 'stop' }}
-          onPress={onStop}
-        />
-      </Card>
-    </Pressable>
-  );
-}
-
-function Stat({ label, value, sub }: { label: string; value: string; sub?: string }) {
-  return (
-    <View style={styles.grow}>
-      <ThemedText type="small" themeColor="textSecondary">
-        {label}
-      </ThemedText>
-      <ThemedText type="smallBold" style={styles.statValue}>
-        {value}
-      </ThemedText>
-      {sub && (
-        <ThemedText type="small" themeColor="textSecondary">
-          {sub}
-        </ThemedText>
       )}
     </View>
   );
@@ -394,34 +180,13 @@ const styles = StyleSheet.create({
   section: {
     gap: Spacing.three,
   },
-  cardHeader: {
+  header: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.two,
-  },
-  buttonRow: {
-    flexDirection: 'row',
-    gap: Spacing.two,
+    gap: Spacing.three,
   },
   grow: {
     flex: 1,
-  },
-  running: {
-    borderWidth: 2,
-  },
-  stopwatch: {
-    fontSize: 24,
-    lineHeight: 30,
-    fontWeight: 600,
-    fontVariant: ['tabular-nums'],
-  },
-  statsRow: {
-    flexDirection: 'row',
-    gap: Spacing.two,
-  },
-  statValue: {
-    fontSize: 20,
-    lineHeight: 28,
   },
   textInput: {
     borderWidth: 1,

@@ -1,3 +1,5 @@
+import { DEFAULT_DASHBOARD, type DashboardCardId } from './dashboard';
+
 // Every record is an immutable-id row with timestamps and a soft-delete marker,
 // so the Phase 2 sync layer can replicate it as a last-writer-wins change log.
 
@@ -86,6 +88,8 @@ export interface Settings {
   napReminders: boolean;
   feedRemindersDay: boolean;
   feedAlarmNight: boolean;
+  /** Visible Today-screen cards in display order. */
+  dashboardCards: DashboardCardId[];
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -97,4 +101,5 @@ export const DEFAULT_SETTINGS: Settings = {
   napReminders: true,
   feedRemindersDay: false,
   feedAlarmNight: true,
+  dashboardCards: DEFAULT_DASHBOARD,
 };

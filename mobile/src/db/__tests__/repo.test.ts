@@ -148,4 +148,19 @@ describe('Repo', () => {
     expect(s.feedAlarmNight).toBe(false);
     expect(s.feedIntervalMinutes).toBe(240);
   });
+
+  it('stores the dashboard layout and drops unknown cards', async () => {
+    const { repo } = await setup();
+    expect((await repo.getSettings()).dashboardCards).toEqual([
+      'timers',
+      'sleep',
+      'feeding',
+      'diaper',
+      'today',
+    ]);
+    await repo.updateSettings({ dashboardCards: ['diaper', 'feeding'] });
+    expect((await repo.getSettings()).dashboardCards).toEqual(['diaper', 'feeding']);
+    await repo.updateSettings({ dashboardCards: ['diaper', 'weather'] as never });
+    expect((await repo.getSettings()).dashboardCards).toEqual(['diaper']);
+  });
 });
