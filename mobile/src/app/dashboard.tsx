@@ -99,17 +99,24 @@ function CardRow({
         <>
           <MoveButton
             label={`Move ${title} up`}
+            testID={`move-up-${id}`}
             icon={{ ios: 'chevron.up', android: 'arrow_upward' }}
             onPress={onUp}
           />
           <MoveButton
             label={`Move ${title} down`}
+            testID={`move-down-${id}`}
             icon={{ ios: 'chevron.down', android: 'arrow_downward' }}
             onPress={onDown}
           />
         </>
       )}
-      <Switch value={visible} onValueChange={onToggle} accessibilityLabel={`Show ${title}`} />
+      <Switch
+        value={visible}
+        onValueChange={onToggle}
+        accessibilityLabel={`Show ${title}`}
+        testID={`show-${id}`}
+      />
     </View>
   );
 }
@@ -118,8 +125,10 @@ function MoveButton({
   label,
   icon,
   onPress,
+  testID,
 }: {
   label: string;
+  testID: string;
   icon: ComponentProps<typeof Icon>['name'];
   onPress?: () => void;
 }) {
@@ -128,6 +137,7 @@ function MoveButton({
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={label}
+      testID={testID}
       accessibilityState={{ disabled: !onPress }}
       disabled={!onPress}
       onPress={onPress}

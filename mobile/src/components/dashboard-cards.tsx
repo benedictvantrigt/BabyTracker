@@ -178,7 +178,7 @@ function DiaperCard({ child, entries, now, repo, run, logged }: DashboardCardPro
 function TodayCard({ entries, now }: DashboardCardProps) {
   const today = summarizeDay(entries, now);
   return (
-    <Card>
+    <Card testID="card-today">
       <ThemedText type="smallBold" themeColor="textSecondary">
         TODAY
       </ThemedText>
@@ -210,7 +210,7 @@ function KindCard({
 }) {
   const color = useTheme()[kind];
   return (
-    <Card>
+    <Card testID={`card-${kind}`}>
       <View style={styles.cardHeader}>
         <Icon name={KIND_ICON[kind]} color={color} />
         <ThemedText type="smallBold" style={[styles.grow, { color }]}>

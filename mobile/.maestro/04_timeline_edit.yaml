@@ -1,0 +1,30 @@
+appId: com.babytracker.app
+name: Timeline lists entries; edit and delete
+---
+- runFlow: subflows/onboard.yaml
+- tapOn: 'Wet'
+- tapOn: 'Left'
+- assertVisible: 'Feeding · Left'
+- tapOn: 'Stop'
+- tapOn: 'Timeline'
+- assertVisible: 'TODAY'
+- assertVisible: 'Feeding · Left'
+- assertVisible: 'Diaper · Wet'
+- takeScreenshot: 04-timeline
+# Edit the diaper: also solid.
+- tapOn: 'Diaper · Wet'
+- assertVisible: 'Edit diaper'
+- tapOn:
+    id: 'toggle-solid'
+- tapOn: 'Save'
+- assertVisible: 'Diaper · Wet \+ solid'
+# Delete the feed (Android alert: second button is the positive one).
+- tapOn: 'Feeding · Left'
+- assertVisible: 'Edit feeding'
+- tapOn: 'Delete'
+- assertVisible: 'Delete entry\?'
+- tapOn:
+    id: 'android:id/button1'
+- assertNotVisible: 'Feeding · Left'
+- assertVisible: 'Diaper · Wet \+ solid'
+- takeScreenshot: 04-timeline-after-edit

@@ -1,0 +1,23 @@
+appId: com.babytracker.app
+name: Sleep timer, and leaves reminders scheduled for the alarm check
+---
+- runFlow: subflows/onboard.yaml
+# Daytime feed reminders on, so a feed reminder is scheduled whatever the CI clock says.
+- tapOn: 'Settings'
+- assertVisible: 'Awake window'
+- scrollUntilVisible:
+    element:
+      id: 'toggle-feed-day'
+- tapOn:
+    id: 'toggle-feed-day'
+- tapOn: 'Today'
+- tapOn: 'Start sleep'
+- assertVisible: 'Asleep since .*'
+- assertVisible: 'Micky is asleep|Nap|Night sleep'
+- takeScreenshot: 06-sleeping
+- tapOn: 'Stop'
+- assertVisible: 'Awake .* \(since .*\)'
+# Leave a feed running: its ongoing notification is checked after the flows.
+- tapOn: 'Left'
+- assertVisible: 'Feeding · Left'
+- takeScreenshot: 06-feed-running

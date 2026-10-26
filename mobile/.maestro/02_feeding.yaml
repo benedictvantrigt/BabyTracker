@@ -1,0 +1,23 @@
+appId: com.babytracker.app
+name: Breast feeding timers switch sides, bottle feed with amount
+---
+- runFlow: subflows/onboard.yaml
+- tapOn: 'Left'
+- assertVisible: 'Feeding · Left'
+- takeScreenshot: 02-feeding-left-running
+- tapOn: 'Right'
+- assertVisible: 'Feeding · Right'
+- assertNotVisible: 'Feeding · Left'
+- tapOn: 'Stop'
+- assertNotVisible: 'Feeding · Right'
+- assertVisible: 'Last: Right, .* ago'
+- assertVisible: 'Next due at .*'
+- tapOn: 'Bottle'
+- assertVisible: 'Add feeding'
+- tapOn:
+    id: 'feed-amount'
+- inputText: '120'
+- hideKeyboard
+- tapOn: 'Save'
+- assertVisible: 'Last: Bottle 120 ml · Formula, .* ago'
+- takeScreenshot: 02-feeding-after-bottle

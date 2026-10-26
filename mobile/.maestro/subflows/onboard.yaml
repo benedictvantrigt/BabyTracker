@@ -1,0 +1,14 @@
+# Fresh install, all permissions granted, baby "Micky" created.
+appId: com.babytracker.app
+---
+- launchApp:
+    clearState: true
+    permissions:
+      all: allow
+- assertVisible: 'Welcome'
+- tapOn:
+    id: 'child-name'
+- inputText: 'Micky'
+- hideKeyboard
+- tapOn: 'Start tracking'
+- assertVisible: 'Micky'

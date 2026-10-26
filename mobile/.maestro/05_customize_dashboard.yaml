@@ -1,0 +1,35 @@
+appId: com.babytracker.app
+name: Hide, reorder and reset dashboard cards
+---
+- runFlow: subflows/onboard.yaml
+- tapOn:
+    id: 'customize-dashboard'
+- assertVisible: 'Customize Today'
+- tapOn:
+    id: 'show-sleep'
+- assertVisible: 'HIDDEN'
+# Diapers: from position 3 (after timers, feeding) to the top.
+- tapOn:
+    id: 'move-up-diaper'
+- tapOn:
+    id: 'move-up-diaper'
+- takeScreenshot: 05-customize
+- back
+- assertNotVisible:
+    id: 'card-sleep'
+- assertVisible:
+    id: 'card-diaper'
+- takeScreenshot: 05-dashboard-newborn-layout
+# The layout survives an app restart.
+- stopApp
+- launchApp
+- assertVisible: 'Micky'
+- assertNotVisible:
+    id: 'card-sleep'
+- tapOn:
+    id: 'customize-dashboard'
+- tapOn: 'Reset to default'
+- assertNotVisible: 'HIDDEN'
+- back
+- assertVisible:
+    id: 'card-sleep'

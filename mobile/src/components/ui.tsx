@@ -38,10 +38,20 @@ export function Icon({
   return <SymbolView name={name} tintColor={color} size={size} />;
 }
 
-export function Card({ children, style }: { children: ReactNode; style?: StyleProp<ViewStyle> }) {
+export function Card({
+  children,
+  style,
+  testID,
+}: {
+  children: ReactNode;
+  style?: StyleProp<ViewStyle>;
+  testID?: string;
+}) {
   const theme = useTheme();
   return (
-    <View style={[styles.card, { backgroundColor: theme.backgroundElement }, style]}>
+    <View
+      testID={testID}
+      style={[styles.card, { backgroundColor: theme.backgroundElement }, style]}>
       {children}
     </View>
   );
@@ -141,11 +151,13 @@ export function ToggleRow({
   description,
   value,
   onChange,
+  testID,
 }: {
   label: string;
   description?: string;
   value: boolean;
   onChange: (value: boolean) => void;
+  testID?: string;
 }) {
   return (
     <View style={styles.row}>
@@ -157,7 +169,7 @@ export function ToggleRow({
           </ThemedText>
         )}
       </View>
-      <Switch value={value} onValueChange={onChange} accessibilityLabel={label} />
+      <Switch value={value} onValueChange={onChange} accessibilityLabel={label} testID={testID} />
     </View>
   );
 }

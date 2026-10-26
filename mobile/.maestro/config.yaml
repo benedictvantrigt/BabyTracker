@@ -1,0 +1,12 @@
+# Maestro workspace: runs the top-level flows in this order. Subflows are not run directly.
+flows:
+  - '*'
+executionOrder:
+  continueOnFailure: true
+  flowsOrder:
+    - 01_onboarding
+    - 02_feeding
+    - 03_diaper
+    - 04_timeline_edit
+    - 05_customize_dashboard
+    - 06_sleep_and_reminders

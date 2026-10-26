@@ -1,0 +1,15 @@
+appId: com.babytracker.app
+name: One-tap diapers with undo
+---
+- runFlow: subflows/onboard.yaml
+- tapOn: 'Wet'
+- assertVisible: 'Diaper logged: wet'
+- takeScreenshot: 03-diaper-undo-banner
+- tapOn: 'UNDO'
+- assertVisible: 'No diaper change logged yet'
+- tapOn: 'Both'
+- assertVisible: 'Last change .* ago'
+- tapOn: 'Solid'
+- scrollUntilVisible:
+    element: '1 wet · 2 solid'
+- takeScreenshot: 03-diaper-totals

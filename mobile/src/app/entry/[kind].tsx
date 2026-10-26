@@ -230,6 +230,7 @@ export default function EntryScreen() {
                 <TextInput
                   value={form.amount}
                   onChangeText={(amount) => set({ amount })}
+                  testID="feed-amount"
                   keyboardType="numeric"
                   placeholder="e.g. 120"
                   placeholderTextColor={theme.textSecondary}
@@ -242,8 +243,18 @@ export default function EntryScreen() {
 
         {kind === 'diaper' && (
           <>
-            <ToggleRow label="Wet" value={form.wet} onChange={(wet) => set({ wet })} />
-            <ToggleRow label="Solid" value={form.solid} onChange={(solid) => set({ solid })} />
+            <ToggleRow
+              label="Wet"
+              value={form.wet}
+              onChange={(wet) => set({ wet })}
+              testID="toggle-wet"
+            />
+            <ToggleRow
+              label="Solid"
+              value={form.solid}
+              onChange={(solid) => set({ solid })}
+              testID="toggle-solid"
+            />
             {form.solid && (
               <Field label="Colour">
                 <Segmented

@@ -54,6 +54,7 @@ function AddChild() {
           <TextInput
             value={name}
             onChangeText={setName}
+            testID="child-name"
             placeholder="Name"
             placeholderTextColor={theme.textSecondary}
             style={[styles.textInput, { color: theme.text, borderColor: theme.border }]}
@@ -118,6 +119,7 @@ function Dashboard({ child }: { child: Child }) {
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Customize dashboard"
+            testID="customize-dashboard"
             onPress={() => router.push('/dashboard')}
             hitSlop={12}>
             <Icon name={{ ios: 'slider.horizontal.3', android: 'tune' }} color={textSecondary} />

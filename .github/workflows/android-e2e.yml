@@ -1,0 +1,128 @@
+name: Android E2E
+
+on:
+  push:
+    branches-ignore: [e2e-results]
+    paths: ['mobile/**', '.github/workflows/android-e2e.yml']
+  workflow_dispatch:
+
+concurrency:
+  group: android-e2e-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: mobile/package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm test
+
+  android:
+    needs: checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      E2E_OUT: ${{ github.workspace }}/e2e-out
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: mobile/package-lock.json
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Install dependencies
+        working-directory: mobile
+        run: npm ci
+
+      - name: Build release APK (x86_64 for the emulator, arm64 for phones)
+        working-directory: mobile
+        run: |
+          npx expo prebuild --platform android --no-install
+          cd android
+          ./gradlew assembleRelease -PreactNativeArchitectures=x86_64,arm64-v8a
+          cp app/build/outputs/apk/release/app-release.apk ../babytracker.apk
+
+      - name: Install Maestro
+        run: |
+          curl -Ls "https://get.maestro.mobile.dev" | bash
+          echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
+
+      - name: Run E2E on emulator
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          target: google_apis
+          arch: x86_64
+          profile: pixel_6
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none
+          script: bash mobile/e2e/run-e2e.sh mobile/babytracker.apk "$E2E_OUT"
+
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-results
+          path: e2e-out
+          if-no-files-found: ignore
+
+      - name: Publish results to the e2e-results branch
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p e2e-out
+          cd e2e-out
+          [ -f summary.md ] || echo "# Android E2E results: no summary (run failed before the tests)" > summary.md
+          {
+            echo ""
+            echo "Commit: ${GITHUB_SHA}"
+            echo "Run: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          } >> summary.md
+          cat summary.md >> "$GITHUB_STEP_SUMMARY"
+          # Keep the branch small: no full logcat or videos.
+          find . -name "*.mp4" -delete
+          [ -f logcat.txt ] && tail -n 5000 logcat.txt > logcat.tmp && mv logcat.tmp logcat.txt
+          git init -q -b e2e-results
+          git add -A
+          git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+            commit -q -m "E2E results for ${GITHUB_SHA::7}"
+          git push -f -q "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" e2e-results
+
+      - name: Publish APK as the android-latest pre-release
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete android-latest --yes --cleanup-tag || true
+          gh release create android-latest mobile/babytracker.apk \
+            --prerelease --target "$GITHUB_SHA" \
+            --title "Android test build ${GITHUB_SHA::7}" \
+            --notes "Debug-signed test build from ${GITHUB_SHA::7}. All E2E checks passed. Install on the phone: download babytracker.apk and open it."

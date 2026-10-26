@@ -1,0 +1,17 @@
+appId: com.babytracker.app
+name: Onboarding shows the default dashboard
+---
+- runFlow: subflows/onboard.yaml
+- assertVisible: '0 days'
+- assertVisible:
+    id: 'card-sleep'
+- assertVisible:
+    id: 'card-feeding'
+- assertVisible:
+    id: 'card-diaper'
+- assertVisible: 'No sleep logged yet'
+- assertVisible: 'No feeding logged yet'
+- scrollUntilVisible:
+    element:
+      id: 'card-today'
+- takeScreenshot: 01-dashboard

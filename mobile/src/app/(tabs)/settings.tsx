@@ -84,6 +84,7 @@ export default function SettingsScreen() {
               label="Daytime reminder"
               description="Notification when a feed is due during the day"
               value={settings.feedRemindersDay}
+              testID="toggle-feed-day"
               onChange={(v) => update({ feedRemindersDay: v })}
             />
             <ToggleRow
