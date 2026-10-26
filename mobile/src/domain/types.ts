@@ -90,7 +90,22 @@ export interface Settings {
   feedAlarmNight: boolean;
   /** Visible Today-screen cards in display order. */
   dashboardCards: DashboardCardId[];
+  /** Whether this phone shows nap and feed reminders (per phone, not synced). */
+  remindersOnThisPhone: boolean;
 }
+
+/** Reminder rules shared by the phones of a family; the rest of Settings is per phone. */
+export const SHARED_SETTINGS = [
+  'awakeWindowMinutes',
+  'feedIntervalMinutes',
+  'dayStartMinute',
+  'dayEndMinute',
+  'napReminders',
+  'feedRemindersDay',
+  'feedAlarmNight',
+] as const satisfies readonly (keyof Settings)[];
+
+export type SharedSettings = Pick<Settings, (typeof SHARED_SETTINGS)[number]>;
 
 export const DEFAULT_SETTINGS: Settings = {
   activeChildId: null,
@@ -102,4 +117,5 @@ export const DEFAULT_SETTINGS: Settings = {
   feedRemindersDay: false,
   feedAlarmNight: true,
   dashboardCards: DEFAULT_DASHBOARD,
+  remindersOnThisPhone: true,
 };

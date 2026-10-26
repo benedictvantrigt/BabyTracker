@@ -19,6 +19,7 @@ import { useAction, useAppData } from '@/data/app-data';
 import { formatDuration, MINUTE, startOfLocalDay, toIsoDate } from '@/domain/time';
 import type { Child, Settings } from '@/domain/types';
 import { useTheme } from '@/hooks/use-theme';
+import { useSync } from '@/sync/app-sync';
 import {
   getPermissionState,
   requestExactAlarmPermission,
@@ -36,6 +37,7 @@ export default function SettingsScreen() {
   const { repo, settings, activeChild } = useAppData();
   const run = useAction(showError);
   const update = (patch: Partial<Settings>) => run(() => repo.updateSettings(patch));
+  const sync = useSync();
 
   return (
     <ThemedView style={styles.fill}>
@@ -48,6 +50,23 @@ export default function SettingsScreen() {
           <PartnerSyncCard />
 
           <PermissionsCard />
+
+          <Card>
+            <ThemedText type="smallBold" themeColor="textSecondary">
+              THIS PHONE
+            </ThemedText>
+            <ToggleRow
+              label="Reminders on this phone"
+              description={
+                sync.status.enabled
+                  ? 'The reminder rules below are shared with your partner; each phone chooses whether to show them.'
+                  : 'Nap and feed reminders as set below.'
+              }
+              value={settings.remindersOnThisPhone}
+              onChange={(v) => update({ remindersOnThisPhone: v })}
+              testID="toggle-reminders-here"
+            />
+          </Card>
 
           <Card>
             <ThemedText type="smallBold" themeColor="textSecondary">

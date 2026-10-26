@@ -84,7 +84,12 @@ jobs:
         env:
           # The production relay, once deployed (repository variable RELAY_URL).
           EXPO_PUBLIC_RELAY_URL: ${{ vars.RELAY_URL }}
+          # Firebase app config for push (optional secret GOOGLE_SERVICES_JSON).
+          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
         run: |
+          if [ -n "$GOOGLE_SERVICES_JSON" ]; then
+            printf '%s' "$GOOGLE_SERVICES_JSON" > google-services.json
+          fi
           npx expo prebuild --platform android --no-install
           cd android
           ./gradlew assembleRelease -PreactNativeArchitectures=x86_64,arm64-v8a

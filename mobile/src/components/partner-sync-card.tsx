@@ -103,6 +103,11 @@ export function PartnerSyncCard() {
           {devices === 1 ? 'Only this phone so far' : `${devices} phones share this log`}
         </ThemedText>
       )}
+      <ThemedText type="small" themeColor="textSecondary" testID="reminder-delivery">
+        {status.push
+          ? 'Reminders arrive by push from the sync server, so they follow your partner’s logging even while this app is closed.'
+          : 'Reminders are scheduled on this phone. Push is not available in this build, so they update when the app syncs.'}
+      </ThemedText>
       <Button
         label="Invite partner"
         variant="primary"

@@ -1,6 +1,7 @@
 import { DurableObject } from 'cloudflare:workers';
 
 import { sha256Hex, verifyRequest } from './auth';
+import { fcmConfigured, sendPushes, type FcmEnv, type PushMessage } from './fcm';
 
 /** Invites are single use and short lived; the code also carries the family key. */
 const INVITE_TTL_MS = 15 * 60_000;
@@ -10,6 +11,13 @@ const MAX_CHANGES_PER_PUSH = 200;
 const MAX_PULL = 500;
 /** Rough abuse guard: a busy family logs a few thousand changes a month. */
 const MAX_CHANGES_STORED = 500_000;
+const MAX_REMINDERS = 10;
+const MAX_REMINDER_BYTES = 4 * 1024;
+/** Reminders further out than this are refused; the phones refresh them on every change. */
+const MAX_REMINDER_AHEAD_MS = 2 * 24 * 60 * 60_000;
+/** A reminder delivered later than this after its time is dropped by FCM. */
+const REMINDER_TTL_SECONDS = 30 * 60;
+const SYNC_NUDGE_TTL_SECONDS = 60 * 60;
 
 type Json = Record<string, unknown>;
 
@@ -22,13 +30,14 @@ function error(code: string, status: number): Response {
 }
 
 /**
- * One family: its devices, pending invites and the encrypted change log.
- * The change log is append-only; each device pulls everything after its last seq.
+ * One family: its devices, pending invites, the encrypted change log and the family's
+ * pending reminders. The change log is append-only; each device pulls everything after
+ * its last seq. Reminders fire from a Durable Object alarm as push messages.
  */
-export class Family extends DurableObject {
+export class Family extends DurableObject<FcmEnv> {
   private sql = this.ctx.storage.sql;
 
-  constructor(ctx: DurableObjectState, env: Cloudflare.Env) {
+  constructor(ctx: DurableObjectState, env: FcmEnv) {
     super(ctx, env);
     this.sql.exec(`
       CREATE TABLE IF NOT EXISTS devices (
@@ -48,7 +57,21 @@ export class Family extends DurableObject {
         body TEXT NOT NULL,
         created_at INTEGER NOT NULL
       );
+      CREATE TABLE IF NOT EXISTS reminders (
+        tag TEXT PRIMARY KEY,
+        fire_at INTEGER NOT NULL,
+        body TEXT NOT NULL
+      );
+      CREATE TABLE IF NOT EXISTS meta (
+        key TEXT PRIMARY KEY,
+        value INTEGER NOT NULL
+      );
     `);
+    const columns = this.sql.exec('PRAGMA table_info(devices)').toArray().map((c) => c.name);
+    if (!columns.includes('push_token')) {
+      this.sql.exec('ALTER TABLE devices ADD COLUMN push_token TEXT');
+      this.sql.exec('ALTER TABLE devices ADD COLUMN reminders INTEGER NOT NULL DEFAULT 1');
+    }
   }
 
   async fetch(request: Request): Promise<Response> {
@@ -81,6 +104,8 @@ export class Family extends DurableObject {
     if (route === 'POST /changes') return this.push(signed.deviceId, body, now);
     if (route === 'GET /changes') return this.pull(url);
     if (route === 'GET /devices') return this.listDevices();
+    if (route === 'PUT /device') return this.updateDevice(signed.deviceId, body);
+    if (route === 'PUT /reminders') return this.setReminders(body, now);
     const revoke = /^DELETE \/devices\/([A-Za-z0-9_-]+)$/.exec(route);
     if (revoke) return this.revoke(revoke[1], now);
     return error('not_found', 404);
@@ -155,6 +180,11 @@ export class Family extends DurableObject {
       );
     }
     const lastSeq = this.sql.exec('SELECT MAX(seq) AS s FROM changes').one().s as number;
+    // Wake the other phones so they pull. High priority only when the sender says the
+    // change shows or clears a notification there (a running timer); Android throttles
+    // high-priority messages that show nothing.
+    const nudge = body.nudge === 'high' ? 'HIGH' : body.nudge === 'none' ? null : 'NORMAL';
+    if (nudge) this.ctx.waitUntil(this.nudge(deviceId, nudge));
     return json({ lastSeq });
   }
 
@@ -182,5 +212,133 @@ export class Family extends DurableObject {
   private revoke(id: string, now: number): Response {
     this.sql.exec('UPDATE devices SET revoked_at = ? WHERE id = ? AND revoked_at IS NULL', now, id);
     return json({ ok: true });
+  }
+
+  private updateDevice(deviceId: string, body: Json): Response {
+    const token = body.pushToken;
+    if (token !== null && (typeof token !== 'string' || token.length > 4096)) {
+      return error('bad_token', 400);
+    }
+    const reminders = body.reminders !== false;
+    // A token belongs to one app install; drop it from any other device row.
+    if (token) this.sql.exec('UPDATE devices SET push_token = NULL WHERE push_token = ?', token);
+    this.sql.exec(
+      'UPDATE devices SET push_token = ?, reminders = ? WHERE id = ?',
+      token,
+      reminders ? 1 : 0,
+      deviceId,
+    );
+    return json({ ok: true, push: fcmConfigured(this.env) });
+  }
+
+  /**
+   * Replaces the family's pending reminders. `basis` is the change-log seq the phone had
+   * applied when it computed them; a set based on an older log is ignored.
+   */
+  private async setReminders(body: Json, now: number): Promise<Response> {
+    const basis = body.basis;
+    const list = body.reminders;
+    if (typeof basis !== 'number' || !Array.isArray(list) || list.length > MAX_REMINDERS) {
+      return error('bad_reminders', 400);
+    }
+    const reminders: { tag: string; fireAt: number; body: string }[] = [];
+    for (const r of list as Json[]) {
+      if (
+        typeof r.tag !== 'string' ||
+        !/^[a-z0-9_-]{1,32}$/.test(r.tag) ||
+        typeof r.fireAt !== 'number' ||
+        r.fireAt > now + MAX_REMINDER_AHEAD_MS ||
+        typeof r.body !== 'string' ||
+        r.body.length > MAX_REMINDER_BYTES
+      ) {
+        return error('bad_reminders', 400);
+      }
+      if (r.fireAt > now) reminders.push({ tag: r.tag, fireAt: r.fireAt, body: r.body });
+    }
+    const current = this.sql.exec("SELECT value FROM meta WHERE key = 'reminder_basis'").toArray();
+    const currentBasis = current.length ? (current[0].value as number) : -1;
+    if (basis < currentBasis) return json({ applied: false });
+
+    this.sql.exec('DELETE FROM reminders');
+    for (const r of reminders) {
+      this.sql.exec('INSERT INTO reminders (tag, fire_at, body) VALUES (?, ?, ?)', r.tag, r.fireAt, r.body);
+    }
+    this.sql.exec(
+      "INSERT INTO meta (key, value) VALUES ('reminder_basis', ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value",
+      basis,
+    );
+    await this.scheduleAlarm();
+    return json({ applied: true });
+  }
+
+  private async scheduleAlarm(): Promise<void> {
+    const next = this.sql.exec('SELECT MIN(fire_at) AS t FROM reminders').one().t as number | null;
+    if (next === null) await this.ctx.storage.deleteAlarm();
+    else await this.ctx.storage.setAlarm(next);
+  }
+
+  /** Durable Object alarm: push every reminder that is due, then wait for the next one. */
+  async alarm(): Promise<void> {
+    const now = Date.now();
+    const due = this.sql
+      .exec('SELECT tag, fire_at, body FROM reminders WHERE fire_at <= ?', now + 1000)
+      .toArray();
+    if (due.length > 0) {
+      const tokens = this.pushTokens(null, true);
+      const messages: PushMessage[] = [];
+      for (const r of due) {
+        for (const t of tokens) {
+          messages.push({
+            token: t.token,
+            data: { type: 'reminder', tag: r.tag as string, payload: r.body as string },
+            priority: 'HIGH',
+            ttlSeconds: REMINDER_TTL_SECONDS,
+          });
+        }
+      }
+      await this.send(messages);
+      this.sql.exec('DELETE FROM reminders WHERE fire_at <= ?', now + 1000);
+    }
+    await this.scheduleAlarm();
+  }
+
+  private pushTokens(exceptDevice: string | null, remindersOnly: boolean) {
+    return this.sql
+      .exec(
+        `SELECT id, push_token FROM devices
+         WHERE revoked_at IS NULL AND push_token IS NOT NULL AND id IS NOT ?
+         ${remindersOnly ? 'AND reminders = 1' : ''}`,
+        exceptDevice,
+      )
+      .toArray()
+      .map((r) => ({ device: r.id as string, token: r.push_token as string }));
+  }
+
+  private async nudge(sender: string, priority: 'HIGH' | 'NORMAL'): Promise<void> {
+    if (!fcmConfigured(this.env)) return;
+    const tokens = this.pushTokens(sender, false);
+    await this.send(
+      tokens.map((t) => ({
+        token: t.token,
+        data: { type: 'sync' },
+        priority,
+        ttlSeconds: SYNC_NUDGE_TTL_SECONDS,
+        collapseKey: 'sync',
+      })),
+    );
+  }
+
+  /** Sends pushes and forgets tokens FCM reports as dead. */
+  private async send(messages: PushMessage[]): Promise<void> {
+    if (messages.length === 0 || !fcmConfigured(this.env)) return;
+    const results = await sendPushes(this.env, messages).catch(() => messages.map(() => 'failed'));
+    results.forEach((result, i) => {
+      if (result === 'invalid_token') {
+        this.sql.exec(
+          'UPDATE devices SET push_token = NULL WHERE push_token = ?',
+          messages[i].token,
+        );
+      }
+    });
   }
 }

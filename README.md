@@ -27,8 +27,32 @@ sync through a tiny relay that only ever sees encrypted data.
   Phones sync shortly after a change, when the app opens and every 30 s while it is open.
 - **Relay:** `relay/`, a Cloudflare Worker with one Durable Object (SQLite) per family storing
   device keys, invite hashes and the encrypted change log. It fits the Workers free plan.
-- Not yet: syncing settings (awake window etc. stay per phone), removing another phone from
-  the family with key rotation, importing existing data.
+- Not yet: removing another phone from the family with key rotation, importing existing data.
+
+## Phase 3 — notifications across phones
+
+- **Reminders from the relay:** while sync is on, the phones hand the family's upcoming
+  reminders (fire time + encrypted text) to the relay after every change. A Durable Object
+  alarm pushes each one when due as a high-priority FCM message; the phone decrypts it and
+  shows it (night feeds on the alarm channel). When either parent logs something, the set is
+  replaced, so a stale reminder never fires. A set computed from an older log is ignored.
+- **Partner updates in the background:** after a change the relay sends the other phones a
+  data-only "sync" push; they sync in a headless task and update their running-timer
+  notification. Normal priority, or high when a timer started or stopped (Android throttles
+  high-priority pushes that show nothing).
+- **Shared rules, per-phone choice:** awake window, feed interval, daytime hours and the
+  reminder switches sync between phones; "Reminders on this phone" stays per phone.
+- **Fallback:** without push (no Firebase config, or offline registration) each phone
+  schedules reminders itself, as in phase 1.
+
+### Enabling push
+
+1. Create a Firebase project, add an Android app with package `com.babytracker.app`, and
+   download `google-services.json`. Store its contents as repository secret
+   `GOOGLE_SERVICES_JSON` (the APK build writes it into the app).
+2. In Firebase → Project settings → Service accounts, generate a private key (JSON) and
+   store it as repository secret `FIREBASE_SERVICE_ACCOUNT`; the "Deploy relay" workflow
+   hands it to the relay as a Worker secret.
 
 ### Deploying the relay
 
@@ -45,7 +69,8 @@ mobile/                Expo (React Native) app
   src/app/             screens (Expo Router)
   src/domain/          pure logic: types, summaries, reminder rules (unit tested)
   src/db/              SQLite schema, migrations and repository (tested against Node's SQLite)
-  src/notifications/   Android channels, permissions, scheduling
+  src/notifications/   Android channels, permissions, scheduling, refresh after changes
+  src/background/      headless task for pushes from the relay (reminders, sync nudges)
   src/sync/            encryption, invite codes, relay client, sync engine, React provider
   e2e/                 emulator test runner, sync integration test, simulated partner phone
 relay/                 Cloudflare Worker + Durable Object relay
@@ -57,7 +82,7 @@ relay/                 Cloudflare Worker + Durable Object relay
 cd mobile
 npm install
 npm test            # unit tests
-npm run test:sync   # two simulated phones syncing through a local relay
+npm run test:sync   # simulated phones syncing through a local relay, push via a fake FCM
 npm run typecheck
 npm run lint
 ```

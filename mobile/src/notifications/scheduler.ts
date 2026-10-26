@@ -143,3 +143,24 @@ export async function syncNotifications(
     });
   }
 }
+
+/** Shows a reminder the sync server pushed (already due), replacing one with the same tag. */
+export async function presentPushedReminder(
+  tag: string,
+  reminder: { title: string; body: string; alarm: boolean },
+): Promise<void> {
+  if (!(await Notifications.getPermissionsAsync()).granted) return;
+  await Notifications.scheduleNotificationAsync({
+    identifier: `pushed-${tag}`,
+    content: {
+      title: reminder.title,
+      body: reminder.body,
+      priority: reminder.alarm
+        ? Notifications.AndroidNotificationPriority.MAX
+        : Notifications.AndroidNotificationPriority.HIGH,
+      interruptionLevel: reminder.alarm ? 'timeSensitive' : 'active',
+      data: { reminder: tag },
+    },
+    trigger: { channelId: reminder.alarm ? CHANNEL_ALARMS : CHANNEL_REMINDERS },
+  });
+}

@@ -51,8 +51,25 @@ export class RelayClient {
     return this.request('POST', '/join', { invite });
   }
 
-  push(changes: string[]): Promise<{ lastSeq: number }> {
-    return this.request('POST', '/changes', { changes });
+  /**
+   * `nudge` asks the relay to wake the other phones: 'high' when the change shows or
+   * clears a notification there (a running timer), else 'normal'.
+   */
+  push(changes: string[], nudge: 'high' | 'normal' = 'normal'): Promise<{ lastSeq: number }> {
+    return this.request('POST', '/changes', { changes, nudge });
+  }
+
+  /** Registers this phone's FCM token (or clears it) and whether it wants reminders. */
+  updateDevice(pushToken: string | null, reminders: boolean): Promise<{ push: boolean }> {
+    return this.request('PUT', '/device', { pushToken, reminders });
+  }
+
+  /** Replaces the family's pending reminders; `basis` is the last change seq applied. */
+  setReminders(
+    basis: number,
+    reminders: { tag: string; fireAt: number; body: string }[],
+  ): Promise<{ applied: boolean }> {
+    return this.request('PUT', '/reminders', { basis, reminders });
   }
 
   pull(after: number, limit = 500): Promise<{ changes: PulledChange[]; more: boolean }> {

@@ -1,5 +1,5 @@
 import { getRandomBytes } from 'expo-crypto';
-import * as SecureStore from 'expo-secure-store';
+import * as Notifications from 'expo-notifications';
 import {
   createContext,
   useCallback,
@@ -14,7 +14,9 @@ import { AppState } from 'react-native';
 
 import { useAppData } from '@/data/app-data';
 
-import type { SecretStore, SyncEngine } from './engine';
+import type { SyncEngine } from './engine';
+import { publishReminders } from './reminders';
+import { secureStore } from './secure-store';
 import { createFamily, joinFamily, leaveFamily, loadEngine, type SyncDeps } from './setup';
 
 /** Relay used when starting a family; set at build time (EXPO_PUBLIC_RELAY_URL). */
@@ -23,17 +25,13 @@ export const DEFAULT_RELAY_URL = process.env.EXPO_PUBLIC_RELAY_URL ?? '';
 const PERIODIC_SYNC_MS = 30_000;
 const AFTER_CHANGE_DELAY_MS = 1_500;
 
-const secureStore: SecretStore = {
-  get: (key) => SecureStore.getItemAsync(key),
-  set: (key, value) => SecureStore.setItemAsync(key, value),
-  delete: (key) => SecureStore.deleteItemAsync(key),
-};
-
 export interface SyncStatus {
   enabled: boolean;
   syncing: boolean;
   lastSyncAt: number | null;
   error: string | null;
+  /** The sync server delivers this phone's reminders by push. */
+  push: boolean;
 }
 
 interface SyncContextValue {
@@ -48,12 +46,24 @@ interface SyncContextValue {
 
 const SyncContext = createContext<SyncContextValue | null>(null);
 
+/** This phone's FCM token, or null when the build has no Firebase config. */
+async function devicePushToken(): Promise<string | null> {
+  try {
+    const token = await Notifications.getDevicePushTokenAsync();
+    return typeof token.data === 'string' ? token.data : null;
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Owns this phone's sync engine: syncs shortly after each local change, when the app
- * comes to the foreground and every 30 seconds while it is open.
+ * comes to the foreground and every 30 seconds while it is open. After a round that
+ * changed anything it hands the family's reminders to the sync server, which pushes
+ * them to every phone when due.
  */
 export function SyncProvider({ children }: { children: ReactNode }) {
-  const { repo } = useAppData();
+  const { repo, settings } = useAppData();
   const deps = useMemo<SyncDeps>(
     () => ({ repo, store: secureStore, random: getRandomBytes }),
     [repo],
@@ -64,14 +74,21 @@ export function SyncProvider({ children }: { children: ReactNode }) {
     syncing: false,
     lastSyncAt: null,
     error: null,
+    push: false,
   });
+  // Publish reminders after the first round too, e.g. after the rules changed elsewhere.
+  const mustPublish = useRef(true);
 
   const runSync = useCallback(async () => {
     const current = engine.current;
     if (!current) return;
     setStatus((s) => ({ ...s, syncing: true }));
     try {
-      await current.sync();
+      const { pushed, pulled } = await current.sync();
+      if (pushed > 0 || pulled > 0 || mustPublish.current) {
+        mustPublish.current = false;
+        await publishReminders(repo, current);
+      }
       setStatus((s) => ({ ...s, syncing: false, lastSyncAt: Date.now(), error: null }));
     } catch (e) {
       setStatus((s) => ({
@@ -80,16 +97,49 @@ export function SyncProvider({ children }: { children: ReactNode }) {
         error: e instanceof Error ? e.message : String(e),
       }));
     }
-  }, []);
+  }, [repo]);
 
   const attach = useCallback(
     (next: SyncEngine | null) => {
       engine.current = next;
-      setStatus({ enabled: Boolean(next), syncing: false, lastSyncAt: null, error: null });
+      mustPublish.current = true;
+      setStatus({
+        enabled: Boolean(next),
+        syncing: false,
+        lastSyncAt: null,
+        error: null,
+        push: false,
+      });
       if (next) runSync();
     },
     [runSync],
   );
+
+  // Register this phone for pushes (reminders and "partner changed something" nudges).
+  const remindersHere = settings.remindersOnThisPhone;
+  useEffect(() => {
+    if (!status.enabled) return;
+    let cancelled = false;
+    const register = async () => {
+      const current = engine.current;
+      if (!current) return;
+      const token = await devicePushToken();
+      try {
+        const { push } = await current.client.updateDevice(token, remindersHere);
+        const active = Boolean(token) && push;
+        await repo.setPushActive(active);
+        if (!cancelled) setStatus((s) => ({ ...s, push: active }));
+      } catch {
+        // Offline: keep the previous state; the next start retries.
+      }
+    };
+    register();
+    const subscription = Notifications.addPushTokenListener(() => register());
+    return () => {
+      cancelled = true;
+      subscription.remove();
+    };
+  }, [status.enabled, remindersHere, repo]);
 
   useEffect(() => {
     loadEngine(deps).then(attach, () => attach(null));

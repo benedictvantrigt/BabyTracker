@@ -2,6 +2,8 @@ import { normalizeDashboard } from '@/domain/dashboard';
 import { validateEntry } from '@/domain/entries';
 import {
   DEFAULT_SETTINGS,
+  SHARED_SETTINGS,
+  type SharedSettings,
   type Child,
   type Entry,
   type EntryInput,
@@ -70,14 +72,24 @@ export interface RepoDeps {
 }
 
 /** A synced record: the full row, merged on the other phone by last write wins. */
-export type SyncChange = { type: 'child'; row: Child } | { type: 'entry'; row: Entry };
+export type SyncChange =
+  | { type: 'child'; row: Child }
+  | { type: 'entry'; row: Entry }
+  | { type: 'settings'; row: { id: 'family'; updatedAt: number; values: SharedSettings } };
 
 export interface SyncState {
   familyId: string;
   relayUrl: string;
   /** Highest relay sequence number applied locally. */
   lastSeq: number;
+  /**
+   * The relay delivers this phone's reminders by push (FCM token registered and the relay
+   * has push configured), so the phone does not schedule them itself.
+   */
+  pushActive?: boolean;
 }
+
+const SHARED_UPDATED_AT = 'sharedSettingsUpdatedAt';
 
 export type ChangeListener = (event: { remote: boolean }) => void;
 
@@ -310,8 +322,37 @@ export class Repo {
         if (key in DEFAULT_SETTINGS && value !== undefined)
           await this.writeSetting(key as keyof Settings, value);
       }
+      if (SHARED_SETTINGS.some((k) => k in patch)) {
+        const updatedAt = this.deps.now();
+        await this.writeRawSetting(SHARED_UPDATED_AT, updatedAt);
+        await this.enqueueSharedSettings(updatedAt);
+      }
     });
     this.changed();
+  }
+
+  private async writeRawSetting(key: string, value: unknown): Promise<void> {
+    await this.db.runAsync(
+      'INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value',
+      [key, JSON.stringify(value)],
+    );
+  }
+
+  /** When the shared reminder rules last changed; -1 when never set on this phone. */
+  private async sharedUpdatedAt(): Promise<number> {
+    const row = await this.db.getFirstAsync<{ value: string }>(
+      'SELECT value FROM settings WHERE key = ?',
+      [SHARED_UPDATED_AT],
+    );
+    return row ? JSON.parse(row.value) : -1;
+  }
+
+  private async enqueueSharedSettings(updatedAt: number): Promise<void> {
+    const settings = await this.getSettings();
+    const values = Object.fromEntries(
+      SHARED_SETTINGS.map((k) => [k, settings[k]]),
+    ) as SharedSettings;
+    await this.enqueue({ type: 'settings', row: { id: 'family', updatedAt, values } });
   }
 
   private async writeSetting(key: keyof Settings, value: unknown): Promise<void> {
@@ -374,7 +415,20 @@ export class Repo {
     );
     const map = Object.fromEntries(rows.map((r) => [r.key, JSON.parse(r.value)]));
     if (typeof map.familyId !== 'string') return null;
-    return { familyId: map.familyId, relayUrl: map.relayUrl, lastSeq: map.lastSeq ?? 0 };
+    return {
+      familyId: map.familyId,
+      relayUrl: map.relayUrl,
+      lastSeq: map.lastSeq ?? 0,
+      pushActive: map.pushActive === true,
+    };
+  }
+
+  /** Records whether the relay now delivers this phone's reminders. */
+  async setPushActive(active: boolean): Promise<void> {
+    const state = await this.getSyncState();
+    if (!state || state.pushActive === active) return;
+    await this.writeSyncState({ pushActive: active });
+    this.changed();
   }
 
   private async writeSyncState(state: Partial<SyncState>): Promise<void> {
@@ -396,7 +450,10 @@ export class Repo {
       await this.db.execAsync('DELETE FROM outbox; DELETE FROM sync_state;');
       if (replaceLocalData) {
         await this.db.execAsync('DELETE FROM entries; DELETE FROM children;');
-        await this.db.runAsync("DELETE FROM settings WHERE key = 'activeChildId'", []);
+        await this.db.runAsync('DELETE FROM settings WHERE key IN (?, ?)', [
+          'activeChildId',
+          SHARED_UPDATED_AT,
+        ]);
       }
       await this.writeSyncState(state);
       if (!replaceLocalData) {
@@ -407,6 +464,7 @@ export class Repo {
           [],
         );
         for (const e of entries) await this.enqueue({ type: 'entry', row: toEntry(e) });
+        await this.enqueueSharedSettings(Math.max(0, await this.sharedUpdatedAt()));
       }
     });
     this.changed(true);
@@ -445,7 +503,7 @@ export class Repo {
             await this.writeEntryRow(change.row);
             applied += 1;
           }
-        } else {
+        } else if (change.type === 'child') {
           const row = await this.db.getFirstAsync<ChildRow>('SELECT * FROM children WHERE id = ?', [
             change.row.id,
           ]);
@@ -453,6 +511,13 @@ export class Repo {
             await this.writeChildRow(change.row);
             applied += 1;
           }
+        } else if (change.row.updatedAt > (await this.sharedUpdatedAt())) {
+          for (const key of SHARED_SETTINGS) {
+            const value = change.row.values[key];
+            if (typeof value === typeof DEFAULT_SETTINGS[key]) await this.writeSetting(key, value);
+          }
+          await this.writeRawSetting(SHARED_UPDATED_AT, change.row.updatedAt);
+          applied += 1;
         }
       }
       await this.writeSyncState({ lastSeq });

@@ -1,8 +1,9 @@
 import { Family } from './family';
+import type { FcmEnv } from './fcm';
 
 export { Family };
 
-export interface Env {
+export interface Env extends FcmEnv {
   FAMILY: DurableObjectNamespace<Family>;
 }
 

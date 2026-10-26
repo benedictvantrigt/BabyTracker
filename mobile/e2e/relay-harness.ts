@@ -1,7 +1,7 @@
 /// <reference types="node" />
 // Starts the relay locally (wrangler dev) for integration tests and the E2E partner.
 import { spawn, type ChildProcess } from 'node:child_process';
-import { mkdtempSync } from 'node:fs';
+import { mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 
@@ -12,11 +12,34 @@ export interface LocalRelay {
   stop(): Promise<void>;
 }
 
-export async function startRelay(port: number): Promise<LocalRelay> {
+/** `vars` become Worker environment variables (e.g. a test FCM service account). */
+export async function startRelay(
+  port: number,
+  vars: Record<string, string> = {},
+): Promise<LocalRelay> {
   const state = mkdtempSync(join(tmpdir(), 'relay-state-'));
+  const envFile = join(state, 'test.env');
+  writeFileSync(
+    envFile,
+    Object.entries(vars)
+      // Single quotes: no escape processing, so JSON values pass through unchanged.
+      .map(([k, v]) => `${k}='${v}'`)
+      .join('\n'),
+  );
   const child: ChildProcess = spawn(
     'npx',
-    ['wrangler', 'dev', '--port', String(port), '--ip', '127.0.0.1', '--persist-to', state],
+    [
+      'wrangler',
+      'dev',
+      '--port',
+      String(port),
+      '--ip',
+      '127.0.0.1',
+      '--persist-to',
+      state,
+      '--env-file',
+      envFile,
+    ],
     {
       cwd: RELAY_DIR,
       env: { ...process.env, WRANGLER_SEND_METRICS: 'false' },

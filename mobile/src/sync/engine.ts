@@ -26,6 +26,7 @@ function isSyncChange(value: unknown): value is SyncChange {
   const { type, row } = value as { type?: unknown; row?: Record<string, unknown> };
   if (!row || typeof row.id !== 'string' || typeof row.updatedAt !== 'number') return false;
   if (type === 'child') return typeof row.name === 'string';
+  if (type === 'settings') return row.id === 'family' && typeof row.values === 'object';
   if (type === 'entry') {
     return (
       typeof row.childId === 'string' &&
@@ -35,6 +36,18 @@ function isSyncChange(value: unknown): value is SyncChange {
     );
   }
   return false;
+}
+
+/** A running timer started, stopped or edited: the partner's ongoing notification changes. */
+function touchesTimer(body: string): boolean {
+  try {
+    const change = JSON.parse(body) as SyncChange;
+    if (change.type !== 'entry' || change.row.kind === 'diaper') return false;
+    // Running, or stopped in the last couple of minutes.
+    return change.row.end === null || change.row.updatedAt - change.row.end < 2 * 60_000;
+  } catch {
+    return false;
+  }
 }
 
 /**
@@ -66,7 +79,10 @@ export class SyncEngine {
     for (;;) {
       const batch = await this.repo.outboxBatch(PUSH_BATCH);
       if (batch.length === 0) break;
-      await this.client.push(batch.map((b) => seal(this.familyKey, b.body, this.random)));
+      await this.client.push(
+        batch.map((b) => seal(this.familyKey, b.body, this.random)),
+        batch.some((b) => touchesTimer(b.body)) ? 'high' : 'normal',
+      );
       await this.repo.ackOutbox(batch[batch.length - 1].id);
       pushed += batch.length;
     }
@@ -91,6 +107,15 @@ export class SyncEngine {
       if (!more) break;
     }
     return { pushed, pulled };
+  }
+
+  /** The family key, for sealing reminder texts and opening pushed ones. */
+  seal(plaintext: string): string {
+    return seal(this.familyKey, plaintext, this.random);
+  }
+
+  open(sealed: string): string {
+    return open(this.familyKey, sealed);
   }
 
   /** A single-use invite code (valid 15 minutes) for a partner's phone. */
