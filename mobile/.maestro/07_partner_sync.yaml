@@ -16,8 +16,8 @@ env:
 - hideKeyboard
 - tapOn: 'Join'
 # The partner's child and feed arrive from the relay.
-- assertVisible:
-    text: 'Micky'
+- extendedWaitUntil:
+    visible: 'Micky'
     timeout: 20000
 - assertVisible: 'Last: Left, .* ago'
 - takeScreenshot: 07-joined
