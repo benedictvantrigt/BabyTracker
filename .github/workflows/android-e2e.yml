@@ -75,6 +75,8 @@ jobs:
           cd android
           ./gradlew assembleRelease -PreactNativeArchitectures=x86_64,arm64-v8a
           cp app/build/outputs/apk/release/app-release.apk ../babytracker.apk
+          # Free the build daemons' memory for the emulator.
+          ./gradlew --stop
 
       - name: Remove build intermediates before the emulator
         run: |
@@ -98,6 +100,7 @@ jobs:
           target: google_apis
           arch: x86_64
           profile: pixel_6
+          ram-size: 3072M
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none
           script: bash mobile/e2e/run-e2e.sh mobile/babytracker.apk "$E2E_OUT"

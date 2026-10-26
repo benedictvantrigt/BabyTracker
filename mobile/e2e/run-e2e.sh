@@ -24,13 +24,20 @@ export MAESTRO_CLI_ANALYSIS_NOTIFICATION_DISABLED=true
 export MAESTRO_DRIVER_STARTUP_TIMEOUT=180000
 
 echo "== maestro $(maestro --version 2>&1 | tail -1) =="
+# One Maestro run per flow, in file order: a stuck flow cannot take the others down, and
+# 06 (which leaves reminders scheduled for the checks below) always runs last.
 maestro_status=0
-(
-  cd "$OUT/screenshots" &&
-    timeout --kill-after=30s 30m maestro test --format junit --output "$OUT/report.xml" \
-      --test-output-dir "$OUT/maestro-output" "$FLOWS" < /dev/null
-) 2>&1 | tee "$OUT/maestro.txt"
-maestro_status=${PIPESTATUS[0]}
+for flow in "$FLOWS"/0*.yaml; do
+  name="$(basename "$flow" .yaml)"
+  echo "== $name =="
+  (
+    cd "$OUT/screenshots" &&
+      timeout --kill-after=30s 8m maestro test --format junit --output "$OUT/report-$name.xml" \
+        --test-output-dir "$OUT/maestro-output/$name" "$flow" < /dev/null
+  ) 2>&1 | tee -a "$OUT/maestro.txt"
+  [ "${PIPESTATUS[0]}" -eq 0 ] || maestro_status=1
+done
+free -m | tee "$OUT/memory.txt"
 
 # Notification sync is debounced; give it a moment after the last tap.
 sleep 3

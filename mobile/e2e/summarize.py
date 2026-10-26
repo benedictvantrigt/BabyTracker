@@ -14,11 +14,20 @@ from pathlib import Path
 PKG = "com.babytracker.app"
 
 
-def flow_results(report: Path):
-    if not report.exists():
-        return []
+def flow_results(out: Path):
     rows = []
-    for case in ET.parse(report).getroot().iter("testcase"):
+    for report in sorted(out.glob("report-*.xml")):
+        rows += cases(report)
+    return rows
+
+
+def cases(report: Path):
+    rows = []
+    try:
+        root = ET.parse(report).getroot()
+    except ET.ParseError:
+        return [(report.stem.removeprefix("report-"), False, "unreadable report")]
+    for case in root.iter("testcase"):
         failure = case.find("failure")
         if failure is None:
             failure = case.find("error")
@@ -43,7 +52,7 @@ def pending_alarms(dumpsys: str):
 def main() -> int:
     out = Path(sys.argv[1])
     maestro_status = int(sys.argv[2])
-    flows = flow_results(out / "report.xml")
+    flows = flow_results(out)
     alarm_text = (out / "dumpsys-alarm.txt").read_text(errors="replace")
     notif_text = (out / "dumpsys-notification.txt").read_text(errors="replace")
     device_now = int((out / "device-epoch.txt").read_text().strip() or 0)
@@ -64,7 +73,7 @@ def main() -> int:
     lines += ["", "## Flows", "", "| Flow | Result | Failure |", "|---|---|---|"]
     lines += [f"| {name} | {'PASS' if ok else 'FAIL'} | {msg} |" for name, ok, msg in flows]
     if not flows:
-        lines.append("| (no report.xml) | FAIL | see maestro.txt |")
+        lines.append("| (no reports) | FAIL | see maestro.txt |")
     lines += ["", "## Pending alarms", ""]
     for t in alarms:
         when = dt.datetime.fromtimestamp(t / 1000, dt.timezone.utc)

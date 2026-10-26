@@ -19,5 +19,11 @@ name: Breast feeding timers switch sides, bottle feed with amount
 - inputText: '120'
 - hideKeyboard
 - tapOn: 'Save'
-- assertVisible: 'Last: Bottle 120 ml · Formula, .* ago'
+# A form entry starts 15 minutes back by default, so "Last" still shows the breast feed.
+- assertVisible: 'Last: Right, .* ago'
 - takeScreenshot: 02-feeding-after-bottle
+- tapOn: 'Timeline'
+- assertVisible: 'Feeding · Bottle 120 ml · Formula'
+- assertVisible: 'Feeding · Right'
+- assertVisible: 'Feeding · Left'
+- takeScreenshot: 02-feeding-timeline
