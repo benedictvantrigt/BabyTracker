@@ -3,7 +3,7 @@ name: Android E2E
 on:
   push:
     branches-ignore: [e2e-results]
-    paths: ['mobile/**', '.github/workflows/android-e2e.yml']
+    paths: ['mobile/**', 'relay/**', '.github/workflows/android-e2e.yml']
   workflow_dispatch:
 
 concurrency:
@@ -26,11 +26,19 @@ jobs:
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: mobile/package-lock.json
+          cache-dependency-path: |
+            mobile/package-lock.json
+            relay/package-lock.json
       - run: npm ci
+      - run: npm ci
+        working-directory: relay
       - run: npm run typecheck
+      - run: npm run typecheck
+        working-directory: relay
       - run: npm run lint
       - run: npm test
+      - name: Sync integration test (two phones through a local relay)
+        run: npm run test:sync
 
   android:
     needs: checks
@@ -51,7 +59,9 @@ jobs:
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: mobile/package-lock.json
+          cache-dependency-path: |
+            mobile/package-lock.json
+            relay/package-lock.json
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -65,11 +75,15 @@ jobs:
           sudo udevadm trigger --name-match=kvm
 
       - name: Install dependencies
-        working-directory: mobile
-        run: npm ci
+        run: |
+          (cd mobile && npm ci)
+          (cd relay && npm ci)
 
       - name: Build release APK (x86_64 for the emulator, arm64 for phones)
         working-directory: mobile
+        env:
+          # The production relay, once deployed (repository variable RELAY_URL).
+          EXPO_PUBLIC_RELAY_URL: ${{ vars.RELAY_URL }}
         run: |
           npx expo prebuild --platform android --no-install
           cd android

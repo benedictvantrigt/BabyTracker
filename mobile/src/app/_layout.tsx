@@ -7,6 +7,7 @@ import { useColorScheme } from 'react-native';
 import { AppDataProvider, useAppData } from '@/data/app-data';
 import { migrate } from '@/db/schema';
 import { NotificationSync } from '@/notifications/notification-sync';
+import { SyncProvider } from '@/sync/app-sync';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -26,14 +27,24 @@ export default function RootLayout() {
         <AppDataProvider>
           <HideSplashWhenLoaded />
           <NotificationSync />
-          <Stack>
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            <Stack.Screen name="entry/[kind]" options={{ presentation: 'modal', title: '' }} />
-            <Stack.Screen
-              name="dashboard"
-              options={{ presentation: 'modal', title: 'Customize Today' }}
-            />
-          </Stack>
+          <SyncProvider>
+            <Stack>
+              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+              <Stack.Screen name="entry/[kind]" options={{ presentation: 'modal', title: '' }} />
+              <Stack.Screen
+                name="dashboard"
+                options={{ presentation: 'modal', title: 'Customize Today' }}
+              />
+              <Stack.Screen
+                name="sync/join"
+                options={{ presentation: 'modal', title: 'Join your partner' }}
+              />
+              <Stack.Screen
+                name="sync/invite"
+                options={{ presentation: 'modal', title: 'Invite your partner' }}
+              />
+            </Stack>
+          </SyncProvider>
         </AppDataProvider>
       </SQLiteProvider>
     </ThemeProvider>

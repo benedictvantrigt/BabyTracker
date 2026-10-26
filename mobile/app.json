@@ -45,7 +45,18 @@
         {
           "color": "#6E56CF"
         }
-      ]
+      ],
+      "expo-secure-store",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Baby Tracker uses the camera to scan your partner’s invite QR code.",
+          "microphonePermission": false,
+          "recordAudioAndroid": false,
+          "barcodeScannerEnabled": true
+        }
+      ],
+      "./plugins/with-local-cleartext"
     ],
     "experiments": {
       "typedRoutes": true,

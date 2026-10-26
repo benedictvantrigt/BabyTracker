@@ -33,6 +33,16 @@ const MIGRATIONS: string[] = [
     value TEXT NOT NULL
   );
   `,
+  `
+  CREATE TABLE outbox (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    body TEXT NOT NULL
+  );
+  CREATE TABLE sync_state (
+    key TEXT PRIMARY KEY NOT NULL,
+    value TEXT NOT NULL
+  );
+  `,
 ];
 
 export const SCHEMA_VERSION = MIGRATIONS.length;

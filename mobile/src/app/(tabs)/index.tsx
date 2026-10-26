@@ -75,6 +75,10 @@ function AddChild() {
           }}
         />
       </Card>
+      <ThemedText themeColor="textSecondary" style={styles.center}>
+        Your partner already uses Baby Tracker?
+      </ThemedText>
+      <Button label="Join your partner" onPress={() => router.push('/sync/join')} />
     </View>
   );
 }
@@ -196,6 +200,10 @@ const styles = StyleSheet.create({
     minHeight: 48,
     paddingHorizontal: Spacing.three,
     fontSize: 16,
+  },
+  center: {
+    textAlign: 'center',
+    marginTop: Spacing.three,
   },
   undo: {
     position: 'absolute',

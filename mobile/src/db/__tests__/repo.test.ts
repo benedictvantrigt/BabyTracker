@@ -1,35 +1,10 @@
 /// <reference types="jest" />
 /// <reference types="node" />
-import { DatabaseSync, type SQLInputValue } from 'node:sqlite';
-
-import type { Db } from '../db';
+import { nodeDb } from '../node-db';
 import { Repo, ValidationError } from '../repo';
 import { SCHEMA_VERSION, migrate } from '../schema';
 
-/** Adapts Node's built-in SQLite to the app's Db interface. */
-function memoryDb(): Db {
-  const db = new DatabaseSync(':memory:');
-  return {
-    execAsync: async (sql) => {
-      db.exec(sql);
-    },
-    runAsync: async (sql, params) => db.prepare(sql).run(...(params as SQLInputValue[])),
-    getFirstAsync: async <T>(sql: string, params: unknown[]) =>
-      (db.prepare(sql).get(...(params as SQLInputValue[])) ?? null) as T | null,
-    getAllAsync: async <T>(sql: string, params: unknown[]) =>
-      db.prepare(sql).all(...(params as SQLInputValue[])) as T[],
-    withTransactionAsync: async (task) => {
-      db.exec('BEGIN');
-      try {
-        await task();
-        db.exec('COMMIT');
-      } catch (e) {
-        db.exec('ROLLBACK');
-        throw e;
-      }
-    },
-  };
-}
+const memoryDb = () => nodeDb();
 
 async function setup() {
   const db = memoryDb();

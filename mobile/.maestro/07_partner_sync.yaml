@@ -1,0 +1,36 @@
+appId: com.babytracker.app
+name: Join a partner's family and sync both ways
+env:
+  INVITE: ''
+---
+- launchApp:
+    clearState: true
+    permissions:
+      all: allow
+- assertVisible: 'Welcome'
+- tapOn: 'Join your partner'
+- assertVisible: 'Join your partner'
+- tapOn:
+    id: 'invite-code'
+- inputText: ${INVITE}
+- hideKeyboard
+- tapOn: 'Join'
+# The partner's child and feed arrive from the relay.
+- assertVisible:
+    text: 'Micky'
+    timeout: 20000
+- assertVisible: 'Last: Left, .* ago'
+- takeScreenshot: 07-joined
+# Log a diaper here; the test machine checks the partner receives it.
+- tapOn: 'Wet'
+- assertVisible: 'Diaper logged: wet'
+- tapOn: 'Settings'
+- scrollUntilVisible:
+    element:
+      id: 'sync-status'
+- tapOn: 'Sync now'
+- assertVisible:
+    id: 'sync-status'
+    text: 'Synced at .*'
+- assertVisible: '2 phones share this log'
+- takeScreenshot: 07-sync-settings

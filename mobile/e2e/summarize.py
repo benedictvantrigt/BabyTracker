@@ -2,10 +2,12 @@
 
 Checks, besides the Maestro flows:
 - the app has at least one alarm pending with Android (nap and/or feed reminder);
-- the running feed timer shows an ongoing notification.
+- the running feed timer shows an ongoing notification;
+- after flow 07, the partner phone (played by e2e/partner.ts) received the app's diaper.
 """
 
 import datetime as dt
+import json
 import re
 import sys
 import xml.etree.ElementTree as ET
@@ -60,10 +62,15 @@ def main() -> int:
     alarms = pending_alarms(alarm_text)
     timer_notification = "Feeding · Left" in notif_text and f"pkg={PKG}" in notif_text
 
+    partner_file = out / "partner" / "check.json"
+    partner = json.loads(partner_file.read_text()) if partner_file.exists() else {}
+
     checks = [
         ("Maestro flows", maestro_status == 0 and bool(flows) and all(ok for _, ok, _ in flows)),
         ("Reminder alarm pending with Android", bool(alarms)),
         ("Ongoing notification for running feed timer", timer_notification),
+        ("Partner phone received the app's diaper", partner.get("diaperFromApp") is True),
+        ("Two phones in the family", partner.get("devices") == 2),
     ]
 
     lines = ["# Android E2E results", ""]

@@ -3,6 +3,7 @@ import { Alert, AppState, Platform, ScrollView, StyleSheet, TextInput, View } fr
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
+import { PartnerSyncCard } from '@/components/partner-sync-card';
 import { ThemedView } from '@/components/themed-view';
 import {
   Button,
@@ -43,6 +44,8 @@ export default function SettingsScreen() {
           <ThemedText type="subtitle">Settings</ThemedText>
 
           {activeChild && <ChildCard key={activeChild.id} child={activeChild} />}
+
+          <PartnerSyncCard />
 
           <PermissionsCard />
 
