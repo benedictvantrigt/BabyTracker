@@ -1,4 +1,5 @@
 import { getRandomBytes } from 'expo-crypto';
+import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
 import {
   createContext,
@@ -10,14 +11,23 @@ import {
   useState,
   type ReactNode,
 } from 'react';
-import { AppState } from 'react-native';
+import { Alert, AppState } from 'react-native';
 
 import { useAppData } from '@/data/app-data';
 
-import type { SyncEngine } from './engine';
+import type { FamilyDevice, SyncEngine } from './engine';
 import { publishReminders } from './reminders';
 import { secureStore } from './secure-store';
-import { createFamily, joinFamily, leaveFamily, loadEngine, type SyncDeps } from './setup';
+import {
+  createFamily,
+  deleteFamily,
+  endSyncHere,
+  isRemovedError,
+  joinFamily,
+  leaveFamily,
+  loadEngine,
+  type SyncDeps,
+} from './setup';
 
 /** Relay used when starting a family; set at build time (EXPO_PUBLIC_RELAY_URL). */
 export const DEFAULT_RELAY_URL = process.env.EXPO_PUBLIC_RELAY_URL ?? '';
@@ -41,7 +51,11 @@ interface SyncContextValue {
   joinFamily(code: string): Promise<void>;
   leaveFamily(): Promise<void>;
   createInvite(): Promise<{ code: string; expiresAt: number }>;
-  deviceCount(): Promise<number>;
+  devices(): Promise<FamilyDevice[]>;
+  /** Removes another phone and gives the others a new family key. */
+  removeDevice(deviceId: string): Promise<void>;
+  /** Deletes the family from the sync server; every phone keeps its own log. */
+  deleteFamily(): Promise<void>;
 }
 
 const SyncContext = createContext<SyncContextValue | null>(null);
@@ -54,6 +68,11 @@ async function devicePushToken(): Promise<string | null> {
   } catch {
     return null;
   }
+}
+
+/** This phone's name as shown to the other phones (sealed on the sync server). */
+function deviceName(): string {
+  return Device.deviceName ?? Device.modelName ?? 'Phone';
 }
 
 /**
@@ -91,13 +110,24 @@ export function SyncProvider({ children }: { children: ReactNode }) {
       }
       setStatus((s) => ({ ...s, syncing: false, lastSyncAt: Date.now(), error: null }));
     } catch (e) {
+      if (isRemovedError(e) && engine.current === current) {
+        // Removed by a partner, or the family was deleted: stop here, keep the log.
+        engine.current = null;
+        await endSyncHere(deps);
+        setStatus({ enabled: false, syncing: false, lastSyncAt: null, error: null, push: false });
+        Alert.alert(
+          'Sync stopped',
+          'This phone is no longer part of the family: it was removed on another phone, or the family was deleted. Everything logged so far stays on this phone.',
+        );
+        return;
+      }
       setStatus((s) => ({
         ...s,
         syncing: false,
         error: e instanceof Error ? e.message : String(e),
       }));
     }
-  }, [repo]);
+  }, [repo, deps]);
 
   const attach = useCallback(
     (next: SyncEngine | null) => {
@@ -125,7 +155,11 @@ export function SyncProvider({ children }: { children: ReactNode }) {
       if (!current) return;
       const token = await devicePushToken();
       try {
-        const { push } = await current.client.updateDevice(token, remindersHere);
+        const { push } = await current.client.updateDevice(
+          token,
+          remindersHere,
+          current.seal(deviceName()),
+        );
         const active = Boolean(token) && push;
         await repo.setPushActive(active);
         if (!cancelled) setStatus((s) => ({ ...s, push: active }));
@@ -178,8 +212,17 @@ export function SyncProvider({ children }: { children: ReactNode }) {
         if (!engine.current) throw new Error('Sync is not set up.');
         return engine.current.createInvite();
       },
-      deviceCount: async () =>
-        engine.current ? (await engine.current.client.devices()).devices.length : 0,
+      devices: async () => (engine.current ? engine.current.devices() : []),
+      removeDevice: async (deviceId) => {
+        if (!engine.current) throw new Error('Sync is not set up.');
+        await engine.current.removeDevice(deviceId);
+        mustPublish.current = true;
+        await runSync();
+      },
+      deleteFamily: async () => {
+        await deleteFamily(deps);
+        attach(null);
+      },
     }),
     [status, runSync, attach, deps],
   );

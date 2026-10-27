@@ -38,7 +38,12 @@ async function handle(message: Message): Promise<boolean> {
 
   if (message.type === 'reminder' && message.tag && message.payload) {
     const settings = await repo.getSettings();
-    const reminder = openReminder(engine, message.payload);
+    let reminder = openReminder(engine, message.payload);
+    if (!reminder) {
+      // Sealed with a family key this phone has not fetched yet (a phone was removed).
+      await engine.sync().catch(() => {});
+      reminder = openReminder(engine, message.payload);
+    }
     if (!reminder || !settings.remindersOnThisPhone) return false;
     await presentPushedReminder(message.tag, reminder);
     return true;

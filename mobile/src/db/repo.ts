@@ -463,18 +463,29 @@ export class Repo {
         ]);
       }
       await this.writeSyncState(state);
-      if (!replaceLocalData) {
-        const children = await this.db.getAllAsync<ChildRow>('SELECT * FROM children', []);
-        for (const c of children) await this.enqueue({ type: 'child', row: toChild(c) });
-        const entries = await this.db.getAllAsync<EntryRow>(
-          `SELECT ${ENTRY_COLUMNS} FROM entries ORDER BY start`,
-          [],
-        );
-        for (const e of entries) await this.enqueue({ type: 'entry', row: toEntry(e) });
-        await this.enqueueSharedSettings(Math.max(0, await this.sharedUpdatedAt()));
-      }
+      if (!replaceLocalData) await this.enqueueEverything();
     });
     this.changed(true);
+  }
+
+  /**
+   * Queues every child, entry (deleted ones too) and the shared settings for upload: a
+   * snapshot for phones that join after the relay dropped older changes, or after a new
+   * family key. Rows keep their `updatedAt`, so phones that have them ignore the copies.
+   */
+  async enqueueSnapshot(): Promise<void> {
+    await this.db.withTransactionAsync(() => this.enqueueEverything());
+  }
+
+  private async enqueueEverything(): Promise<void> {
+    const children = await this.db.getAllAsync<ChildRow>('SELECT * FROM children', []);
+    for (const c of children) await this.enqueue({ type: 'child', row: toChild(c) });
+    const entries = await this.db.getAllAsync<EntryRow>(
+      `SELECT ${ENTRY_COLUMNS} FROM entries ORDER BY start`,
+      [],
+    );
+    for (const e of entries) await this.enqueue({ type: 'entry', row: toEntry(e) });
+    await this.enqueueSharedSettings(Math.max(0, await this.sharedUpdatedAt()));
   }
 
   /** Turns sync off on this phone; the local log stays. */

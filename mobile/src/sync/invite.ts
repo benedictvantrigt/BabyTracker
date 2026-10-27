@@ -7,6 +7,8 @@ export interface Invite {
   relayUrl: string;
   familyId: string;
   familyKey: Uint8Array;
+  /** The family key's epoch; it changes when a phone is removed. */
+  keyEpoch: number;
   /** Single-use secret; the relay only knows its hash. */
   inviteSecret: string;
 }
@@ -16,6 +18,7 @@ export function encodeInvite(invite: Invite): string {
     u: invite.relayUrl,
     f: invite.familyId,
     k: b64url.encode(invite.familyKey),
+    e: invite.keyEpoch,
     i: invite.inviteSecret,
   });
   return PREFIX + b64url.encode(utf8Bytes(payload));
@@ -42,7 +45,9 @@ export function decodeInvite(code: string): Invite {
     ) {
       throw new InvalidInviteError();
     }
-    return { relayUrl: p.u, familyId: p.f, familyKey, inviteSecret: p.i };
+    const keyEpoch = p.e === undefined ? 0 : p.e;
+    if (!Number.isInteger(keyEpoch) || keyEpoch < 0) throw new InvalidInviteError();
+    return { relayUrl: p.u, familyId: p.f, familyKey, keyEpoch, inviteSecret: p.i };
   } catch {
     throw new InvalidInviteError();
   }

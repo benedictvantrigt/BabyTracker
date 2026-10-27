@@ -5,7 +5,14 @@ import assert from 'node:assert/strict';
 import { after, before, describe, it } from 'node:test';
 
 import { RelayClient, RelayError } from '../src/sync/client';
-import { createFamily, joinFamily, leaveFamily, loadEngine } from '../src/sync/setup';
+import {
+  createFamily,
+  deleteFamily,
+  isRemovedError,
+  joinFamily,
+  leaveFamily,
+  loadEngine,
+} from '../src/sync/setup';
 import { phone, random, type Phone } from './phone';
 import { startRelay, type LocalRelay } from './relay-harness';
 
@@ -167,5 +174,100 @@ describe('partner sync', () => {
     const { changes } = await engineA.client.pull(0);
     assert.ok(changes.length > 0);
     for (const c of changes) assert.ok(!c.body.includes('Secretname'));
+  });
+
+  it('removes a phone and moves the others to a new family key', async () => {
+    const [a, b, c] = [await phone(), await phone(), await phone()];
+    const child = await a.repo.addChild('Micky', null);
+    const engineA = await createFamily(a, relay.url);
+    await joinFamily(b, (await engineA.createInvite()).code);
+    await joinFamily(c, (await engineA.createInvite()).code);
+    const engineC = (await loadEngine(c))!;
+
+    // B logs something before it learns about the new key: its push is refused once,
+    // then sealed again with the new key.
+    const [childB] = await b.repo.listChildren();
+    const t = Date.now();
+    await b.repo.addEntry(childB.id, {
+      kind: 'diaper',
+      start: t,
+      end: t,
+      data: { wet: true, solid: false },
+    });
+
+    await engineA.removeDevice(engineC.client.deviceId);
+    assert.equal(engineA.epoch, 1);
+    const devices = await engineA.devices();
+    assert.deepEqual(
+      devices.map((d) => d.id).sort(),
+      [engineA.client.deviceId, (await loadEngine(b))!.client.deviceId].sort(),
+    );
+
+    await a.repo.addEntry(child.id, {
+      kind: 'diaper',
+      start: t + 1,
+      end: t + 1,
+      data: { wet: false, solid: true },
+    });
+    await syncAll(b, a, b);
+    assert.equal((await loadEngine(b))!.epoch, 1, 'B stored the new key');
+    assert.equal((await entriesOf(a)).length, 2);
+    assert.equal((await entriesOf(b)).length, 2);
+
+    // C is out: the relay refuses it, and what it still knows cannot open new data.
+    await assert.rejects(engineC.sync(), (e: unknown) => isRemovedError(e));
+    const { changes } = await engineA.client.pull(0);
+    assert.ok(changes.length > 0);
+    for (const ch of changes) assert.throws(() => engineC.open(ch.body));
+  });
+
+  it('drops changes every phone has received; a later partner still gets everything', async () => {
+    const [a, b, c] = [await phone(), await phone(), await phone()];
+    const child = await a.repo.addChild('Micky', null);
+    const engineA = await createFamily(a, relay.url);
+    await joinFamily(b, (await engineA.createInvite()).code);
+    const t = Date.now() - 60 * 60_000;
+    for (let i = 0; i < 5; i++) {
+      await a.repo.addEntry(child.id, {
+        kind: 'diaper',
+        start: t + i * 60_000,
+        end: t + i * 60_000,
+        data: { wet: true, solid: false },
+      });
+    }
+    await syncAll(a, b, a, b);
+    assert.equal((await engineA.client.pull(0)).changes.length, 0, 'relay dropped the log');
+
+    await joinFamily(c, (await engineA.createInvite()).code);
+    assert.equal((await entriesOf(c)).length, 5);
+    assert.deepEqual(
+      (await c.repo.listChildren()).map((k) => k.name),
+      ['Micky'],
+    );
+  });
+
+  it('deletes the family; the other phones stop syncing and keep their log', async () => {
+    const [a, b] = [await phone(), await phone()];
+    await a.repo.addChild('Micky', null);
+    const engineA = await createFamily(a, relay.url);
+    await joinFamily(b, (await engineA.createInvite()).code);
+    const engineB = (await loadEngine(b))!;
+
+    await deleteFamily(a);
+    assert.equal(await a.repo.getSyncState(), null);
+    await assert.rejects(engineB.sync(), (e: unknown) => isRemovedError(e));
+    assert.equal((await b.repo.listChildren()).length, 1);
+  });
+
+  it('only lets a phone remove itself without a new key', async () => {
+    const [a, b] = [await phone(), await phone()];
+    await a.repo.addChild('Micky', null);
+    const engineA = await createFamily(a, relay.url);
+    await joinFamily(b, (await engineA.createInvite()).code);
+    const engineB = (await loadEngine(b))!;
+    await assert.rejects(
+      engineA.client.revoke(engineB.client.deviceId),
+      (e: unknown) => (e as RelayError).code === 'use_rotate',
+    );
   });
 });

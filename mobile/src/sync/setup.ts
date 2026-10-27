@@ -1,6 +1,6 @@
 import type { Repo } from '@/db/repo';
 
-import { RelayClient } from './client';
+import { RelayClient, RelayError } from './client';
 import type { RandomBytes } from './crypto';
 import {
   SyncEngine,
@@ -29,20 +29,20 @@ export async function loadEngine({ repo, store, random, fetch }: SyncDeps) {
   }
   if (!state || !secrets) return null;
   const client = new RelayClient(state.relayUrl, state.familyId, secrets.deviceSecret, fetch);
-  return new SyncEngine(repo, client, secrets.familyKey, random);
+  return new SyncEngine(repo, client, secrets.familyKey, secrets.deviceSecret, store, random);
 }
 
 /** Starts sharing from this phone: everything logged so far is uploaded, encrypted. */
 export async function createFamily(deps: SyncDeps, relayUrl: string): Promise<SyncEngine> {
   const { repo, store, random } = deps;
   const familyId = randomId(random);
-  const familyKey = random(32);
+  const familyKey = { key: random(32), epoch: 0 };
   const deviceSecret = random(32);
   const client = new RelayClient(relayUrl, familyId, deviceSecret, deps.fetch);
   await client.createFamily();
   await saveSecrets(store, familyKey, deviceSecret);
   await repo.startSync({ familyId, relayUrl: relayUrl.replace(/\/+$/, ''), lastSeq: 0 }, false);
-  const engine = new SyncEngine(repo, client, familyKey, random);
+  const engine = new SyncEngine(repo, client, familyKey, deviceSecret, store, random);
   await engine.sync();
   return engine;
 }
@@ -57,12 +57,13 @@ export async function joinFamily(deps: SyncDeps, code: string): Promise<SyncEngi
   const deviceSecret = random(32);
   const client = new RelayClient(invite.relayUrl, invite.familyId, deviceSecret, deps.fetch);
   await client.join(invite.inviteSecret);
-  await saveSecrets(store, invite.familyKey, deviceSecret);
+  const familyKey = { key: invite.familyKey, epoch: invite.keyEpoch };
+  await saveSecrets(store, familyKey, deviceSecret);
   await repo.startSync(
     { familyId: invite.familyId, relayUrl: invite.relayUrl.replace(/\/+$/, ''), lastSeq: 0 },
     true,
   );
-  const engine = new SyncEngine(repo, client, invite.familyKey, random);
+  const engine = new SyncEngine(repo, client, familyKey, deviceSecret, store, random);
   await engine.sync();
   return engine;
 }
@@ -73,6 +74,26 @@ export async function leaveFamily(deps: SyncDeps): Promise<void> {
   if (engine) {
     await engine.client.revoke(engine.client.deviceId).catch(() => {});
   }
+  await endSyncHere(deps);
+}
+
+/**
+ * Deletes the family from the sync server: its phones, the encrypted log and reminders.
+ * Every phone keeps its own log; the other phones stop syncing when they next connect.
+ */
+export async function deleteFamily(deps: SyncDeps): Promise<void> {
+  const engine = await loadEngine(deps);
+  if (engine) await engine.client.deleteFamily();
+  await endSyncHere(deps);
+}
+
+/** Forgets the family on this phone only, e.g. after it was removed. The log stays. */
+export async function endSyncHere(deps: SyncDeps): Promise<void> {
   await deps.repo.stopSync();
   await clearSecrets(deps.store);
+}
+
+/** The relay no longer knows this phone: removed by a partner, or the family was deleted. */
+export function isRemovedError(e: unknown): boolean {
+  return e instanceof RelayError && e.status === 403 && e.code === 'not_a_member';
 }

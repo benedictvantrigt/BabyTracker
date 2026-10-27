@@ -21,13 +21,13 @@ per phone. The app is React Native (Expo), Android first, iOS later.
 | Phase | Scope | Status |
 |---|---|---|
 | 1. Local MVP | Data model; feeding, sleep and diaper entry; timers; "time since last" dashboard; local reminders | ✅ Done in 0.1.0 (plus customizable Today screen, emulator E2E tests) |
-| 2. Sync | QR pairing, encrypted change log, Cloudflare relay, data import | 🟡 0.2.0: pairing, encryption and relay done; data import and device removal open |
+| 2. Sync | QR pairing, encrypted change log, Cloudflare relay, device removal, retention | ✅ 0.2.0 pairing, encryption and relay; 0.5.0 device removal with key rotation, retention, delete family; data import dropped |
 | 3. Notifications | Scheduled pushes through the relay, iOS Notification Service Extension, Android exact alarms, awake-window and feed rules | 🟡 0.3.0: done for Android; iOS part open |
 | 4. Extras | Record types still missing (tummy time, pumping, growth, …), NFC tags, Live Activities / Live Updates, widgets, charts, growth curves, PDF/CSV export | ⬜ Not started |
 | 5. Hardening | Key recovery, backups, privacy statement, store submission | ⬜ Not started |
 
-Current position: phases 1–3 are done for Android (version 0.3.0). Phase 4 has started with the
-age-based sleep schedule (#28, version 0.4.0).
+Current position: phases 1–3 are done for Android (Phase 2 completed in 0.5.0). Phase 4 has
+started with the age-based sleep schedule (#28, version 0.4.0).
 
 To use sync and push on real phones, the relay must be deployed and push configured (README:
 Cloudflare secrets, `RELAY_URL` variable, Firebase secrets).
@@ -57,12 +57,12 @@ Close an issue with "Closes #N" in the commit or pull request that finishes it, 
 phase table above when a milestone is done. Problems found while testing are issues labelled
 [`bug`](https://github.com/benedictvantrigt/BabyTracker/labels/bug), without a milestone.
 
-### Phase 2: Sync (remaining) — [milestone](https://github.com/benedictvantrigt/BabyTracker/milestone/1)
+### Phase 2: Sync — [milestone](https://github.com/benedictvantrigt/BabyTracker/milestone/1) (done in 0.5.0)
 
-- #1 Import existing data from another tracker
-- #2 Remove another phone from the family, with key rotation
-- #3 Relay data retention: delete changes all devices have received
-- #4 Delete family
+- ~~#1 Import existing data from another tracker~~ (not planned)
+- #2 Remove another phone from the family, with key rotation (0.5.0)
+- #3 Relay data retention: delete changes all devices have received (0.5.0)
+- #4 Delete family (0.5.0)
 
 ### Phase 3: Notifications (remaining) — [milestone](https://github.com/benedictvantrigt/BabyTracker/milestone/2)
 

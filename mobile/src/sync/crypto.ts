@@ -1,5 +1,6 @@
 import { xchacha20poly1305 } from '@noble/ciphers/chacha.js';
-import { ed25519 } from '@noble/curves/ed25519.js';
+import { ed25519, x25519 } from '@noble/curves/ed25519.js';
+import { hkdf } from '@noble/hashes/hkdf.js';
 import { sha256 } from '@noble/hashes/sha2.js';
 import { bytesToHex } from '@noble/hashes/utils.js';
 import { base64urlnopad, utf8 } from '@scure/base';
@@ -36,6 +37,36 @@ export function open(key: Uint8Array, sealed: string): string {
   const bytes = b64url.decode(sealed);
   const nonce = bytes.subarray(0, NONCE_BYTES);
   return bytesUtf8(xchacha20poly1305(key, nonce).decrypt(bytes.subarray(NONCE_BYTES)));
+}
+
+const WRAP_INFO = utf8Bytes('baby-tracker key wrap v1');
+
+/** Key-encryption key shared by two devices: X25519 on their Ed25519 keys, then HKDF. */
+function wrappingKey(ownSecret: Uint8Array, otherDeviceId: string): Uint8Array {
+  const shared = x25519.getSharedSecret(
+    ed25519.utils.toMontgomerySecret(ownSecret),
+    ed25519.utils.toMontgomery(b64url.decode(otherDeviceId)),
+  );
+  return hkdf(sha256, shared, undefined, WRAP_INFO, 32);
+}
+
+/** Seals a family key so only `recipientDeviceId` (and the sender) can open it. */
+export function wrapKey(
+  senderSecret: Uint8Array,
+  recipientDeviceId: string,
+  key: Uint8Array,
+  random: RandomBytes,
+): string {
+  return seal(wrappingKey(senderSecret, recipientDeviceId), b64url.encode(key), random);
+}
+
+/** Opens a key wrapped by `senderDeviceId` for this device. Throws when it was not. */
+export function unwrapKey(
+  recipientSecret: Uint8Array,
+  senderDeviceId: string,
+  wrapped: string,
+): Uint8Array {
+  return b64url.decode(open(wrappingKey(recipientSecret, senderDeviceId), wrapped));
 }
 
 /** A device id is its base64url Ed25519 public key. */

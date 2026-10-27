@@ -1,6 +1,6 @@
 {
   "name": "babytracker",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "main": "index.ts",
   "dependencies": {
     "@expo/ui": "~58.0.23",
@@ -59,7 +59,7 @@
     "lint": "expo lint",
     "typecheck": "tsc --noEmit",
     "test": "TZ=Europe/Amsterdam jest",
-    "test:sync": "node --import tsx --test --test-concurrency=1 e2e/sync.test.ts e2e/push.test.ts"
+    "test:sync": "node --import tsx --test --test-concurrency=1 e2e/keys.test.ts e2e/sync.test.ts e2e/push.test.ts"
   },
   "private": true,
   "jest": {

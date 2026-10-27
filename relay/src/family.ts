@@ -18,6 +18,8 @@ const MAX_REMINDER_AHEAD_MS = 2 * 24 * 60 * 60_000;
 /** A reminder delivered later than this after its time is dropped by FCM. */
 const REMINDER_TTL_SECONDS = 30 * 60;
 const SYNC_NUDGE_TTL_SECONDS = 60 * 60;
+/** Sealed per-device data: device labels and wrapped family keys. */
+const MAX_SEALED_BYTES = 1024;
 
 type Json = Record<string, unknown>;
 
@@ -31,8 +33,14 @@ function error(code: string, status: number): Response {
 
 /**
  * One family: its devices, pending invites, the encrypted change log and the family's
- * pending reminders. The change log is append-only; each device pulls everything after
- * its last seq. Reminders fire from a Durable Object alarm as push messages.
+ * pending reminders. Each device pulls everything after its last seq; changes every
+ * device has received are deleted (a phone that invites someone uploads a snapshot, and
+ * nothing is deleted while an invite is open). Reminders fire from a Durable Object
+ * alarm as push messages.
+ *
+ * The family key has an epoch. Removing a phone starts a new epoch: the remover sends the
+ * new key wrapped for each remaining device (the relay cannot unwrap it), the old log is
+ * dropped and the remover uploads a snapshot sealed with the new key.
  */
 export class Family extends DurableObject<FcmEnv> {
   private sql = this.ctx.storage.sql;
@@ -66,11 +74,23 @@ export class Family extends DurableObject<FcmEnv> {
         key TEXT PRIMARY KEY,
         value INTEGER NOT NULL
       );
+      CREATE TABLE IF NOT EXISTS key_wraps (
+        device TEXT PRIMARY KEY,
+        epoch INTEGER NOT NULL,
+        from_device TEXT NOT NULL,
+        body TEXT NOT NULL
+      );
     `);
     const columns = this.sql.exec('PRAGMA table_info(devices)').toArray().map((c) => c.name);
     if (!columns.includes('push_token')) {
       this.sql.exec('ALTER TABLE devices ADD COLUMN push_token TEXT');
       this.sql.exec('ALTER TABLE devices ADD COLUMN reminders INTEGER NOT NULL DEFAULT 1');
+    }
+    if (!columns.includes('acked_seq')) {
+      this.sql.exec('ALTER TABLE devices ADD COLUMN acked_seq INTEGER NOT NULL DEFAULT 0');
+      this.sql.exec('ALTER TABLE devices ADD COLUMN last_seen_at INTEGER');
+      this.sql.exec('ALTER TABLE devices ADD COLUMN label TEXT');
+      this.sql.exec('ALTER TABLE changes ADD COLUMN epoch INTEGER NOT NULL DEFAULT 0');
     }
   }
 
@@ -100,14 +120,22 @@ export class Family extends DurableObject<FcmEnv> {
     if (route === 'POST /join') return this.join(signed.deviceId, body, now);
 
     if (!this.isMember(signed.deviceId)) return error('not_a_member', 403);
+    this.sql.exec('UPDATE devices SET last_seen_at = ? WHERE id = ?', now, signed.deviceId);
     if (route === 'POST /invites') return this.createInvite(signed.deviceId, body, now);
     if (route === 'POST /changes') return this.push(signed.deviceId, body, now);
-    if (route === 'GET /changes') return this.pull(url);
+    if (route === 'GET /changes') return this.pull(signed.deviceId, url, now);
+    if (route === 'GET /key') return this.key(signed.deviceId);
+    if (route === 'POST /rotate') return this.rotate(signed.deviceId, body, now);
+    if (route === 'DELETE /') return this.deleteFamily();
     if (route === 'GET /devices') return this.listDevices();
     if (route === 'PUT /device') return this.updateDevice(signed.deviceId, body);
     if (route === 'PUT /reminders') return this.setReminders(body, now);
     const revoke = /^DELETE \/devices\/([A-Za-z0-9_-]+)$/.exec(route);
-    if (revoke) return this.revoke(revoke[1], now);
+    if (revoke) {
+      // A phone can only leave by itself; removing another phone rotates the key.
+      if (revoke[1] !== signed.deviceId) return error('use_rotate', 403);
+      return this.revoke(revoke[1], now);
+    }
     return error('not_found', 404);
   }
 
@@ -152,7 +180,7 @@ export class Family extends DurableObject<FcmEnv> {
     }
     this.sql.exec('UPDATE invites SET used_at = ? WHERE hash = ?', now, hash);
     this.sql.exec(
-      'INSERT INTO devices (id, created_at) VALUES (?, ?) ON CONFLICT(id) DO UPDATE SET revoked_at = NULL',
+      'INSERT INTO devices (id, created_at) VALUES (?, ?) ON CONFLICT(id) DO UPDATE SET revoked_at = NULL, acked_seq = 0',
       deviceId,
       now,
     );
@@ -169,17 +197,24 @@ export class Family extends DurableObject<FcmEnv> {
         return error('bad_changes', 400);
       }
     }
+    // Changes sealed with an older family key are refused; the phone fetches the new key.
+    const epoch = this.epoch();
+    if ((typeof body.epoch === 'number' ? body.epoch : 0) !== epoch) {
+      return json({ error: 'stale_key', epoch }, 409);
+    }
     const stored = this.sql.exec('SELECT COUNT(*) AS n FROM changes').one().n as number;
     if (stored + changes.length > MAX_CHANGES_STORED) return error('quota_exceeded', 507);
     for (const c of changes) {
       this.sql.exec(
-        'INSERT INTO changes (device, body, created_at) VALUES (?, ?, ?)',
+        'INSERT INTO changes (device, body, created_at, epoch) VALUES (?, ?, ?, ?)',
         deviceId,
         c,
         now,
+        epoch,
       );
     }
     const lastSeq = this.sql.exec('SELECT MAX(seq) AS s FROM changes').one().s as number;
+    this.setMeta('last_seq', lastSeq);
     // Wake the other phones so they pull. High priority only when the sender says the
     // change shows or clears a notification there (a running timer); Android throttles
     // high-priority messages that show nothing.
@@ -188,9 +223,19 @@ export class Family extends DurableObject<FcmEnv> {
     return json({ lastSeq });
   }
 
-  private pull(url: URL): Response {
+  /**
+   * Changes after `after`. Pulling from `after` also tells the relay this device has
+   * everything up to it, so changes all devices have can be deleted.
+   */
+  private pull(deviceId: string, url: URL, now: number): Response {
     const after = Math.max(0, Number(url.searchParams.get('after') ?? 0) || 0);
     const limit = Math.min(MAX_PULL, Math.max(1, Number(url.searchParams.get('limit') ?? MAX_PULL) || MAX_PULL));
+    this.sql.exec(
+      'UPDATE devices SET acked_seq = MAX(acked_seq, ?) WHERE id = ?',
+      Math.min(after, this.maxSeq()),
+      deviceId,
+    );
+    this.compact(now);
     const rows = this.sql
       .exec(
         'SELECT seq, device, body FROM changes WHERE seq > ? ORDER BY seq LIMIT ?',
@@ -199,18 +244,143 @@ export class Family extends DurableObject<FcmEnv> {
       )
       .toArray();
     const more = rows.length > limit;
-    return json({ changes: rows.slice(0, limit), more });
+    return json({ changes: rows.slice(0, limit), more, epoch: this.epoch() });
+  }
+
+  /** Deletes changes every device has received, unless an invite is open. */
+  private compact(now: number): void {
+    const open = this.sql
+      .exec('SELECT COUNT(*) AS n FROM invites WHERE used_at IS NULL AND expires_at >= ?', now)
+      .one().n as number;
+    if (open > 0) return;
+    const floor = this.sql
+      .exec('SELECT MIN(acked_seq) AS f FROM devices WHERE revoked_at IS NULL')
+      .one().f as number | null;
+    if (floor) this.sql.exec('DELETE FROM changes WHERE seq <= ?', floor);
+  }
+
+  /** The highest seq ever stored; kept in meta because compaction deletes the rows. */
+  private maxSeq(): number {
+    const stored = this.getMeta('last_seq');
+    if (stored !== null) return stored;
+    return (this.sql.exec('SELECT MAX(seq) AS s FROM changes').one().s as number | null) ?? 0;
+  }
+
+  private epoch(): number {
+    return this.getMeta('key_epoch') ?? 0;
+  }
+
+  private getMeta(key: string): number | null {
+    const row = this.sql.exec('SELECT value FROM meta WHERE key = ?', key).toArray()[0];
+    return (row?.value as number | undefined) ?? null;
+  }
+
+  private setMeta(key: string, value: number): void {
+    this.sql.exec(
+      'INSERT INTO meta (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value',
+      key,
+      value,
+    );
+  }
+
+  /** The current family key, wrapped for this device by the phone that last rotated it. */
+  private key(deviceId: string): Response {
+    const wrap = this.sql
+      .exec('SELECT epoch, from_device, body FROM key_wraps WHERE device = ?', deviceId)
+      .toArray()[0];
+    return json({
+      epoch: this.epoch(),
+      wrap: wrap ? { epoch: wrap.epoch, from: wrap.from_device, body: wrap.body } : null,
+    });
+  }
+
+  /**
+   * Removes devices and starts a new key epoch. The sender must have pulled the whole log
+   * (`basis`), because the log is dropped; it then uploads a snapshot with the new key.
+   * Every remaining device, the sender included, needs a wrapped key.
+   */
+  private async rotate(deviceId: string, body: Json, now: number): Promise<Response> {
+    const { epoch, basis, remove, wraps, labels } = body as {
+      epoch: unknown;
+      basis: unknown;
+      remove: unknown;
+      wraps: unknown;
+      labels: unknown;
+    };
+    const current = this.epoch();
+    if (epoch !== current + 1) return json({ error: 'stale_key', epoch: current }, 409);
+    if (typeof basis !== 'number' || basis < this.maxSeq()) return error('not_up_to_date', 409);
+    if (!Array.isArray(remove) || !remove.every((d) => typeof d === 'string')) {
+      return error('bad_rotate', 400);
+    }
+    if (remove.includes(deviceId)) return error('bad_rotate', 400);
+    const isSealed = (v: unknown) => typeof v === 'string' && v.length > 0 && v.length <= MAX_SEALED_BYTES;
+    if (!wraps || typeof wraps !== 'object') return error('bad_rotate', 400);
+    const wrapMap = wraps as Record<string, unknown>;
+    const labelMap = (labels && typeof labels === 'object' ? labels : {}) as Record<string, unknown>;
+    const active = this.sql
+      .exec('SELECT id FROM devices WHERE revoked_at IS NULL')
+      .toArray()
+      .map((r) => r.id as string);
+    const remaining = active.filter((id) => !remove.includes(id));
+    if (!remaining.every((id) => isSealed(wrapMap[id]))) return error('missing_wraps', 400);
+
+    for (const id of remove) {
+      this.sql.exec(
+        'UPDATE devices SET revoked_at = ?, push_token = NULL, label = NULL WHERE id = ? AND revoked_at IS NULL',
+        now,
+        id,
+      );
+    }
+    this.sql.exec('DELETE FROM key_wraps');
+    for (const id of remaining) {
+      this.sql.exec(
+        'INSERT INTO key_wraps (device, epoch, from_device, body) VALUES (?, ?, ?, ?)',
+        id,
+        epoch,
+        deviceId,
+        wrapMap[id] as string,
+      );
+      // Labels were sealed with the old key; the remover reseals the ones it could read.
+      const label = labelMap[id];
+      this.sql.exec('UPDATE devices SET label = ? WHERE id = ?', isSealed(label) ? label : null, id);
+    }
+    this.setMeta('key_epoch', epoch);
+    // Everything sealed with the old key goes: the log, open invites (they carry the old
+    // key) and pending reminders.
+    this.sql.exec('DELETE FROM changes');
+    this.sql.exec('DELETE FROM invites');
+    this.sql.exec('DELETE FROM reminders');
+    this.sql.exec('UPDATE devices SET acked_seq = 0');
+    await this.scheduleAlarm();
+    return json({ epoch });
+  }
+
+  /** Deletes the family from the relay: devices, log, invites and reminders. */
+  private async deleteFamily(): Promise<Response> {
+    for (const table of ['devices', 'invites', 'changes', 'reminders', 'meta', 'key_wraps']) {
+      this.sql.exec(`DELETE FROM ${table}`);
+    }
+    await this.ctx.storage.deleteAlarm();
+    return json({ ok: true });
   }
 
   private listDevices(): Response {
     const devices = this.sql
-      .exec('SELECT id, created_at AS createdAt FROM devices WHERE revoked_at IS NULL ORDER BY created_at')
+      .exec(
+        `SELECT id, created_at AS createdAt, last_seen_at AS lastSeenAt, label
+         FROM devices WHERE revoked_at IS NULL ORDER BY created_at`,
+      )
       .toArray();
     return json({ devices });
   }
 
   private revoke(id: string, now: number): Response {
-    this.sql.exec('UPDATE devices SET revoked_at = ? WHERE id = ? AND revoked_at IS NULL', now, id);
+    this.sql.exec(
+      'UPDATE devices SET revoked_at = ?, push_token = NULL, label = NULL WHERE id = ? AND revoked_at IS NULL',
+      now,
+      id,
+    );
     return json({ ok: true });
   }
 
@@ -218,6 +388,14 @@ export class Family extends DurableObject<FcmEnv> {
     const token = body.pushToken;
     if (token !== null && (typeof token !== 'string' || token.length > 4096)) {
       return error('bad_token', 400);
+    }
+    const label = body.label;
+    if (
+      label !== undefined &&
+      label !== null &&
+      (typeof label !== 'string' || label.length > MAX_SEALED_BYTES)
+    ) {
+      return error('bad_label', 400);
     }
     const reminders = body.reminders !== false;
     // A token belongs to one app install; drop it from any other device row.
@@ -228,6 +406,9 @@ export class Family extends DurableObject<FcmEnv> {
       reminders ? 1 : 0,
       deviceId,
     );
+    if (label !== undefined) {
+      this.sql.exec('UPDATE devices SET label = ? WHERE id = ?', label, deviceId);
+    }
     return json({ ok: true, push: fcmConfigured(this.env) });
   }
 

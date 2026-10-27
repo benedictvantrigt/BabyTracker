@@ -3,7 +3,7 @@
 A baby tracker without self-hosting: data lives on the phones, and partners
 sync through a tiny relay that only ever sees encrypted data.
 
-## Status: version 0.4.0 — phases 1–3 done, age-based sleep schedule (Android first)
+## Status: version 0.5.0 — phases 1–3 done, age-based sleep schedule (Android first)
 
 See [docs/ROADMAP.md](docs/ROADMAP.md) for the plan and the feature backlog.
 
@@ -34,7 +34,12 @@ See [docs/ROADMAP.md](docs/ROADMAP.md) for the plan and the feature backlog.
   Phones sync shortly after a change, when the app opens and every 30 s while it is open.
 - **Relay:** `relay/`, a Cloudflare Worker with one Durable Object (SQLite) per family storing
   device keys, invite hashes and the encrypted change log. It fits the Workers free plan.
-- Not yet: removing another phone from the family with key rotation, importing existing data.
+- **Family:** Settings → Partner sync lists the phones. Removing one gives the others a new
+  family key, wrapped for each remaining phone with X25519 on its device key, so neither the
+  relay nor the removed phone can open it; the old log is dropped and the remover uploads a
+  snapshot. "Delete family" wipes the family from the relay; every phone keeps its own log.
+- **Retention:** the relay deletes changes every phone has received. Inviting a phone first
+  uploads a snapshot, and nothing is deleted while an invite is open.
 
 ## Phase 3 — notifications across phones
 
