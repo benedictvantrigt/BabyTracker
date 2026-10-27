@@ -71,9 +71,9 @@ sync through a tiny relay that only ever sees encrypted data.
 - Versions follow [Semantic Versioning](https://semver.org/). `mobile/app.json` holds the
   version (`expo.version`) and the Android `versionCode`, which goes up by one per release so a
   new APK installs over the old one. `CHANGELOG.md` lists what each version changed.
-- To release: raise both numbers, add the CHANGELOG entry, merge to `main`, then tag that
-  commit (`git tag v0.4.0 && git push origin v0.4.0`). The tag run checks that the tag matches
-  `app.json`, runs all tests and publishes the APK as GitHub release `v0.4.0`.
+- To release: raise both numbers, add the CHANGELOG entry and merge to `main`. When all tests
+  pass on `main` and that version has no release yet, the workflow creates tag and GitHub
+  release `v0.4.0` with the APK.
 - `android-latest` stays a pre-release with the newest passing build of any branch, for testing.
 
 ## Layout

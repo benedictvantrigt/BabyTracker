@@ -12,13 +12,13 @@ before 1.0.0 a minor version marks a phase of the plan.
 - Reminder rules sync between phones; "Reminders on this phone" stays per phone.
 - Falls back to on-phone scheduling without Firebase or push registration.
 
-## [0.2.0] — 2026-10-26 — Phase 2: partner sync
+## 0.2.0 — 2026-10-26 — Phase 2: partner sync
 
 - Pairing by single-use QR / invite code (15 minutes).
 - End-to-end encryption (XChaCha20-Poly1305 family key, Ed25519 device signatures).
 - Cloudflare Worker relay with one Durable Object per family; most recent edit wins.
 
-## [0.1.0] — 2026-10-26 — Phase 1: local MVP (Android)
+## 0.1.0 — 2026-10-26 — Phase 1: local MVP (Android)
 
 - Feeding, sleep and diaper logging with one-tap timers, Today screen and timeline.
 - Customizable Today dashboard.
@@ -26,5 +26,3 @@ before 1.0.0 a minor version marks a phase of the plan.
 - Android end-to-end tests on a GitHub Actions emulator; passing APK as `android-latest`.
 
 [0.3.0]: https://github.com/benedictvantrigt/BabyTracker/releases/tag/v0.3.0
-[0.2.0]: https://github.com/benedictvantrigt/BabyTracker/tree/v0.2.0
-[0.1.0]: https://github.com/benedictvantrigt/BabyTracker/tree/v0.1.0
