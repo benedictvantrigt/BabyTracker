@@ -28,9 +28,14 @@ name: Join a partner's family and sync both ways
 - scrollUntilVisible:
     element:
       id: 'sync-status'
+# The card lists the family's phones, so its buttons sit lower.
+- scrollUntilVisible:
+    element: 'Sync now'
 - tapOn: 'Sync now'
-- assertVisible:
-    id: 'sync-status'
-    text: 'Synced at .*'
-- assertVisible: '2 phones share this log'
+- scrollUntilVisible:
+    element:
+      id: 'sync-status'
+      text: 'Synced at .*'
+    direction: UP
+- assertVisible: '.*\(this phone\)'
 - takeScreenshot: 07-sync-settings
