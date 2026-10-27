@@ -209,7 +209,8 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: Spacing.three,
     right: Spacing.three,
-    bottom: BottomTabInset + Spacing.three,
+    // The native tab bar already ends the screen above it; no extra inset here.
+    bottom: Spacing.three,
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.three,
