@@ -5,6 +5,8 @@ sync through a tiny relay that only ever sees encrypted data.
 
 ## Status: version 0.3.0 — phases 1–3 done (Android first)
 
+See [docs/ROADMAP.md](docs/ROADMAP.md) for the plan and the feature backlog.
+
 ## Phase 1 — local MVP
 
 - Feeding (breast left/right/both, bottle with ml, formula/solids), sleep (nap/night), diapers (wet/solid/colour)
