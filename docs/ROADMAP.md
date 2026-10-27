@@ -90,6 +90,7 @@ Other extras:
 - #20 Daily reset at 20:00
 - #21 Roles per phone (read-only babysitter)
 - #28 Age-based sleep schedule in the sleep timer (0.4.0)
+- #29 Show days in the age under the baby's name
 
 ### Phase 5: Hardening — [milestone](https://github.com/benedictvantrigt/BabyTracker/milestone/5)
 
