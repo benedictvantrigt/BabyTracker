@@ -9,6 +9,10 @@ name: One-tap diapers with undo
 - assertVisible: 'No diaper change logged yet'
 - tapOn: 'Both'
 - assertVisible: 'Last change .* ago'
+# The undo bar can cover the buttons, depending on how tall the cards above are.
+- extendedWaitUntil:
+    notVisible: 'UNDO'
+    timeout: 10000
 - tapOn: 'Solid'
 - scrollUntilVisible:
     element: '1 wet · 2 solid'

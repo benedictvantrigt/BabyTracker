@@ -445,13 +445,23 @@ function adviceFor(
     }
   }
 
-  // The midday nap (the longest) went wrong: catch up late in the afternoon.
+  // The midday nap (the longest) went wrong: catch up late in the afternoon. Only when
+  // sleep is being logged today, and no planned nap is left to do that job.
   const main = slots.reduce<SlotState | null>(
     (a, s) => (!a || s.endAt - s.startAt > a.endAt - a.startAt ? s : a),
     null,
   );
   const latestNapEnd = scheduleTime(settings, now, LATEST_NAP_END);
-  if (main && (main.status === 'missed' || main.status === 'short') && now < latestNapEnd) {
+  const dayStart = scheduleTime(settings, now, BASE_DAY_START);
+  const loggedToday = sleeps.some((e) => (e.end ?? now) >= dayStart - HOUR);
+  const napLeft = slots.some((s) => s !== main && (s.status === 'upcoming' || s.status === 'now'));
+  if (
+    main &&
+    (main.status === 'missed' || main.status === 'short') &&
+    loggedToday &&
+    !napLeft &&
+    now < latestNapEnd
+  ) {
     const start = slots.length >= 3 ? CATCH_UP_FROM.threeNaps : CATCH_UP_FROM.fewerNaps;
     const from = Math.max(scheduleTime(settings, now, start), main.endAt);
     return { kind: 'catch-up', from, to: latestNapEnd };

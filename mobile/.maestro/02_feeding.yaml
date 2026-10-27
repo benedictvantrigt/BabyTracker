@@ -5,6 +5,10 @@ name: Breast feeding timers switch sides, bottle feed with amount
 - tapOn: 'Left'
 - assertVisible: 'Feeding · Left'
 - takeScreenshot: 02-feeding-left-running
+# The undo bar can cover the buttons, depending on how tall the cards above are.
+- extendedWaitUntil:
+    notVisible: 'UNDO'
+    timeout: 10000
 - tapOn: 'Right'
 - assertVisible: 'Feeding · Right'
 - assertNotVisible: 'Feeding · Left'
@@ -12,6 +16,9 @@ name: Breast feeding timers switch sides, bottle feed with amount
 - assertNotVisible: 'Feeding · Right'
 - assertVisible: 'Last: Right, .* ago'
 - assertVisible: 'Next due at .*'
+- extendedWaitUntil:
+    notVisible: 'UNDO'
+    timeout: 10000
 - tapOn: 'Bottle'
 - assertVisible: 'Add feeding'
 - tapOn:

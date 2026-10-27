@@ -19,6 +19,9 @@ name: Sleep timer, and leaves reminders scheduled for the alarm check
 - tapOn: 'Stop'
 - assertVisible: 'Awake .* \(since .*\)'
 # Leave a feed running: its ongoing notification is checked after the flows.
+- extendedWaitUntil:
+    notVisible: 'UNDO'
+    timeout: 10000
 - tapOn: 'Left'
 - assertVisible: 'Feeding · Left'
 - takeScreenshot: 06-feed-running

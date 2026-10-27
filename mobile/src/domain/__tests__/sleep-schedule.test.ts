@@ -110,15 +110,23 @@ describe('scheduleStatus', () => {
   });
 
   it('advises a catch-up nap after a missed or short midday nap', () => {
-    const missed = scheduleStatus([night, nap(9, 0, 10)], fourMonths, settings, at(14, 30))!;
-    expect(missed.slots[1].status).toBe('missed');
-    expect(missed.advice).toEqual({ kind: 'catch-up', from: at(15), to: at(17) });
-
     const short = scheduleStatus([night, nap(12, 30, 13)], tenMonths, settings, at(15))!;
     expect(short.slots[1].status).toBe('short');
     expect(short.advice).toEqual({ kind: 'catch-up', from: at(16), to: at(17) });
 
-    expect(scheduleStatus([night], fourMonths, settings, at(17, 30))!.advice).toBeNull();
+    const missed = scheduleStatus([night, nap(9, 15, 10)], tenMonths, settings, at(14, 45))!;
+    expect(missed.slots[1].status).toBe('missed');
+    expect(missed.advice).toEqual({ kind: 'catch-up', from: at(16), to: at(17) });
+
+    expect(scheduleStatus([night], tenMonths, settings, at(17, 30))!.advice).toBeNull();
+  });
+
+  it('gives no catch-up advice while a planned nap is left, or nothing is logged today', () => {
+    // Three naps: the late-afternoon nap is the catch-up.
+    const threeNaps = scheduleStatus([night, nap(9, 0, 10)], fourMonths, settings, at(14, 30))!;
+    expect(threeNaps.slots[1].status).toBe('missed');
+    expect(threeNaps.advice).toBeNull();
+    expect(scheduleStatus([], tenMonths, settings, at(15))!.advice).toBeNull();
   });
 
   it('flags a nap running past its planned end', () => {
