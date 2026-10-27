@@ -53,7 +53,8 @@ Cloudflare secrets, `RELAY_URL` variable, Firebase secrets).
 Features to build later are GitHub issues, grouped in one milestone per phase:
 [all milestones](https://github.com/benedictvantrigt/BabyTracker/milestones), [open issues](https://github.com/benedictvantrigt/BabyTracker/issues).
 Close an issue with "Closes #N" in the commit or pull request that finishes it, and update the
-phase table above when a milestone is done.
+phase table above when a milestone is done. Problems found while testing are issues labelled
+[`bug`](https://github.com/benedictvantrigt/BabyTracker/labels/bug), without a milestone.
 
 ### Phase 2: Sync (remaining) — [milestone](https://github.com/benedictvantrigt/BabyTracker/milestone/1)
 
@@ -87,6 +88,7 @@ Other extras:
 - #19 PDF / CSV export
 - #20 Daily reset at 20:00
 - #21 Roles per phone (read-only babysitter)
+- #28 Age-based sleep schedule in the sleep timer
 
 ### Phase 5: Hardening — [milestone](https://github.com/benedictvantrigt/BabyTracker/milestone/5)
 
