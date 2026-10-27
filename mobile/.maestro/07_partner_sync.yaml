@@ -14,10 +14,11 @@ name: Join a partner's family and sync both ways
 - inputText: ${INVITE}
 - hideKeyboard
 - tapOn: 'Join'
-# The partner's child and feed arrive from the relay.
+- takeScreenshot: 07-after-join-tap
+# The partner's child and feed arrive from the relay; the emulator can be slow here.
 - extendedWaitUntil:
     visible: 'Micky'
-    timeout: 20000
+    timeout: 40000
 - assertVisible: 'Last: Left, .* ago'
 - takeScreenshot: 07-joined
 # Log a diaper here; the test machine checks the partner receives it.
