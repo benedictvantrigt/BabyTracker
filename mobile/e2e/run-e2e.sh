@@ -35,18 +35,37 @@ export MAESTRO_DRIVER_STARTUP_TIMEOUT=180000
 echo "== maestro $(maestro --version 2>&1 | tail -1) =="
 # One Maestro run per flow, in file order: a stuck flow cannot take the others down.
 maestro_status=0
+
+# Emulator faults rather than test failures: no report (Maestro hung before the flow
+# ran) or the on-device driver died. A flow that hit one is run once more.
+infra_failure() { # report file
+  [ ! -s "$1" ] || grep -qE 'DeviceServerDied|StatusRuntimeException: UNAVAILABLE' "$1"
+}
+
+run_maestro() { # name, flow file, extra maestro args...
+  local name="$1" flow="$2"
+  shift 2
+  (
+    cd "$OUT/screenshots" &&
+      timeout --kill-after=30s 8m maestro test --format junit --output "$OUT/report-$name.xml" \
+        --test-output-dir "$OUT/maestro-output/$name" "$@" "$flow" < /dev/null
+  ) 2>&1 | tee -a "$OUT/maestro.txt"
+  return "${PIPESTATUS[0]}"
+}
+
 run_flow() { # flow file, extra maestro args...
   local flow="$1"
   shift
   local name
   name="$(basename "$flow" .yaml)"
   echo "== $name =="
-  (
-    cd "$OUT/screenshots" &&
-      timeout --kill-after=30s 8m maestro test --format junit --output "$OUT/report-$name.xml" \
-        --test-output-dir "$OUT/maestro-output/$name" "$@" "$flow" < /dev/null
-  ) 2>&1 | tee -a "$OUT/maestro.txt"
-  [ "${PIPESTATUS[0]}" -eq 0 ] || maestro_status=1
+  run_maestro "$name" "$flow" "$@" && return 0
+  if infra_failure "$OUT/report-$name.xml"; then
+    echo "== $name: emulator fault, running it once more ==" | tee -a "$OUT/maestro.txt"
+    mv "$OUT/report-$name.xml" "$OUT/report-$name-attempt1.xml.txt" 2>/dev/null
+    run_maestro "$name" "$flow" "$@" && return 0
+  fi
+  maestro_status=1
 }
 
 # 01-06 run on a fresh install each; 06 leaves reminders scheduled for the checks below.
@@ -60,12 +79,27 @@ adb shell dumpsys alarm > "$OUT/dumpsys-alarm.txt"
 adb shell dumpsys notification --noredact > "$OUT/dumpsys-notification.txt"
 adb exec-out screencap -p > "$OUT/screenshots/99-final-state.png" || true
 
-# Partner sync: the test machine plays the partner's phone.
+# Partner sync: the test machine plays the partner's phone. Invites are single use, so a
+# retry after an emulator fault starts a new partner family.
 PARTNER="$OUT/partner"
-(cd "$HERE/.." && npx tsx e2e/partner.ts create "$PARTNER" "http://localhost:$RELAY_PORT") \
-  2>&1 | tee -a "$OUT/partner.txt"
+partner_attempt() {
+  rm -rf "$PARTNER"
+  (cd "$HERE/.." && npx tsx e2e/partner.ts create "$PARTNER" "http://localhost:$RELAY_PORT") \
+    2>&1 | tee -a "$OUT/partner.txt"
+  [ -f "$PARTNER/invite.txt" ] || return 1
+  run_maestro 07_partner_sync "$FLOWS/07_partner_sync.yaml" -e "INVITE=$(cat "$PARTNER/invite.txt")"
+}
+echo "== 07_partner_sync =="
+if ! partner_attempt; then
+  if infra_failure "$OUT/report-07_partner_sync.xml"; then
+    echo "== 07_partner_sync: emulator fault, running it once more ==" | tee -a "$OUT/maestro.txt"
+    mv "$OUT/report-07_partner_sync.xml" "$OUT/report-07_partner_sync-attempt1.xml.txt" 2>/dev/null
+    partner_attempt || maestro_status=1
+  else
+    maestro_status=1
+  fi
+fi
 if [ -f "$PARTNER/invite.txt" ]; then
-  run_flow "$FLOWS/07_partner_sync.yaml" -e "INVITE=$(cat "$PARTNER/invite.txt")"
   (cd "$HERE/.." && npx tsx e2e/partner.ts check "$PARTNER") 2>&1 | tee -a "$OUT/partner.txt"
 fi
 
