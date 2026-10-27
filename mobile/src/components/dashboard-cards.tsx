@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import type { ComponentType, ReactNode } from 'react';
+import { useState, type ComponentType, type ReactNode } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
@@ -18,7 +18,14 @@ import {
   summarizeDay,
 } from '@/domain/entries';
 import { nextFeedAt, nextNapAt } from '@/domain/reminders';
-import { formatAgo, formatClock, formatDuration, formatStopwatch } from '@/domain/time';
+import {
+  isNewStage,
+  scheduleStatus,
+  type ScheduleStatus,
+  type SleepAdvice,
+  type SlotState,
+} from '@/domain/sleep-schedule';
+import { MINUTE, formatAgo, formatClock, formatDuration, formatStopwatch } from '@/domain/time';
 import type { Child, DiaperData, Entry, FeedingMethod, Settings } from '@/domain/types';
 import { useTheme } from '@/hooks/use-theme';
 
@@ -67,7 +74,8 @@ function SleepCard({ child, settings, entries, now, repo, run, logged }: Dashboa
   const theme = useTheme();
   const sleeping = runningEntries(entries).find((e) => e.kind === 'sleep');
   const lastSleep = lastCompletedSleep(entries);
-  const napAt = nextNapAt(entries, settings);
+  const schedule = settings.sleepSchedule ? scheduleStatus(entries, child, settings, now) : null;
+  const napAt = schedule ? null : nextNapAt(entries, settings);
   const startSleep = () =>
     run(async () => {
       const e = await repo.startTimer(child.id, 'sleep', {
@@ -78,6 +86,11 @@ function SleepCard({ child, settings, entries, now, repo, run, logged }: Dashboa
 
   return (
     <KindCard kind="sleep" onAdd={() => router.push('/entry/sleep')}>
+      {schedule && isNewStage(schedule.stage, now) && (
+        <ThemedText type="small" style={{ color: theme.sleep }} testID="schedule-new-stage">
+          New schedule: {schedule.stage.stage.label}, {schedule.plan.naps.length} naps a day
+        </ThemedText>
+      )}
       <ThemedText>
         {sleeping
           ? `Asleep since ${formatClock(sleeping.start)}`
@@ -85,17 +98,146 @@ function SleepCard({ child, settings, entries, now, repo, run, logged }: Dashboa
             ? `Awake ${formatDuration(now - lastSleep.end)} (since ${formatClock(lastSleep.end)})`
             : 'No sleep logged yet'}
       </ThemedText>
-      {!sleeping && napAt && (
-        <ThemedText type="small" themeColor="textSecondary">
-          {napAt > now
-            ? `Nap due at ${formatClock(napAt)}`
-            : `Nap was due ${formatAgo(napAt, now)}`}
-        </ThemedText>
+      {schedule ? (
+        <ScheduleLines schedule={schedule} sleeping={!!sleeping} now={now} />
+      ) : (
+        !sleeping &&
+        napAt && (
+          <ThemedText type="small" themeColor="textSecondary">
+            {napAt > now
+              ? `Nap due at ${formatClock(napAt)}`
+              : `Nap was due ${formatAgo(napAt, now)}`}
+          </ThemedText>
+        )
       )}
       {!sleeping && (
         <Button label="Start sleep" variant="primary" color={theme.sleep} onPress={startSleep} />
       )}
+      {schedule && <DayPlan schedule={schedule} now={now} />}
     </KindCard>
+  );
+}
+
+/** Where the day stands: the nap running now or the next one, and advice when off plan. */
+function ScheduleLines({
+  schedule,
+  sleeping,
+  now,
+}: {
+  schedule: ScheduleStatus;
+  sleeping: boolean;
+  now: number;
+}) {
+  const theme = useTheme();
+  const naps = schedule.plan.naps.length;
+  const { current, next } = schedule;
+  let line: string;
+  if (current) {
+    const which = current.slot ? `Nap ${current.slot.index} of ${naps}` : 'Extra nap';
+    line =
+      current.endAt > now
+        ? `${which} · until ${formatClock(current.endAt)} · ${formatDuration(current.endAt - now)} left`
+        : `${which} · planned until ${formatClock(current.endAt)}`;
+  } else if (sleeping) {
+    line = `Night · day starts at ${formatClock(schedule.morningAt)}`;
+  } else if (next) {
+    line =
+      next.startAt > now
+        ? `Nap ${next.index} of ${naps} at ${formatClock(next.startAt)} · in ${formatDuration(next.startAt - now)}`
+        : `Nap ${next.index} of ${naps} was due at ${formatClock(next.startAt)}`;
+  } else if (schedule.plan.bedtimeAt > now) {
+    line = `Bed at ${formatClock(schedule.plan.bedtimeAt)} · in ${formatDuration(schedule.plan.bedtimeAt - now)}`;
+  } else {
+    line = `Bedtime was ${formatClock(schedule.plan.bedtimeAt)}`;
+  }
+  return (
+    <>
+      <ThemedText type="small" themeColor="textSecondary" testID="schedule-next">
+        {line}
+      </ThemedText>
+      {schedule.advice && (
+        <ThemedText type="small" style={{ color: theme.sleep }} testID="schedule-advice">
+          {adviceText(schedule.advice)}
+        </ThemedText>
+      )}
+    </>
+  );
+}
+
+function adviceText(advice: SleepAdvice): string {
+  switch (advice.kind) {
+    case 'resettle':
+      return `Woke early: try to settle again; the nap runs until ${formatClock(advice.until)}.`;
+    case 'catch-up':
+      return `Short day sleep: one long or two short naps between ${formatClock(advice.from)} and ${formatClock(advice.to)}.`;
+    case 'wake-overdue':
+      return `Time to wake up: the nap was planned until ${formatClock(advice.since)}.`;
+  }
+}
+
+const SLOT_STATUS_LABEL: Record<SlotState['status'], string> = {
+  done: 'slept',
+  short: 'short',
+  missed: 'missed',
+  now: 'now',
+  sleeping: 'sleeping',
+  upcoming: '',
+};
+
+/** Today's planned naps and bedtime with what was slept, and day sleep against the target. */
+function DayPlan({ schedule, now }: { schedule: ScheduleStatus; now: number }) {
+  const [open, setOpen] = useState(false);
+  const [min, max] = schedule.stage.stage.daySleep;
+  const target =
+    min === max
+      ? formatDuration(min * MINUTE)
+      : `${formatDuration(min * MINUTE)}–${formatDuration(max * MINUTE)}`;
+  return (
+    <View style={styles.plan}>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityState={{ expanded: open }}
+        onPress={() => setOpen(!open)}
+        hitSlop={8}
+        testID="schedule-plan">
+        <ThemedText type="smallBold" themeColor="textSecondary">
+          {`${open ? '▾' : '▸'} Today's plan · ${schedule.stage.stage.label}${schedule.stage.manual ? ' (set by hand)' : ''}`}
+        </ThemedText>
+        {!open && (
+          <ThemedText type="small" themeColor="textSecondary">
+            {`${schedule.slots.map((n) => formatClock(n.startAt)).join(' · ')} · bed ${formatClock(schedule.plan.bedtimeAt)}`}
+          </ThemedText>
+        )}
+      </Pressable>
+      {open &&
+        schedule.slots.map((slot) => (
+          <View key={slot.index} style={styles.planRow}>
+            <ThemedText type="small" style={styles.grow}>
+              {`Nap ${slot.index}  ${formatClock(slot.startAt)}–${formatClock(slot.endAt)}`}
+            </ThemedText>
+            <ThemedText type="small" themeColor="textSecondary">
+              {slot.sleptMs > 0
+                ? `${formatDuration(slot.sleptMs)} ${SLOT_STATUS_LABEL[slot.status]}`
+                : SLOT_STATUS_LABEL[slot.status]}
+            </ThemedText>
+          </View>
+        ))}
+      {open && (
+        <>
+          <View style={styles.planRow}>
+            <ThemedText type="small" style={styles.grow}>
+              {`Bed  ${formatClock(schedule.plan.bedtimeAt)}`}
+            </ThemedText>
+            <ThemedText type="small" themeColor="textSecondary">
+              {schedule.plan.bedtimeAt <= now ? 'past' : ''}
+            </ThemedText>
+          </View>
+          <ThemedText type="small" themeColor="textSecondary">
+            {`Day sleep ${formatDuration(schedule.daySleptMs)} of ${target}`}
+          </ThemedText>
+        </>
+      )}
+    </View>
   );
 }
 
@@ -294,6 +436,13 @@ const styles = StyleSheet.create({
   },
   grow: {
     flex: 1,
+  },
+  plan: {
+    gap: Spacing.one,
+  },
+  planRow: {
+    flexDirection: 'row',
+    gap: Spacing.two,
   },
   running: {
     borderWidth: 2,

@@ -214,11 +214,16 @@ export function Stepper({
 }
 
 /** Opens the Android date dialog, followed by the time dialog unless `dateOnly`. */
-function pickAndroidDateTime(value: number, dateOnly: boolean, onChange: (ms: number) => void) {
+function pickAndroidDateTime(
+  value: number,
+  dateOnly: boolean,
+  allowFuture: boolean,
+  onChange: (ms: number) => void,
+) {
   DateTimePickerAndroid.open({
     value: new Date(value),
     mode: 'date',
-    maximumDate: new Date(),
+    maximumDate: allowFuture ? undefined : new Date(),
     onValueChange: (_, date) => {
       if (dateOnly) {
         onChange(startOfLocalDay(date.getTime()));
@@ -234,15 +239,19 @@ function pickAndroidDateTime(value: number, dateOnly: boolean, onChange: (ms: nu
   });
 }
 
-/** Date + time (or date-only) field that never allows a moment in the future. */
+/** Date + time (or date-only) field; no moment in the future unless `allowFuture`. */
 export function DateTimeField({
   value,
   onChange,
   dateOnly = false,
+  allowFuture = false,
+  testID,
 }: {
   value: number;
   onChange: (ms: number) => void;
   dateOnly?: boolean;
+  allowFuture?: boolean;
+  testID?: string;
 }) {
   const theme = useTheme();
   const now = useNow(60_000);
@@ -252,7 +261,8 @@ export function DateTimeField({
         value={new Date(value)}
         mode={dateOnly ? 'date' : 'datetime'}
         display="compact"
-        maximumDate={new Date(now)}
+        maximumDate={allowFuture ? undefined : new Date(now)}
+        testID={testID}
         onValueChange={(_, date) =>
           onChange(dateOnly ? startOfLocalDay(date.getTime()) : date.getTime())
         }
@@ -262,7 +272,8 @@ export function DateTimeField({
   return (
     <Pressable
       accessibilityRole="button"
-      onPress={() => pickAndroidDateTime(value, dateOnly, onChange)}
+      onPress={() => pickAndroidDateTime(value, dateOnly, allowFuture, onChange)}
+      testID={testID}
       style={[styles.input, { borderColor: theme.border }]}>
       <ThemedText>
         {dateOnly

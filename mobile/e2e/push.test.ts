@@ -242,12 +242,21 @@ describe('push through the relay', () => {
   it('shares reminder rules between phones but keeps per-phone choices', async () => {
     const [a, b] = await family();
     await b.repo.updateSettings({ remindersOnThisPhone: false, dashboardCards: ['diaper'] });
-    await a.repo.updateSettings({ awakeWindowMinutes: 120, feedAlarmNight: false });
+    await a.repo.updateSettings({
+      awakeWindowMinutes: 120,
+      feedAlarmNight: false,
+      sleepSchedule: false,
+      scheduleStage: 'm6',
+      napLeadMinutes: 25,
+    });
     await (await engineOf(a)).sync();
     await (await engineOf(b)).sync();
     const s = await b.repo.getSettings();
     assert.equal(s.awakeWindowMinutes, 120);
     assert.equal(s.feedAlarmNight, false);
+    assert.equal(s.sleepSchedule, false);
+    assert.equal(s.scheduleStage, 'm6');
+    assert.equal(s.napLeadMinutes, 25);
     assert.equal(s.remindersOnThisPhone, false);
     assert.deepEqual(s.dashboardCards, ['diaper']);
   });

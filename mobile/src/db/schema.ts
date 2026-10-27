@@ -43,6 +43,9 @@ const MIGRATIONS: string[] = [
     value TEXT NOT NULL
   );
   `,
+  `
+  ALTER TABLE children ADD COLUMN due_date TEXT;
+  `,
 ];
 
 export const SCHEMA_VERSION = MIGRATIONS.length;

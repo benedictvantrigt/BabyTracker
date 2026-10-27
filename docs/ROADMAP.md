@@ -26,7 +26,8 @@ per phone. The app is React Native (Expo), Android first, iOS later.
 | 4. Extras | Record types still missing (tummy time, pumping, growth, …), NFC tags, Live Activities / Live Updates, widgets, charts, growth curves, PDF/CSV export | ⬜ Not started |
 | 5. Hardening | Key recovery, backups, privacy statement, store submission | ⬜ Not started |
 
-Current position: phases 1–3 are done for Android (version 0.3.0). Next up is phase 4.
+Current position: phases 1–3 are done for Android (version 0.3.0). Phase 4 has started with the
+age-based sleep schedule (#28, version 0.4.0).
 
 To use sync and push on real phones, the relay must be deployed and push configured (README:
 Cloudflare secrets, `RELAY_URL` variable, Firebase secrets).
@@ -88,7 +89,7 @@ Other extras:
 - #19 PDF / CSV export
 - #20 Daily reset at 20:00
 - #21 Roles per phone (read-only babysitter)
-- #28 Age-based sleep schedule in the sleep timer
+- #28 Age-based sleep schedule in the sleep timer (0.4.0)
 
 ### Phase 5: Hardening — [milestone](https://github.com/benedictvantrigt/BabyTracker/milestone/5)
 

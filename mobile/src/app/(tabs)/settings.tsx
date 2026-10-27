@@ -16,7 +16,15 @@ import {
 } from '@/components/ui';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useAction, useAppData } from '@/data/app-data';
-import { formatDuration, MINUTE, startOfLocalDay, toIsoDate } from '@/domain/time';
+import { SCHEDULE_STAGES, planDay, stageFor } from '@/domain/sleep-schedule';
+import {
+  DAY,
+  formatClock,
+  formatDuration,
+  MINUTE,
+  startOfLocalDay,
+  toIsoDate,
+} from '@/domain/time';
 import type { Child, Settings } from '@/domain/types';
 import { useTheme } from '@/hooks/use-theme';
 import { useSync } from '@/sync/app-sync';
@@ -68,26 +76,7 @@ export default function SettingsScreen() {
             />
           </Card>
 
-          <Card>
-            <ThemedText type="smallBold" themeColor="textSecondary">
-              SLEEP
-            </ThemedText>
-            <Stepper
-              label="Awake window"
-              value={settings.awakeWindowMinutes}
-              format={formatMinutes}
-              step={15}
-              min={30}
-              max={6 * 60}
-              onChange={(v) => update({ awakeWindowMinutes: v })}
-            />
-            <ToggleRow
-              label="Nap reminder"
-              description="When the awake window has passed, during the day"
-              value={settings.napReminders}
-              onChange={(v) => update({ napReminders: v })}
-            />
-          </Card>
+          <SleepCard child={activeChild} settings={settings} update={update} />
 
           <Card>
             <ThemedText type="smallBold" themeColor="textSecondary">
@@ -146,6 +135,97 @@ export default function SettingsScreen() {
   );
 }
 
+function SleepCard({
+  child,
+  settings,
+  update,
+}: {
+  child: Child | null;
+  settings: Settings;
+  update: (patch: Partial<Settings>) => void;
+}) {
+  const [now] = useState(() => Date.now());
+  const ageStage = child ? stageFor(child, { scheduleStage: '' }, now) : null;
+  const stage = child ? stageFor(child, settings, now) : null;
+  const picked = SCHEDULE_STAGES.findIndex((s) => s.id === settings.scheduleStage);
+  const plan = stage ? planDay(stage.stage, settings, now) : null;
+  const useSchedule = settings.sleepSchedule && plan !== null;
+
+  return (
+    <Card>
+      <ThemedText type="smallBold" themeColor="textSecondary">
+        SLEEP
+      </ThemedText>
+      <ToggleRow
+        label="Follow the age schedule"
+        description="Planned naps and bedtime for the baby's age, from the day start below"
+        value={settings.sleepSchedule}
+        onChange={(v) => update({ sleepSchedule: v })}
+        testID="toggle-schedule"
+      />
+      {settings.sleepSchedule && (
+        <>
+          <Stepper
+            label="Stage"
+            value={picked}
+            format={(i) =>
+              i < 0
+                ? ageStage
+                  ? `Auto: ${ageStage.stage.label}`
+                  : 'Auto'
+                : SCHEDULE_STAGES[i].label
+            }
+            step={1}
+            min={-1}
+            max={SCHEDULE_STAGES.length - 1}
+            onChange={(i) => update({ scheduleStage: i < 0 ? '' : SCHEDULE_STAGES[i].id })}
+          />
+          {plan ? (
+            <ThemedText type="small" themeColor="textSecondary" testID="schedule-summary">
+              {`Naps ${plan.naps.map((n) => `${formatClock(n.startAt)}–${formatClock(n.endAt)}`).join(', ')} · bed ${formatClock(plan.bedtimeAt)}`}
+            </ThemedText>
+          ) : (
+            <ThemedText type="small" themeColor="textSecondary">
+              Set the date of birth, or pick a stage, to use the schedule.
+            </ThemedText>
+          )}
+        </>
+      )}
+      {useSchedule ? (
+        <Stepper
+          label="Remind before nap"
+          value={settings.napLeadMinutes}
+          format={formatMinutes}
+          step={5}
+          min={0}
+          max={60}
+          onChange={(v) => update({ napLeadMinutes: v })}
+        />
+      ) : (
+        <Stepper
+          label="Awake window"
+          value={settings.awakeWindowMinutes}
+          format={formatMinutes}
+          step={15}
+          min={30}
+          max={6 * 60}
+          onChange={(v) => update({ awakeWindowMinutes: v })}
+        />
+      )}
+      <ToggleRow
+        label="Nap reminders"
+        description={
+          useSchedule
+            ? 'Before each planned nap and bedtime, and when a nap should end'
+            : 'When the awake window has passed, during the day'
+        }
+        value={settings.napReminders}
+        onChange={(v) => update({ napReminders: v })}
+      />
+    </Card>
+  );
+}
+
 function ChildCard({ child }: { child: Child }) {
   const { repo } = useAppData();
   const run = useAction(showError);
@@ -156,9 +236,16 @@ function ChildCard({ child }: { child: Child }) {
     const [y, m, d] = child.birthDate.split('-').map(Number);
     return new Date(y, m - 1, d).getTime();
   });
+  const [due, setDue] = useState<number | null>(() => {
+    if (!child.dueDate) return null;
+    const [y, m, d] = child.dueDate.split('-').map(Number);
+    return new Date(y, m - 1, d).getTime();
+  });
   const [today] = useState(() => startOfLocalDay(Date.now()));
   const birthIso = birth === null ? null : toIsoDate(birth);
-  const dirty = name.trim() !== child.name || birthIso !== child.birthDate;
+  const dueIso = due === null ? null : toIsoDate(due);
+  const dirty =
+    name.trim() !== child.name || birthIso !== child.birthDate || dueIso !== child.dueDate;
 
   return (
     <Card>
@@ -175,11 +262,25 @@ function ChildCard({ child }: { child: Child }) {
       <Field label="Date of birth">
         <DateTimeField value={birth ?? today} onChange={setBirth} dateOnly />
       </Field>
+      <ToggleRow
+        label="Born early"
+        description="The sleep schedule then counts age from the due date"
+        value={due !== null}
+        onChange={(v) => setDue(v ? (birth ?? today) + 28 * DAY : null)}
+        testID="toggle-born-early"
+      />
+      {due !== null && (
+        <Field label="Due date">
+          <DateTimeField value={due} onChange={setDue} dateOnly allowFuture />
+        </Field>
+      )}
       {dirty && (
         <Button
           label="Save"
           variant="primary"
-          onPress={() => run(() => repo.updateChild(child.id, name, birthIso))}
+          onPress={() =>
+            run(() => repo.updateChild(child.id, { name, birthDate: birthIso, dueDate: dueIso }))
+          }
         />
       )}
     </Card>

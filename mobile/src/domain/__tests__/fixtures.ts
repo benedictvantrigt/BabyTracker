@@ -36,4 +36,9 @@ export function entry<K extends EntryKind>(
   } as Entry;
 }
 
+/** A child for reminders and the schedule; no birth date means no schedule. */
+export function kid(name: string, birthDate: string | null = null, dueDate: string | null = null) {
+  return { name, birthDate, dueDate };
+}
+
 export const settings: Settings = { ...DEFAULT_SETTINGS, activeChildId: 'c1' };

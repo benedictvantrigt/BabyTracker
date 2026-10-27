@@ -38,6 +38,18 @@ describe('Repo', () => {
     await expect(repo.addChild('  ', null)).rejects.toBeInstanceOf(ValidationError);
   });
 
+  it('stores a due date for a baby born early', async () => {
+    const { repo, child } = await setup();
+    expect(child.dueDate).toBeNull();
+    await repo.updateChild(child.id, {
+      name: 'Micky',
+      birthDate: '2026-08-01',
+      dueDate: '2026-09-01',
+    });
+    const [stored] = await repo.listChildren();
+    expect(stored).toMatchObject({ birthDate: '2026-08-01', dueDate: '2026-09-01' });
+  });
+
   it('round-trips entries and lists running timers regardless of age', async () => {
     const { repo, child, now, advance } = await setup();
     const sleep = await repo.startTimer(child.id, 'sleep', { nap: true });

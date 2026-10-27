@@ -1,5 +1,5 @@
 appId: com.babytracker.app
-name: Onboarding shows the default dashboard
+name: Onboarding shows the default dashboard and the sleep plan
 ---
 - runFlow: subflows/onboard.yaml
 - assertVisible: '0 days'
@@ -11,6 +11,17 @@ name: Onboarding shows the default dashboard
     id: 'card-diaper'
 - assertVisible: 'No sleep logged yet'
 - assertVisible: 'No feeding logged yet'
+# A newborn follows the age schedule: next nap or bedtime, and today's plan.
+- assertVisible:
+    id: 'schedule-next'
+- scrollUntilVisible:
+    element:
+      id: 'schedule-plan'
+- tapOn:
+    id: 'schedule-plan'
+- assertVisible: 'Nap 1 .*'
+- assertVisible: 'Day sleep .* of .*'
+- takeScreenshot: 01-sleep-plan
 - scrollUntilVisible:
     element:
       id: 'card-today'

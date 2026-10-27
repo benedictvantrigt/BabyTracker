@@ -20,6 +20,6 @@ export async function refreshNotifications(repo: Repo, now = Date.now()): Promis
   if (!child) return;
   const entries = await repo.listEntries(child.id, now - 2 * DAY);
   const localReminders = settings.remindersOnThisPhone && !sync?.pushActive;
-  const reminders = localReminders ? computeReminders(entries, settings, child.name, now) : [];
+  const reminders = localReminders ? computeReminders(entries, settings, child, now) : [];
   await syncNotifications(reminders, runningEntries(entries), child.name);
 }

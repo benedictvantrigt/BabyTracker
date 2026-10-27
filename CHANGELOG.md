@@ -3,6 +3,20 @@
 All notable changes to Baby Tracker. Versions follow [Semantic Versioning](https://semver.org/);
 before 1.0.0 a minor version marks a phase of the plan.
 
+## [0.4.0] — unreleased — Age-based sleep schedule
+
+- The sleep timer follows a day schedule for the baby's age (14 stages from 0–3 weeks to
+  3–4 years): planned naps (in-bed times), bedtime, awake windows and target day sleep,
+  shifted with the day start. Stage from the birth date, or from the due date for a baby
+  born early; can be set by hand.
+- Sleep card: next nap or time left in the current nap, today's plan against what was
+  slept, and advice when the day goes off plan (resettle after waking early, catch-up nap
+  after a missed or short midday nap, wake-up when a nap runs over).
+- Reminders before each planned nap and bedtime and at the planned end of a nap; the
+  next morning's first nap after bedtime. Replace the awake-window reminder while the
+  schedule is on; schedule settings are shared between partner phones.
+- Due date for a baby born early (Settings → Baby).
+
 ## [0.3.0] — 2026-10-26 — Phase 3: notifications across phones
 
 - Reminders handed to the relay (fire time + encrypted text) and pushed by FCM when due;
@@ -25,4 +39,5 @@ before 1.0.0 a minor version marks a phase of the plan.
 - On-phone reminders: nap, daytime feed, night feed alarm, ongoing timer notification.
 - Android end-to-end tests on a GitHub Actions emulator; passing APK as `android-latest`.
 
+[0.4.0]: https://github.com/benedictvantrigt/BabyTracker/releases/tag/v0.4.0
 [0.3.0]: https://github.com/benedictvantrigt/BabyTracker/releases/tag/v0.3.0

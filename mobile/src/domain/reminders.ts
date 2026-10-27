@@ -1,8 +1,12 @@
 import { lastCompletedSleep, latest } from './entries';
-import { MINUTE, formatClock, formatDuration, isDaytime } from './time';
-import type { Entry, Settings } from './types';
+import { planDay, scheduleStatus, stageFor, type ScheduleStatus } from './sleep-schedule';
+import { DAY, MINUTE, formatClock, formatDuration, isDaytime } from './time';
+import type { Child, Entry, Settings } from './types';
 
-export type ReminderId = 'nap' | 'feed';
+export type ReminderId = 'nap' | 'wake' | 'bed' | 'feed';
+
+/** What reminders need to know about the child. */
+export type ReminderChild = Pick<Child, 'name' | 'birthDate' | 'dueDate'>;
 
 export interface Reminder {
   id: ReminderId;
@@ -21,14 +25,18 @@ export interface Reminder {
 export function computeReminders(
   entries: Entry[],
   settings: Settings,
-  childName: string,
+  child: ReminderChild,
   now: number,
 ): Reminder[] {
+  const childName = child.name;
   const live = entries.filter((e) => e.deletedAt === null);
   const reminders: Reminder[] = [];
   const asleep = live.some((e) => e.kind === 'sleep' && e.end === null);
+  const schedule = settings.sleepSchedule ? scheduleStatus(live, child, settings, now) : null;
 
-  if (settings.napReminders && !asleep) {
+  if (settings.napReminders && schedule) {
+    reminders.push(...scheduleReminders(schedule, child, settings, asleep, now));
+  } else if (settings.napReminders && !asleep) {
     const sleep = lastCompletedSleep(live);
     if (sleep && sleep.end !== null) {
       const fireAt = sleep.end + settings.awakeWindowMinutes * MINUTE;
@@ -60,6 +68,74 @@ export function computeReminders(
     }
   }
 
+  return reminders;
+}
+
+/**
+ * Reminders from the day schedule: before the next planned nap and bedtime while awake,
+ * and at the planned end of a running nap. After bedtime, the next morning's first nap.
+ */
+function scheduleReminders(
+  status: ScheduleStatus,
+  child: ReminderChild,
+  settings: Settings,
+  asleep: boolean,
+  now: number,
+): Reminder[] {
+  const lead = settings.napLeadMinutes * MINUTE;
+  const naps = status.plan.naps.length;
+  const reminders: Reminder[] = [];
+
+  if (status.current) {
+    const { slot, endAt } = status.current;
+    if (endAt > now) {
+      reminders.push({
+        id: 'wake',
+        fireAt: endAt,
+        title: 'Wake-up time',
+        body: slot
+          ? `Nap ${slot.index} of ${naps} is planned until ${formatClock(endAt)}.`
+          : `${child.name} has napped long enough; wake up at ${formatClock(endAt)}.`,
+        alarm: false,
+      });
+    }
+    return reminders;
+  }
+  if (asleep) return reminders;
+
+  if (status.next && status.next.startAt - lead > now) {
+    const next = status.next;
+    reminders.push({
+      id: 'nap',
+      fireAt: next.startAt - lead,
+      title: 'Nap time soon',
+      body: `Nap ${next.index} of ${naps}: in bed ${formatClock(next.startAt)}–${formatClock(next.endAt)}.`,
+      alarm: false,
+    });
+  }
+  const bedAt = status.plan.bedtimeAt;
+  if (bedAt - lead > now) {
+    reminders.push({
+      id: 'bed',
+      fireAt: bedAt - lead,
+      title: 'Bedtime soon',
+      body: `${child.name} goes to bed at ${formatClock(bedAt)}.`,
+      alarm: false,
+    });
+  } else {
+    // Today's plan is over: remind about tomorrow's first nap.
+    const tomorrow = stageFor(child, settings, now + DAY);
+    const first = tomorrow && planDay(tomorrow.stage, settings, now + DAY).naps[0];
+    if (first && first.startAt - lead > now) {
+      reminders.push({
+        id: 'nap',
+        fireAt: first.startAt - lead,
+        title: 'Nap time soon',
+        body: `Nap 1 of ${tomorrow.stage.naps.length}: in bed ${formatClock(first.startAt)}–${formatClock(first.endAt)}.`,
+        alarm: false,
+      });
+    }
+  }
   return reminders;
 }
 

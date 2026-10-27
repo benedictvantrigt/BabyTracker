@@ -24,7 +24,7 @@ export async function publishReminders(repo: Repo, engine: SyncEngine, now = Dat
   const reminders = [];
   for (const [index, child] of children.entries()) {
     const entries = await repo.listEntries(child.id, now - 2 * DAY);
-    for (const r of computeReminders(entries, settings, child.name, now)) {
+    for (const r of computeReminders(entries, settings, child, now)) {
       const payload: ReminderPayload = { title: r.title, body: r.body, alarm: r.alarm };
       reminders.push({
         tag: `${r.id}-${index}`,

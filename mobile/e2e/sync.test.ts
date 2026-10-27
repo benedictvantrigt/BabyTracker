@@ -33,6 +33,11 @@ describe('partner sync', () => {
     const b = await phone();
 
     const child = await a.repo.addChild('Micky', '2026-10-01');
+    await a.repo.updateChild(child.id, {
+      name: 'Micky',
+      birthDate: '2026-10-01',
+      dueDate: '2026-10-20',
+    });
     const t = Date.now() - 60 * 60_000;
     await a.repo.addEntry(child.id, {
       kind: 'feeding',
@@ -55,8 +60,8 @@ describe('partner sync', () => {
     await joinFamily(b, code);
 
     assert.deepEqual(
-      (await b.repo.listChildren()).map((c) => c.name),
-      ['Micky'],
+      (await b.repo.listChildren()).map((c) => [c.name, c.dueDate]),
+      [['Micky', '2026-10-20']],
     );
     assert.equal((await b.repo.getSettings()).activeChildId, null);
     const bEntries = await entriesOf(b);

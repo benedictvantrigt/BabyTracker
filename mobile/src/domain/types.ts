@@ -71,6 +71,8 @@ export interface Child {
   name: string;
   /** ISO date (YYYY-MM-DD) or null when unknown. */
   birthDate: string | null;
+  /** ISO due date for a baby born early; the sleep schedule counts age from it. */
+  dueDate: string | null;
   createdAt: number;
   updatedAt: number;
   deletedAt: number | null;
@@ -78,7 +80,13 @@ export interface Child {
 
 export interface Settings {
   activeChildId: string | null;
-  /** Minutes awake after a sleep before the nap reminder fires. */
+  /** Follow the age-based day schedule for naps and bedtime (else the awake window). */
+  sleepSchedule: boolean;
+  /** Schedule stage id picked by hand, or '' to follow the child's age. */
+  scheduleStage: string;
+  /** Minutes before a planned nap or bedtime that the reminder fires. */
+  napLeadMinutes: number;
+  /** Minutes awake after a sleep before the nap reminder fires (without the schedule). */
   awakeWindowMinutes: number;
   /** Minutes after the start of the last feed before the next one is due. */
   feedIntervalMinutes: number;
@@ -96,6 +104,9 @@ export interface Settings {
 
 /** Reminder rules shared by the phones of a family; the rest of Settings is per phone. */
 export const SHARED_SETTINGS = [
+  'sleepSchedule',
+  'scheduleStage',
+  'napLeadMinutes',
   'awakeWindowMinutes',
   'feedIntervalMinutes',
   'dayStartMinute',
@@ -109,6 +120,9 @@ export type SharedSettings = Pick<Settings, (typeof SHARED_SETTINGS)[number]>;
 
 export const DEFAULT_SETTINGS: Settings = {
   activeChildId: null,
+  sleepSchedule: true,
+  scheduleStage: '',
+  napLeadMinutes: 15,
   awakeWindowMinutes: 90,
   feedIntervalMinutes: 240,
   dayStartMinute: 7 * 60,

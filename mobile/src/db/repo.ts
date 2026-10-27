@@ -30,6 +30,7 @@ interface ChildRow {
   id: string;
   name: string;
   birth_date: string | null;
+  due_date: string | null;
   created_at: number;
   updated_at: number;
   deleted_at: number | null;
@@ -55,6 +56,7 @@ function toChild(row: ChildRow): Child {
     id: row.id,
     name: row.name,
     birthDate: row.birth_date,
+    dueDate: row.due_date ?? null,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
     deletedAt: row.deleted_at,
@@ -133,6 +135,7 @@ export class Repo {
       id: this.deps.uuid(),
       name: trimmed,
       birthDate,
+      dueDate: null,
       createdAt: now,
       updatedAt: now,
       deletedAt: null,
@@ -150,13 +153,16 @@ export class Repo {
     return child;
   }
 
-  async updateChild(id: string, name: string, birthDate: string | null): Promise<void> {
-    const trimmed = name.trim();
+  async updateChild(
+    id: string,
+    fields: Pick<Child, 'name' | 'birthDate' | 'dueDate'>,
+  ): Promise<void> {
+    const trimmed = fields.name.trim();
     if (!trimmed) throw new ValidationError('Name is required.');
     await this.db.withTransactionAsync(async () => {
       await this.db.runAsync(
-        'UPDATE children SET name = ?, birth_date = ?, updated_at = ? WHERE id = ?',
-        [trimmed, birthDate, this.deps.now(), id],
+        'UPDATE children SET name = ?, birth_date = ?, due_date = ?, updated_at = ? WHERE id = ?',
+        [trimmed, fields.birthDate, fields.dueDate, this.deps.now(), id],
       );
       await this.enqueueChild(id);
     });
@@ -384,9 +390,10 @@ export class Repo {
 
   private async writeChildRow(c: Child): Promise<void> {
     await this.db.runAsync(
-      `INSERT OR REPLACE INTO children (id, name, birth_date, created_at, updated_at, deleted_at)
-       VALUES (?, ?, ?, ?, ?, ?)`,
-      [c.id, c.name, c.birthDate, c.createdAt, c.updatedAt, c.deletedAt],
+      `INSERT OR REPLACE INTO children
+         (id, name, birth_date, due_date, created_at, updated_at, deleted_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [c.id, c.name, c.birthDate, c.dueDate ?? null, c.createdAt, c.updatedAt, c.deletedAt],
     );
   }
 
