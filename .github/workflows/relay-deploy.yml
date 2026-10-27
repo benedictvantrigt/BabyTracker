@@ -7,7 +7,7 @@ name: Deploy relay
 # Optional: FIREBASE_SERVICE_ACCOUNT (service account JSON) enables push from the relay.
 on:
   push:
-    branches-ignore: [e2e-results]
+    branches: [main]
     paths: ['relay/**', '.github/workflows/relay-deploy.yml']
   workflow_dispatch:
 

@@ -3,6 +3,8 @@ name: Android E2E
 on:
   push:
     branches-ignore: [e2e-results]
+    # Version tags (v1.2.3) build, test and publish a release; path filters don't apply to tags.
+    tags: ['v*']
     paths: ['mobile/**', 'relay/**', '.github/workflows/android-e2e.yml']
   workflow_dispatch:
 
@@ -29,6 +31,14 @@ jobs:
           cache-dependency-path: |
             mobile/package-lock.json
             relay/package-lock.json
+      - name: Version tag matches the app version
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          version=$(node -p "require('./app.json').expo.version")
+          if [ "v$version" != "$GITHUB_REF_NAME" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match app.json version $version"
+            exit 1
+          fi
       - run: npm ci
       - run: npm ci
         working-directory: relay
@@ -155,8 +165,18 @@ jobs:
             commit -q -m "E2E results for ${GITHUB_SHA::7}"
           git push -f -q "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" e2e-results
 
+      - name: Publish APK as the release for this version tag
+        if: success() && startsWith(github.ref, 'refs/tags/v')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp mobile/babytracker.apk "babytracker-${GITHUB_REF_NAME}.apk"
+          gh release create "$GITHUB_REF_NAME" "babytracker-${GITHUB_REF_NAME}.apk" \
+            --verify-tag --title "Baby Tracker ${GITHUB_REF_NAME}" \
+            --notes "See CHANGELOG.md for what changed. All E2E checks passed. Install on the phone: download the APK and open it."
+
       - name: Publish APK as the android-latest pre-release
-        if: success()
+        if: success() && !startsWith(github.ref, 'refs/tags/v')
         env:
           GH_TOKEN: ${{ github.token }}
         run: |

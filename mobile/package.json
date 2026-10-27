@@ -1,6 +1,6 @@
 {
   "name": "babytracker",
-  "version": "1.0.0",
+  "version": "0.3.0",
   "main": "index.ts",
   "dependencies": {
     "@expo/ui": "~58.0.23",

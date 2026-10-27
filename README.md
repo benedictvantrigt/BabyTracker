@@ -3,7 +3,9 @@
 A baby tracker without self-hosting: data lives on the phones, and partners
 sync through a tiny relay that only ever sees encrypted data.
 
-## Status: Phase 1 — local MVP (Android first)
+## Status: version 0.3.0 — phases 1–3 done (Android first)
+
+## Phase 1 — local MVP
 
 - Feeding (breast left/right/both, bottle with ml, formula/solids), sleep (nap/night), diapers (wet/solid/colour)
 - One-tap timers: tap Left/Right to start a feed, switching sides stops the other side; Start/Stop sleep
@@ -61,6 +63,18 @@ sync through a tiny relay that only ever sees encrypted data.
    `CLOUDFLARE_ACCOUNT_ID`, then run the "Deploy relay" workflow.
 3. Add a repository variable `RELAY_URL` with the URL it prints
    (`https://babytracker-relay.<you>.workers.dev`); app builds then use it by default.
+
+## Versions and branches
+
+- `main` is the released line; work happens on short-lived branches merged into `main` by
+  pull request. The relay deploys only from `main`.
+- Versions follow [Semantic Versioning](https://semver.org/). `mobile/app.json` holds the
+  version (`expo.version`) and the Android `versionCode`, which goes up by one per release so a
+  new APK installs over the old one. `CHANGELOG.md` lists what each version changed.
+- To release: raise both numbers, add the CHANGELOG entry, merge to `main`, then tag that
+  commit (`git tag v0.4.0 && git push origin v0.4.0`). The tag run checks that the tag matches
+  `app.json`, runs all tests and publishes the APK as GitHub release `v0.4.0`.
+- `android-latest` stays a pre-release with the newest passing build of any branch, for testing.
 
 ## Layout
 
