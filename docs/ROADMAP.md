@@ -29,8 +29,9 @@ per phone. The app is React Native (Expo), Android first, iOS later.
 Current position: phases 1–3 are done for Android (Phase 2 completed in 0.5.0). Phase 4 has
 started with the age-based sleep schedule (#28, version 0.4.0).
 
-To use sync and push on real phones, the relay must be deployed and push configured (README:
-Cloudflare secrets, `RELAY_URL` variable, Firebase secrets).
+The server side runs in two environments, acceptance and production, each with its own
+relay Worker, Firebase project and app package (README: "Environments: acceptance and
+production" and "Setting up the server side").
 
 ## Design decisions to keep
 

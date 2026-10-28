@@ -1,18 +1,34 @@
 name: Deploy relay
 
-# Deploys relay/ to Cloudflare Workers. Needs two repository secrets:
-#   CLOUDFLARE_API_TOKEN  (token with the "Edit Cloudflare Workers" template)
-#   CLOUDFLARE_ACCOUNT_ID
-# Without them the job reports what is missing and skips the deploy.
-# Optional: FIREBASE_SERVICE_ACCOUNT (service account JSON) enables push from the relay.
+# Deploys relay/ to Cloudflare Workers, to one of two environments:
+#   acceptance  Worker babytracker-relay-acc; on every push to main that touches relay/,
+#               or by hand from any branch
+#   production  Worker babytracker-relay; from main only, by hand or when the Android
+#               workflow releases a new version
+# Repository secrets:
+#   CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID   both environments; without them the deploy
+#                                                  is skipped with a warning
+#   FIREBASE_SERVICE_ACCOUNT_ACC / _PROD          service account JSON per Firebase project;
+#                                                  without it that relay runs without push
 on:
   push:
     branches: [main]
     paths: ['relay/**', '.github/workflows/relay-deploy.yml']
   workflow_dispatch:
+    inputs:
+      target:
+        description: Environment to deploy
+        type: choice
+        options: [acceptance, production]
+        default: acceptance
+  workflow_call:
+    inputs:
+      target:
+        type: string
+        required: true
 
 concurrency:
-  group: relay-deploy
+  group: relay-deploy-${{ inputs.target || 'acceptance' }}
   cancel-in-progress: false
 
 jobs:
@@ -23,9 +39,11 @@ jobs:
       run:
         working-directory: relay
     env:
+      TARGET: ${{ inputs.target || 'acceptance' }}
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-      FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+      FIREBASE_SERVICE_ACCOUNT_ACC: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_ACC }}
+      FIREBASE_SERVICE_ACCOUNT_PROD: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_PROD }}
       WRANGLER_SEND_METRICS: 'false'
     steps:
       - uses: actions/checkout@v4
@@ -38,16 +56,25 @@ jobs:
       - run: npm run typecheck
       - name: Deploy
         run: |
+          case "$TARGET" in
+            acceptance) env=acc; service_account="$FIREBASE_SERVICE_ACCOUNT_ACC" ;;
+            production) env=; service_account="$FIREBASE_SERVICE_ACCOUNT_PROD" ;;
+            *) echo "::error::Unknown target '$TARGET'"; exit 1 ;;
+          esac
+          if [ "$TARGET" = production ] && [ "$GITHUB_REF" != refs/heads/main ]; then
+            echo "::error::Production deploys only from main (this run is on $GITHUB_REF)."
+            exit 1
+          fi
           if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
             echo "::warning::CLOUDFLARE_API_TOKEN / CLOUDFLARE_ACCOUNT_ID secrets not set; skipping deploy."
             exit 0
           fi
-          npx wrangler deploy | tee deploy.log
-          if [ -n "$FIREBASE_SERVICE_ACCOUNT" ]; then
-            printf '%s' "$FIREBASE_SERVICE_ACCOUNT" | npx wrangler secret put FCM_SERVICE_ACCOUNT
+          npx wrangler deploy --env="$env" | tee deploy.log
+          if [ -n "$service_account" ]; then
+            printf '%s' "$service_account" | npx wrangler secret put FCM_SERVICE_ACCOUNT --env="$env"
           else
-            echo "::notice::FIREBASE_SERVICE_ACCOUNT not set; the relay runs without push."
+            echo "::notice::No Firebase service account for $TARGET; this relay runs without push."
           fi
           url=$(grep -oE 'https://[a-z0-9.-]+\.workers\.dev' deploy.log | head -1)
-          echo "Relay deployed at: $url" | tee -a "$GITHUB_STEP_SUMMARY"
+          echo "Relay ($TARGET) deployed at: $url" | tee -a "$GITHUB_STEP_SUMMARY"
           curl -sf "$url/health"

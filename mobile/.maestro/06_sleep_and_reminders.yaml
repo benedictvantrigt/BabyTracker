@@ -1,4 +1,4 @@
-appId: com.babytracker.app
+appId: com.babytracker.app.acc
 name: Sleep timer, and leaves reminders scheduled for the alarm check
 ---
 - runFlow: subflows/onboard.yaml

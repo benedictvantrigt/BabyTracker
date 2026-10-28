@@ -1,4 +1,4 @@
-appId: com.babytracker.app
+appId: com.babytracker.app.acc
 name: Join a partner's family and sync both ways
 # INVITE comes from the test runner (-e INVITE=...); a default here would override it.
 ---

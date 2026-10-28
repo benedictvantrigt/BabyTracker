@@ -1,4 +1,4 @@
-appId: com.babytracker.app
+appId: com.babytracker.app.acc
 name: Breast feeding timers switch sides, bottle feed with amount
 ---
 - runFlow: subflows/onboard.yaml

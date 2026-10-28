@@ -57,34 +57,52 @@ See [docs/ROADMAP.md](docs/ROADMAP.md) for the plan and the feature backlog.
 - **Fallback:** without push (no Firebase config, or offline registration) each phone
   schedules reminders itself, as in phase 1.
 
-### Enabling push
+### Environments: acceptance and production
 
-1. Create a Firebase project, add an Android app with package `com.babytracker.app`, and
-   download `google-services.json`. Store its contents as repository secret
-   `GOOGLE_SERVICES_JSON` (the APK build writes it into the app).
-2. In Firebase → Project settings → Service accounts, generate a private key (JSON) and
-   store it as repository secret `FIREBASE_SERVICE_ACCOUNT`; the "Deploy relay" workflow
-   hands it to the relay as a Worker secret.
+The server side exists twice, so changes can be tried on phones before they reach the real
+family:
 
-### Deploying the relay
+| | Acceptance | Production |
+|---|---|---|
+| Relay Worker | `babytracker-relay-acc` (`wrangler deploy --env acc`) | `babytracker-relay` (`wrangler deploy --env=""`) |
+| Relay deploys | every push to `main` touching `relay/`; by hand from any branch | when a new version is released from `main`; by hand from `main` |
+| Firebase project | one with Android app `com.babytracker.app.acc` | one with Android app `com.babytracker.app` |
+| App | "Baby Tracker (acc)", `com.babytracker.app.acc` (`APP_VARIANT=acceptance`), installs next to production | "Baby Tracker", `com.babytracker.app` |
+| APK | `android-latest` pre-release; the E2E tests run on this build | the versioned GitHub release |
 
-1. Create a free Cloudflare account and an API token with the "Edit Cloudflare Workers" template.
-2. In the GitHub repository settings add secrets `CLOUDFLARE_API_TOKEN` and
-   `CLOUDFLARE_ACCOUNT_ID`, then run the "Deploy relay" workflow.
-3. Add a repository variable `RELAY_URL` with the URL it prints
-   (`https://babytracker-relay.<you>.workers.dev`); app builds then use it by default.
+Each relay has its own Durable Object storage and secrets, so the two never share data.
+
+### Setting up the server side
+
+1. **Cloudflare:** a free account, and an API token with *Account → Workers Scripts: Edit*
+   and *Account → Account Settings: Read* on that account.
+2. **Firebase:** two projects. In each, add the Android app with the package from the table,
+   download its `google-services.json`, and under Project settings → Service accounts
+   generate a private key (JSON).
+3. **GitHub repository secrets:** `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`,
+   `GOOGLE_SERVICES_JSON_ACC` / `_PROD` (contents of `google-services.json`) and
+   `FIREBASE_SERVICE_ACCOUNT_ACC` / `_PROD` (contents of the private key; the deploy hands it
+   to the relay as Worker secret `FCM_SERVICE_ACCOUNT`).
+4. Run the "Deploy relay" workflow for each environment (production from `main`) and add
+   the URLs it prints as repository variables `RELAY_URL_ACC` and `RELAY_URL_PROD`
+   (`https://babytracker-relay[-acc].<you>.workers.dev`); app builds use them by default.
+
+Without the Cloudflare secrets the deploy is skipped; without a Firebase secret that relay
+runs without push and the app schedules reminders on the phone itself.
 
 ## Versions and branches
 
 - `main` is the released line; work happens on short-lived branches merged into `main` by
-  pull request. The relay deploys only from `main`.
+  pull request. The acceptance relay deploys from `main` (or by hand from a branch); the
+  production relay only from `main`.
 - Versions follow [Semantic Versioning](https://semver.org/). `mobile/app.json` holds the
   version (`expo.version`) and the Android `versionCode`, which goes up by one per release so a
   new APK installs over the old one. `CHANGELOG.md` lists what each version changed.
 - To release: raise both numbers, add the CHANGELOG entry and merge to `main`. When all tests
-  pass on `main` and that version has no release yet, the workflow creates tag and GitHub
-  release `v0.4.0` with the APK.
-- `android-latest` stays a pre-release with the newest passing build of any branch, for testing.
+  pass on `main` and that version has no release yet, the workflow deploys the production
+  relay, builds the production APK and creates tag and GitHub release `v0.4.0` with it.
+- `android-latest` stays a pre-release with the newest passing acceptance build of any
+  branch, for testing.
 
 ## Layout
 
@@ -127,5 +145,5 @@ Every push that touches `mobile/` runs `.github/workflows/android-e2e.yml`:
 3. checks that the app registered its reminder alarms and the ongoing timer notification;
    then joins a family created by a simulated partner phone and checks both directions sync;
 4. pushes a summary, screenshots and logs to the `e2e-results` branch;
-5. when everything passes, publishes the APK as the `android-latest` pre-release
+5. when everything passes, publishes the acceptance APK as the `android-latest` pre-release
    (open the release on the phone, download `babytracker.apk`, install).
