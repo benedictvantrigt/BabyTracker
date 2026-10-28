@@ -69,6 +69,7 @@ jobs:
             echo "::warning::CLOUDFLARE_API_TOKEN / CLOUDFLARE_ACCOUNT_ID secrets not set; skipping deploy."
             exit 0
           fi
+          set -o pipefail
           npx wrangler deploy --env="$env" | tee deploy.log
           if [ -n "$service_account" ]; then
             printf '%s' "$service_account" | npx wrangler secret put FCM_SERVICE_ACCOUNT --env="$env"
@@ -77,4 +78,5 @@ jobs:
           fi
           url=$(grep -oE 'https://[a-z0-9.-]+\.workers\.dev' deploy.log | head -1)
           echo "Relay ($TARGET) deployed at: $url" | tee -a "$GITHUB_STEP_SUMMARY"
-          curl -sf "$url/health"
+          # A new Worker's workers.dev address can take a little while to answer.
+          curl -sf --retry 12 --retry-delay 10 --retry-all-errors "$url/health"
