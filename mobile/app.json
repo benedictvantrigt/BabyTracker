@@ -2,7 +2,7 @@
   "expo": {
     "name": "Baby Tracker",
     "slug": "babytracker",
-    "version": "0.5.0",
+    "version": "0.5.1",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "babytracker",
@@ -23,7 +23,7 @@
       },
       "predictiveBackGestureEnabled": false,
       "package": "com.babytracker.app",
-      "versionCode": 5,
+      "versionCode": 6,
       "permissions": [
         "android.permission.SCHEDULE_EXACT_ALARM",
         "android.permission.POST_NOTIFICATIONS"
