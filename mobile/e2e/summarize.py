@@ -13,7 +13,7 @@ import sys
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
-PKG = "com.babytracker.app"
+PKG = "com.babytracker.app.acc"  # CI tests the acceptance build
 
 
 def flow_results(out: Path):

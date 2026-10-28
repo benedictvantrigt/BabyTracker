@@ -1,5 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
+  // Top level is production (babytracker-relay); `--env acc` deploys acceptance as a
+  // separate Worker with its own Durable Object storage and secrets.
   "name": "babytracker-relay",
   "main": "src/index.ts",
   "compatibility_date": "2026-09-01",
@@ -7,5 +9,14 @@
   "durable_objects": {
     "bindings": [{ "name": "FAMILY", "class_name": "Family" }]
   },
-  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["Family"] }]
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["Family"] }],
+  "env": {
+    "acc": {
+      "name": "babytracker-relay-acc",
+      "durable_objects": {
+        "bindings": [{ "name": "FAMILY", "class_name": "Family" }]
+      },
+      "migrations": [{ "tag": "v1", "new_sqlite_classes": ["Family"] }]
+    }
+  }
 }

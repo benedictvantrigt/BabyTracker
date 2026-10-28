@@ -79,13 +79,15 @@ jobs:
           (cd mobile && npm ci)
           (cd relay && npm ci)
 
-      - name: Build release APK (x86_64 for the emulator, arm64 for phones)
+      - name: Build acceptance APK (x86_64 for the emulator, arm64 for phones)
         working-directory: mobile
         env:
-          # The production relay, once deployed (repository variable RELAY_URL).
-          EXPO_PUBLIC_RELAY_URL: ${{ vars.RELAY_URL }}
-          # Firebase app config for push (optional secret GOOGLE_SERVICES_JSON).
-          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
+          # The acceptance app (com.babytracker.app.acc) installs next to the production one.
+          APP_VARIANT: acceptance
+          # The acceptance relay, once deployed (repository variable RELAY_URL_ACC).
+          EXPO_PUBLIC_RELAY_URL: ${{ vars.RELAY_URL_ACC }}
+          # Firebase app config for push (optional secret GOOGLE_SERVICES_JSON_ACC).
+          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON_ACC }}
         run: |
           if [ -n "$GOOGLE_SERVICES_JSON" ]; then
             printf '%s' "$GOOGLE_SERVICES_JSON" > google-services.json
@@ -155,22 +157,6 @@ jobs:
             commit -q -m "E2E results for ${GITHUB_SHA::7}"
           git push -f -q "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" e2e-results
 
-      - name: Release a new version from main
-        # A version in mobile/app.json that has no release yet becomes tag + release vX.Y.Z.
-        if: success() && github.ref == 'refs/heads/main'
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          tag="v$(node -p "require('./mobile/app.json').expo.version")"
-          if gh release view "$tag" > /dev/null 2>&1; then
-            echo "$tag is already released"
-            exit 0
-          fi
-          cp mobile/babytracker.apk "babytracker-$tag.apk"
-          gh release create "$tag" "babytracker-$tag.apk" \
-            --target "$GITHUB_SHA" --title "Baby Tracker $tag" \
-            --notes "See CHANGELOG.md for what changed. All E2E checks passed. Install on the phone: download the APK and open it."
-
       - name: Publish APK as the android-latest pre-release
         if: success()
         env:
@@ -179,5 +165,87 @@ jobs:
           gh release delete android-latest --yes --cleanup-tag || true
           gh release create android-latest mobile/babytracker.apk \
             --prerelease --target "$GITHUB_SHA" \
-            --title "Android test build ${GITHUB_SHA::7}" \
-            --notes "Debug-signed test build from ${GITHUB_SHA::7}. All E2E checks passed. Install on the phone: download babytracker.apk and open it."
+            --title "Android acceptance build ${GITHUB_SHA::7}" \
+            --notes "Debug-signed acceptance build (Baby Tracker (acc), acceptance relay) from ${GITHUB_SHA::7}. All E2E checks passed. Install on the phone: download babytracker.apk and open it."
+
+  # A version in mobile/app.json that has no release yet becomes tag + release vX.Y.Z:
+  # the production relay is deployed, then the production APK is built and released.
+  release-check:
+    needs: android
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.check.outputs.tag }}
+      new: ${{ steps.check.outputs.new }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: check
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag="v$(node -p "require('./mobile/app.json').expo.version")"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          if gh release view "$tag" > /dev/null 2>&1; then
+            echo "$tag is already released"
+            echo "new=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "new=true" >> "$GITHUB_OUTPUT"
+          fi
+
+  relay-production:
+    needs: release-check
+    if: needs.release-check.outputs.new == 'true'
+    uses: ./.github/workflows/relay-deploy.yml
+    with:
+      target: production
+    secrets: inherit
+
+  release:
+    needs: [release-check, relay-production]
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Free disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/.ghcup /usr/local/share/boost \
+            /usr/local/lib/node_modules /usr/share/swift "$AGENT_TOOLSDIRECTORY/CodeQL" \
+            /usr/local/share/powershell /usr/local/share/chromium /opt/microsoft || true
+          df -h /
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: mobile/package-lock.json
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Build production APK
+        working-directory: mobile
+        env:
+          # The production relay (repository variable RELAY_URL_PROD).
+          EXPO_PUBLIC_RELAY_URL: ${{ vars.RELAY_URL_PROD }}
+          # Firebase app config for push (optional secret GOOGLE_SERVICES_JSON_PROD).
+          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON_PROD }}
+        run: |
+          npm ci
+          if [ -n "$GOOGLE_SERVICES_JSON" ]; then
+            printf '%s' "$GOOGLE_SERVICES_JSON" > google-services.json
+          fi
+          npx expo prebuild --platform android --no-install
+          cd android
+          ./gradlew assembleRelease -PreactNativeArchitectures=x86_64,arm64-v8a
+          cp app/build/outputs/apk/release/app-release.apk ../babytracker.apk
+
+      - name: Create the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.release-check.outputs.tag }}
+        run: |
+          cp mobile/babytracker.apk "babytracker-$TAG.apk"
+          gh release create "$TAG" "babytracker-$TAG.apk" \
+            --target "$GITHUB_SHA" --title "Baby Tracker $TAG" \
+            --notes "See CHANGELOG.md for what changed. All E2E checks passed on the acceptance build. Install on the phone: download the APK and open it."

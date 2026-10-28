@@ -1,5 +1,5 @@
 # Fresh install, all permissions granted, baby "Micky" created.
-appId: com.babytracker.app
+appId: com.babytracker.app.acc
 ---
 - launchApp:
     clearState: true

@@ -6,7 +6,7 @@ set -uo pipefail
 
 APK="$1"
 OUT="$2"
-PKG=com.babytracker.app
+PKG=com.babytracker.app.acc  # CI tests the acceptance build
 HERE="$(cd "$(dirname "$0")" && pwd)"
 FLOWS="$(cd "$HERE/../.maestro" && pwd)"
 

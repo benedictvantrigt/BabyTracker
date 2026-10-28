@@ -3,6 +3,17 @@
 All notable changes to Baby Tracker. Versions follow [Semantic Versioning](https://semver.org/);
 before 1.0.0 a minor version marks a phase of the plan.
 
+## Unreleased — acceptance and production environments
+
+- Two server environments: relay Workers `babytracker-relay-acc` (acceptance) and
+  `babytracker-relay` (production), each with its own storage, secrets and Firebase project.
+- The acceptance app "Baby Tracker (acc)" (`com.babytracker.app.acc`) installs next to the
+  production app. `android-latest` and the E2E tests use it.
+- The acceptance relay deploys on every push to `main`; releasing a version deploys the
+  production relay and builds the release APK with the production settings.
+- New repository secrets and variables: `GOOGLE_SERVICES_JSON_ACC` / `_PROD`,
+  `FIREBASE_SERVICE_ACCOUNT_ACC` / `_PROD`, `RELAY_URL_ACC` / `_PROD`.
+
 ## [0.5.0] — unreleased — Phase 2 complete: family management
 
 - Settings → Partner sync lists the family's phones by name (sealed on the relay), with

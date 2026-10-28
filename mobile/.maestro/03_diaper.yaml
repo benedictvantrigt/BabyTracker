@@ -1,4 +1,4 @@
-appId: com.babytracker.app
+appId: com.babytracker.app.acc
 name: One-tap diapers with undo
 ---
 - runFlow: subflows/onboard.yaml

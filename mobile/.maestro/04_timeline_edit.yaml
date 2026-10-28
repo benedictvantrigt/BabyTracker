@@ -1,4 +1,4 @@
-appId: com.babytracker.app
+appId: com.babytracker.app.acc
 name: Timeline lists entries; edit and delete
 ---
 - runFlow: subflows/onboard.yaml

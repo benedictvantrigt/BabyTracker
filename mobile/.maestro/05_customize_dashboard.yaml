@@ -1,4 +1,4 @@
-appId: com.babytracker.app
+appId: com.babytracker.app.acc
 name: Hide, reorder and reset dashboard cards
 ---
 - runFlow: subflows/onboard.yaml
