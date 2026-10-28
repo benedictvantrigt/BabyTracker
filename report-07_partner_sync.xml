@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="test" tests="1" failures="0" time="73.321" timestamp="2026-10-28T20:58:06">
+    <testcase id="Join a partner's family and sync both ways" name="Join a partner's family and sync both ways" classname="Join a partner's family and sync both ways" file="/home/runner/work/BabyTracker/BabyTracker/mobile/.maestro/07_partner_sync.yaml" time="73.303" timestamp="2026-10-28T20:58:06" status="SUCCESS"/>
+  </testsuite>
+</testsuites>

@@ -1,0 +1,42 @@
+
+Waiting for flows to complete...
+[Passed] Onboarding shows the default dashboard and the sleep plan (40s)
+
+1/1 Flow Passed in 40s
+
+
+Waiting for flows to complete...
+[Passed] Breast feeding timers switch sides, bottle feed with amount (54s)
+
+1/1 Flow Passed in 54s
+
+
+Waiting for flows to complete...
+[Passed] One-tap diapers with undo (38s)
+
+1/1 Flow Passed in 38s
+
+
+Waiting for flows to complete...
+[Passed] Timeline lists entries; edit and delete (48s)
+
+1/1 Flow Passed in 48s
+
+
+Waiting for flows to complete...
+[Passed] Hide, reorder and reset dashboard cards (44s)
+
+1/1 Flow Passed in 44s
+
+
+Waiting for flows to complete...
+[Passed] Sleep timer, and leaves reminders scheduled for the alarm check (44s)
+
+1/1 Flow Passed in 44s
+
+
+Waiting for flows to complete...
+[Passed] Join a partner's family and sync both ways (1m 13s)
+
+1/1 Flow Passed in 1m 13s
+

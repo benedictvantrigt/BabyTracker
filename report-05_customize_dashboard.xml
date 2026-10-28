@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="test" tests="1" failures="0" time="44.079" timestamp="2026-10-28T20:56:17">
+    <testcase id="Hide, reorder and reset dashboard cards" name="Hide, reorder and reset dashboard cards" classname="Hide, reorder and reset dashboard cards" file="/home/runner/work/BabyTracker/BabyTracker/mobile/.maestro/05_customize_dashboard.yaml" time="44.058" timestamp="2026-10-28T20:56:17" status="SUCCESS"/>
+  </testsuite>
+</testsuites>

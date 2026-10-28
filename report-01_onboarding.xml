@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="test" tests="1" failures="0" time="40.129" timestamp="2026-10-28T20:52:36">
+    <testcase id="Onboarding shows the default dashboard and the sleep plan" name="Onboarding shows the default dashboard and the sleep plan" classname="Onboarding shows the default dashboard and the sleep plan" file="/home/runner/work/BabyTracker/BabyTracker/mobile/.maestro/01_onboarding.yaml" time="40.099" timestamp="2026-10-28T20:52:36" status="SUCCESS"/>
+  </testsuite>
+</testsuites>
