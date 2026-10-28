@@ -22,7 +22,7 @@ per phone. The app is React Native (Expo), Android first, iOS later.
 |---|---|---|
 | 1. Local MVP | Data model; feeding, sleep and diaper entry; timers; "time since last" dashboard; local reminders | ✅ Done in 0.1.0 (plus customizable Today screen, emulator E2E tests) |
 | 2. Sync | QR pairing, encrypted change log, Cloudflare relay, device removal, retention | ✅ 0.2.0 pairing, encryption and relay; 0.5.0 device removal with key rotation, retention, delete family; data import dropped |
-| 3. Notifications | Scheduled pushes through the relay, iOS Notification Service Extension, Android exact alarms, awake-window and feed rules | 🟡 0.3.0: done for Android; iOS part open |
+| 3. Notifications | Scheduled pushes through the relay, iOS Notification Service Extension, Android exact alarms, awake-window and feed rules | 🟡 0.3.0: done for Android; iOS started (#5: build config, local reminders) |
 | 4. Extras | Record types still missing (tummy time, pumping, growth, …), NFC tags, Live Activities / Live Updates, widgets, charts, growth curves, PDF/CSV export | ⬜ Not started |
 | 5. Hardening | Key recovery, backups, privacy statement, store submission | ⬜ Not started |
 
@@ -67,7 +67,7 @@ phase table above when a milestone is done. Problems found while testing are iss
 
 ### Phase 3: Notifications (remaining) — [milestone](https://github.com/benedictvantrigt/BabyTracker/milestone/2)
 
-- #5 iOS app build
+- #5 iOS app build (in progress: Simulator profile and build workflow, iPhone schedules its own reminders; not yet tested on a device)
 - #6 iOS Notification Service Extension to decrypt pushed reminders
 - #7 iOS night-feed alarm
 

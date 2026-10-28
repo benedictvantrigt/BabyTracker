@@ -5,6 +5,11 @@ before 1.0.0 a minor version marks a phase of the plan.
 
 ## Unreleased — acceptance and production environments
 
+- iOS build started (#5): an EAS `simulator` profile and a manual "iOS build" workflow that
+  builds the acceptance app for the iOS Simulator. On an iPhone, reminders are scheduled on
+  the phone itself (its push token is an APNs token, which the FCM-only relay cannot use);
+  night feeds are time-sensitive notifications (entitlement added).
+
 - Two server environments: relay Workers `babytracker-relay-acc` (acceptance) and
   `babytracker-relay` (production), each with its own storage, secrets and Firebase project.
 - The acceptance app "Baby Tracker (acc)" (`com.babytracker.app.acc`) installs next to the

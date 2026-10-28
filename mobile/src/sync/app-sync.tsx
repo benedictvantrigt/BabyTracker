@@ -60,11 +60,15 @@ interface SyncContextValue {
 
 const SyncContext = createContext<SyncContextValue | null>(null);
 
-/** This phone's FCM token, or null when the build has no Firebase config. */
+/**
+ * This phone's FCM token, or null when the build has no Firebase config. On iOS the
+ * device token is an APNs token, which the relay (FCM only) cannot use: null there too,
+ * so the iPhone keeps scheduling its reminders itself.
+ */
 async function devicePushToken(): Promise<string | null> {
   try {
     const token = await Notifications.getDevicePushTokenAsync();
-    return typeof token.data === 'string' ? token.data : null;
+    return token.type === 'android' && typeof token.data === 'string' ? token.data : null;
   } catch {
     return null;
   }

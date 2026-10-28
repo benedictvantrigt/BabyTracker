@@ -111,7 +111,7 @@ mobile/                Expo (React Native) app
   src/app/             screens (Expo Router)
   src/domain/          pure logic: types, summaries, reminder rules (unit tested)
   src/db/              SQLite schema, migrations and repository (tested against Node's SQLite)
-  src/notifications/   Android channels, permissions, scheduling, refresh after changes
+  src/notifications/   channels (Android), permissions, scheduling, refresh after changes
   src/background/      headless task for pushes from the relay (reminders, sync nudges)
   src/sync/            encryption, invite codes, relay client, sync engine, React provider
   e2e/                 emulator test runner, sync integration test, simulated partner phone
@@ -135,6 +135,16 @@ On a phone:
   is not available inside Expo Go.
 - **Installable APK:** `npx eas-cli@latest build -p android --profile preview` (free Expo account),
   or `npx expo run:android` with Android Studio installed.
+
+On an iPhone (work in progress, #5): the iPhone schedules its reminders itself, because pushes
+from the relay only reach Android so far (#6). Night feeds use a time-sensitive notification,
+which can break through a Focus when allowed in the iPhone settings.
+
+- **Simulator:** `npx eas-cli@latest build -p ios --profile simulator` (free Expo account), or
+  run the "iOS build" workflow by hand (Actions tab), which uploads the Simulator app as
+  `babytracker-ios-simulator`. Neither needs an Apple account; installing needs a Mac with Xcode.
+- **iPhone:** `npx eas-cli@latest build -p ios --profile preview` needs the Apple Developer
+  Program ($99/year) and the iPhone registered with `npx eas-cli@latest device:create`.
 
 ## Automated Android tests
 
