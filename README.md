@@ -157,3 +157,11 @@ Every push that touches `mobile/` runs `.github/workflows/android-e2e.yml`:
 4. pushes a summary, screenshots and logs to the `e2e-results` branch;
 5. when everything passes, publishes the acceptance APK as the `android-latest` pre-release
    (open the release on the phone, download `babytracker.apk`, install).
+
+## License
+
+[Functional Source License 1.1, Apache 2.0 future license](LICENSE.md) (FSL-1.1-ALv2):
+you may use, change and share the code for any purpose except a competing commercial
+product or service. Each version becomes available under the Apache License 2.0 two years
+after it is published. `mobile/LICENSE-expo-template` is the MIT license of the Expo
+template the app started from.

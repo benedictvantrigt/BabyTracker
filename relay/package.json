@@ -19,5 +19,6 @@
     "tsx": "^4.23.15",
     "typescript": "~6.0.3",
     "wrangler": "^4.152.0"
-  }
+  },
+  "license": "FSL-1.1-ALv2"
 }

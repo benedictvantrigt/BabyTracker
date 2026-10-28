@@ -74,5 +74,6 @@
       "/node_modules/",
       "/e2e/"
     ]
-  }
+  },
+  "license": "FSL-1.1-ALv2"
 }
