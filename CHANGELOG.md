@@ -3,6 +3,14 @@
 All notable changes to Baby Tracker. Versions follow [Semantic Versioning](https://semver.org/);
 before 1.0.0 a minor version marks a phase of the plan.
 
+## Unreleased
+
+- License: Functional Source License 1.1 with Apache 2.0 future license (`LICENSE.md`).
+- iOS build started (#5): an EAS `simulator` profile and a manual "iOS build" workflow that
+  builds the acceptance app for the iOS Simulator. On an iPhone, reminders are scheduled on
+  the phone itself (its push token is an APNs token, which the FCM-only relay cannot use);
+  night feeds are time-sensitive notifications (entitlement added).
+
 ## [0.5.1] — 2026-10-28 — Acceptance and production environments
 
 - First release built for the production environment: the app connects to the production

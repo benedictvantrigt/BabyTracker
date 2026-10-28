@@ -111,7 +111,7 @@ mobile/                Expo (React Native) app
   src/app/             screens (Expo Router)
   src/domain/          pure logic: types, summaries, reminder rules (unit tested)
   src/db/              SQLite schema, migrations and repository (tested against Node's SQLite)
-  src/notifications/   Android channels, permissions, scheduling, refresh after changes
+  src/notifications/   channels (Android), permissions, scheduling, refresh after changes
   src/background/      headless task for pushes from the relay (reminders, sync nudges)
   src/sync/            encryption, invite codes, relay client, sync engine, React provider
   e2e/                 emulator test runner, sync integration test, simulated partner phone
@@ -136,6 +136,16 @@ On a phone:
 - **Installable APK:** `npx eas-cli@latest build -p android --profile preview` (free Expo account),
   or `npx expo run:android` with Android Studio installed.
 
+On an iPhone (work in progress, #5): the iPhone schedules its reminders itself, because pushes
+from the relay only reach Android so far (#6). Night feeds use a time-sensitive notification,
+which can break through a Focus when allowed in the iPhone settings.
+
+- **Simulator:** `npx eas-cli@latest build -p ios --profile simulator` (free Expo account), or
+  run the "iOS build" workflow by hand (Actions tab), which uploads the Simulator app as
+  `babytracker-ios-simulator`. Neither needs an Apple account; installing needs a Mac with Xcode.
+- **iPhone:** `npx eas-cli@latest build -p ios --profile preview` needs the Apple Developer
+  Program ($99/year) and the iPhone registered with `npx eas-cli@latest device:create`.
+
 ## Automated Android tests
 
 Every push that touches `mobile/` runs `.github/workflows/android-e2e.yml`:
@@ -147,3 +157,11 @@ Every push that touches `mobile/` runs `.github/workflows/android-e2e.yml`:
 4. pushes a summary, screenshots and logs to the `e2e-results` branch;
 5. when everything passes, publishes the acceptance APK as the `android-latest` pre-release
    (open the release on the phone, download `babytracker.apk`, install).
+
+## License
+
+[Functional Source License 1.1, Apache 2.0 future license](LICENSE.md) (FSL-1.1-ALv2):
+you may use, change and share the code for any purpose except a competing commercial
+product or service. Each version becomes available under the Apache License 2.0 two years
+after it is published. `mobile/LICENSE-expo-template` is the MIT license of the Expo
+template the app started from.
