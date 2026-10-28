@@ -3,7 +3,7 @@
 A baby tracker without self-hosting: data lives on the phones, and partners
 sync through a tiny relay that only ever sees encrypted data.
 
-## Status: version 0.5.0 — phases 1–3 done, age-based sleep schedule (Android first)
+## Status: version 0.5.1 — phases 1–3 done, age-based sleep schedule (Android first)
 
 See [docs/ROADMAP.md](docs/ROADMAP.md) for the plan and the feature backlog.
 
