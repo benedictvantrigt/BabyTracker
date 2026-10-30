@@ -93,6 +93,7 @@ Other extras:
 - #28 Age-based sleep schedule in the sleep timer (0.4.0)
 - #29 Show days in the age under the baby's name
 - #30 Show total sleep needed per the schedule and total slept that day
+- #35 Today screen layout: keep turned-off cards in place, and hide their settings
 
 ### Phase 5: Hardening — [milestone](https://github.com/benedictvantrigt/BabyTracker/milestone/5)
 
