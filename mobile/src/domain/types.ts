@@ -1,4 +1,4 @@
-import { DEFAULT_DASHBOARD, type DashboardCardId } from './dashboard';
+import { DEFAULT_DASHBOARD, type DashboardLayout } from './dashboard';
 
 // Every record is an immutable-id row with timestamps and a soft-delete marker,
 // so the Phase 2 sync layer can replicate it as a last-writer-wins change log.
@@ -96,8 +96,8 @@ export interface Settings {
   napReminders: boolean;
   feedRemindersDay: boolean;
   feedAlarmNight: boolean;
-  /** Visible Today-screen cards in display order. */
-  dashboardCards: DashboardCardId[];
+  /** Today-screen cards: display order and which are turned off (per phone). */
+  dashboardLayout: DashboardLayout;
   /** Whether this phone shows nap and feed reminders (per phone, not synced). */
   remindersOnThisPhone: boolean;
 }
@@ -130,6 +130,6 @@ export const DEFAULT_SETTINGS: Settings = {
   napReminders: true,
   feedRemindersDay: false,
   feedAlarmNight: true,
-  dashboardCards: DEFAULT_DASHBOARD,
+  dashboardLayout: DEFAULT_DASHBOARD,
   remindersOnThisPhone: true,
 };

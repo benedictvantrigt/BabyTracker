@@ -92,6 +92,8 @@ export interface SyncState {
 }
 
 const SHARED_UPDATED_AT = 'sharedSettingsUpdatedAt';
+/** Settings key of the Today-screen layout up to 0.5 (visible card ids in order). */
+const LEGACY_DASHBOARD_KEY = 'dashboardCards';
 
 export type ChangeListener = (event: { remote: boolean }) => void;
 
@@ -314,11 +316,17 @@ export class Repo {
       [],
     );
     const settings: Settings = { ...DEFAULT_SETTINGS };
+    let legacyDashboard: unknown;
     for (const { key, value } of rows) {
       if (key in DEFAULT_SETTINGS)
         (settings as unknown as Record<string, unknown>)[key] = JSON.parse(value);
+      else if (key === LEGACY_DASHBOARD_KEY) legacyDashboard = JSON.parse(value);
     }
-    settings.dashboardCards = normalizeDashboard(settings.dashboardCards);
+    // Up to 0.5 the layout was `dashboardCards`, the visible cards in order.
+    const storedLayout = rows.some((r) => r.key === 'dashboardLayout');
+    settings.dashboardLayout = normalizeDashboard(
+      storedLayout ? settings.dashboardLayout : (legacyDashboard ?? settings.dashboardLayout),
+    );
     return settings;
   }
 

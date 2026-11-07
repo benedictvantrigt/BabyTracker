@@ -9,6 +9,7 @@ import { DASHBOARD_CARD_COMPONENTS, type DashboardCardProps } from '@/components
 import { Button, Card, DateTimeField, Field, Icon } from '@/components/ui';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useAction, useAppData, useEntries, useNow } from '@/data/app-data';
+import { visibleCards } from '@/domain/dashboard';
 import { DAY, formatAge, startOfLocalDay, toIsoDate } from '@/domain/time';
 import type { Child, Entry } from '@/domain/types';
 import { useTheme } from '@/hooks/use-theme';
@@ -107,6 +108,7 @@ function Dashboard({ child }: { child: Child }) {
 
   const { textSecondary } = useTheme();
   const cardProps: DashboardCardProps = { child, settings, entries, now, repo, run, logged };
+  const cards = visibleCards(settings.dashboardLayout);
 
   return (
     <View style={styles.fill}>
@@ -128,12 +130,12 @@ function Dashboard({ child }: { child: Child }) {
           </Pressable>
         </View>
 
-        {settings.dashboardCards.map((id) => {
+        {cards.map((id) => {
           const CardComponent = DASHBOARD_CARD_COMPONENTS[id];
           return <CardComponent key={id} {...cardProps} />;
         })}
 
-        {settings.dashboardCards.length === 0 && (
+        {cards.length === 0 && (
           <Card>
             <ThemedText themeColor="textSecondary">All cards are hidden.</ThemedText>
             <Button label="Customize dashboard" onPress={() => router.push('/dashboard')} />

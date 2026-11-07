@@ -10,18 +10,19 @@ export const DASHBOARD_CARDS: Record<DashboardCardId, { title: string; descripti
 
 export const ALL_CARDS = Object.keys(DASHBOARD_CARDS) as DashboardCardId[];
 
-/** Visible cards in display order. */
-export const DEFAULT_DASHBOARD: DashboardCardId[] = [
-  'timers',
-  'sleep',
-  'feeding',
-  'diaper',
-  'today',
-];
+/**
+ * Today-screen layout: every card in one fixed order, plus the cards that are turned off.
+ * A turned-off card keeps its place, so turning it back on restores it there.
+ */
+export interface DashboardLayout {
+  order: DashboardCardId[];
+  off: DashboardCardId[];
+}
 
-/** Drops unknown and duplicate ids, e.g. from a stored layout written by another app version. */
-export function normalizeDashboard(ids: unknown): DashboardCardId[] {
-  if (!Array.isArray(ids)) return DEFAULT_DASHBOARD;
+export const DEFAULT_DASHBOARD: DashboardLayout = { order: [...ALL_CARDS], off: [] };
+
+function validIds(ids: unknown): DashboardCardId[] {
+  if (!Array.isArray(ids)) return [];
   const seen = new Set<DashboardCardId>();
   for (const id of ids) {
     if (typeof id === 'string' && id in DASHBOARD_CARDS) seen.add(id as DashboardCardId);
@@ -29,26 +30,56 @@ export function normalizeDashboard(ids: unknown): DashboardCardId[] {
   return [...seen];
 }
 
-/** Moves a visible card one place up (-1) or down (+1); no-op at the ends. */
-export function moveCard(
-  ids: DashboardCardId[],
-  id: DashboardCardId,
-  delta: -1 | 1,
-): DashboardCardId[] {
-  const from = ids.indexOf(id);
-  const to = from + delta;
-  if (from < 0 || to < 0 || to >= ids.length) return ids;
-  const next = [...ids];
-  [next[from], next[to]] = [next[to], next[from]];
-  return next;
+/**
+ * Makes a stored layout complete: drops unknown and duplicate ids and appends cards the
+ * layout does not list (a card added in a newer version shows at the bottom).
+ * A list of ids is the layout of versions up to 0.5: the visible cards in order. The cards
+ * missing from it were hidden; they move to the bottom, turned off.
+ */
+export function normalizeDashboard(stored: unknown): DashboardLayout {
+  if (Array.isArray(stored)) {
+    const visible = validIds(stored);
+    const off = ALL_CARDS.filter((id) => !visible.includes(id));
+    return { order: [...visible, ...off], off };
+  }
+  if (typeof stored !== 'object' || stored === null) return DEFAULT_DASHBOARD;
+  const { order, off } = stored as { order?: unknown; off?: unknown };
+  const listed = validIds(order);
+  return {
+    order: [...listed, ...ALL_CARDS.filter((id) => !listed.includes(id))],
+    off: validIds(off),
+  };
 }
 
-/** Shows a card (appended at the bottom) or hides it. */
+/** The cards the Today screen shows, in display order. */
+export function visibleCards(layout: DashboardLayout): DashboardCardId[] {
+  return layout.order.filter((id) => !layout.off.includes(id));
+}
+
+export function isCardOn(layout: DashboardLayout, id: DashboardCardId): boolean {
+  return !layout.off.includes(id);
+}
+
+/** Moves a card, on or off, one place up (-1) or down (+1); no-op at the ends. */
+export function moveCard(
+  layout: DashboardLayout,
+  id: DashboardCardId,
+  delta: -1 | 1,
+): DashboardLayout {
+  const from = layout.order.indexOf(id);
+  const to = from + delta;
+  if (from < 0 || to < 0 || to >= layout.order.length) return layout;
+  const order = [...layout.order];
+  [order[from], order[to]] = [order[to], order[from]];
+  return { ...layout, order };
+}
+
+/** Turns a card on or off; it keeps its place in the order. */
 export function setCardVisible(
-  ids: DashboardCardId[],
+  layout: DashboardLayout,
   id: DashboardCardId,
   visible: boolean,
-): DashboardCardId[] {
-  if (visible) return ids.includes(id) ? ids : [...ids, id];
-  return ids.filter((x) => x !== id);
+): DashboardLayout {
+  const off = layout.off.filter((x) => x !== id);
+  return { ...layout, off: visible ? off : [...off, id] };
 }

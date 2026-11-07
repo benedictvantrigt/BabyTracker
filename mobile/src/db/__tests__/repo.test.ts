@@ -138,16 +138,37 @@ describe('Repo', () => {
 
   it('stores the dashboard layout and drops unknown cards', async () => {
     const { repo } = await setup();
-    expect((await repo.getSettings()).dashboardCards).toEqual([
-      'timers',
-      'sleep',
-      'feeding',
-      'diaper',
-      'today',
+    expect((await repo.getSettings()).dashboardLayout).toEqual({
+      order: ['timers', 'sleep', 'feeding', 'diaper', 'today'],
+      off: [],
+    });
+    const layout = {
+      order: ['today', 'diaper', 'feeding', 'sleep', 'timers'],
+      off: ['feeding'],
+    } as const;
+    await repo.updateSettings({ dashboardLayout: { order: [...layout.order], off: ['feeding'] } });
+    expect((await repo.getSettings()).dashboardLayout).toEqual(layout);
+    await repo.updateSettings({
+      dashboardLayout: { order: ['diaper', 'weather'], off: ['weather'] } as never,
+    });
+    expect((await repo.getSettings()).dashboardLayout).toEqual({
+      order: ['diaper', 'timers', 'sleep', 'feeding', 'today'],
+      off: [],
+    });
+  });
+
+  it('migrates the layout stored by 0.5 and older', async () => {
+    const { db, repo } = await setup();
+    await db.runAsync('INSERT INTO settings (key, value) VALUES (?, ?)', [
+      'dashboardCards',
+      JSON.stringify(['diaper', 'sleep']),
     ]);
-    await repo.updateSettings({ dashboardCards: ['diaper', 'feeding'] });
-    expect((await repo.getSettings()).dashboardCards).toEqual(['diaper', 'feeding']);
-    await repo.updateSettings({ dashboardCards: ['diaper', 'weather'] as never });
-    expect((await repo.getSettings()).dashboardCards).toEqual(['diaper']);
+    expect((await repo.getSettings()).dashboardLayout).toEqual({
+      order: ['diaper', 'sleep', 'timers', 'feeding', 'today'],
+      off: ['timers', 'feeding', 'today'],
+    });
+    // Once a new layout is saved it wins over the old key.
+    await repo.updateSettings({ dashboardLayout: { order: ['sleep'], off: [] } });
+    expect((await repo.getSettings()).dashboardLayout.off).toEqual([]);
   });
 });

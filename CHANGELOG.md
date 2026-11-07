@@ -5,6 +5,11 @@ before 1.0.0 a minor version marks a phase of the plan.
 
 ## Unreleased
 
+- Today screen layout (#35): a turned-off card stays in its place, dimmed, and can still be
+  moved; turning it back on restores it there. The separate "Hidden" list is gone. While the
+  Sleep or Feeding card is off, its settings are hidden from the Settings tab (the Daytime
+  settings when both are off); stored values and reminders stay as they were. Layouts saved
+  by older versions are migrated.
 - License: Functional Source License 1.1 with Apache 2.0 future license (`LICENSE.md`).
 - iOS build started (#5): an EAS `simulator` profile and a manual "iOS build" workflow that
   builds the acceptance app for the iOS Simulator. On an iPhone, reminders are scheduled on
