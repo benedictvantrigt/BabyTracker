@@ -71,6 +71,54 @@ describe('Repo', () => {
     expect(listed[1].end).toBeNull();
   });
 
+  it('stores tags, keeps them when an edit leaves them out, and lists them by use', async () => {
+    const { repo, child, now, advance } = await setup();
+    const diaper = (tags?: string[]) =>
+      ({
+        kind: 'diaper',
+        start: now(),
+        end: now(),
+        data: { wet: true, solid: false },
+        tags,
+      }) as const;
+    const a = await repo.addEntry(child.id, diaper(['#Teething', ' teething ', '', 'Daycare']));
+    expect(a.tags).toEqual(['Teething', 'Daycare']);
+    expect((await repo.getEntry(a.id))?.tags).toEqual(['Teething', 'Daycare']);
+
+    advance(60_000);
+    await repo.updateEntry(a.id, { ...diaper(), notes: 'edited' });
+    expect((await repo.getEntry(a.id))?.tags).toEqual(['Teething', 'Daycare']);
+    await repo.updateEntry(a.id, diaper(['daycare']));
+    expect((await repo.getEntry(a.id))?.tags).toEqual(['daycare']);
+
+    advance(60_000);
+    await repo.addEntry(child.id, diaper(['grandma']));
+    await repo.addEntry(child.id, diaper(['grandma']));
+    advance(60_000);
+    await repo.addEntry(child.id, diaper(['Daycare', 'grandma']));
+    const deleted = await repo.addEntry(child.id, diaper(['gone']));
+    await repo.deleteEntry(deleted.id);
+    expect(await repo.listTags(child.id)).toEqual(['grandma', 'Daycare']);
+  });
+
+  it('accepts entries from phones without tags', async () => {
+    const { repo, child, now } = await setup();
+    const row = {
+      id: 'remote-1',
+      childId: child.id,
+      kind: 'diaper',
+      start: now(),
+      end: now(),
+      data: { wet: true, solid: false },
+      notes: '',
+      createdAt: now(),
+      updatedAt: now(),
+      deletedAt: null,
+    };
+    await repo.applyRemote([{ type: 'entry', row: row as never }], 1);
+    expect((await repo.getEntry('remote-1'))?.tags).toEqual([]);
+  });
+
   it('switching sides stops the running feed and starts a new one', async () => {
     const { repo, child, advance, now } = await setup();
     const left = await repo.startTimer(child.id, 'feeding', {
@@ -138,16 +186,37 @@ describe('Repo', () => {
 
   it('stores the dashboard layout and drops unknown cards', async () => {
     const { repo } = await setup();
-    expect((await repo.getSettings()).dashboardCards).toEqual([
-      'timers',
-      'sleep',
-      'feeding',
-      'diaper',
-      'today',
+    expect((await repo.getSettings()).dashboardLayout).toEqual({
+      order: ['timers', 'sleep', 'feeding', 'diaper', 'today'],
+      off: [],
+    });
+    const layout = {
+      order: ['today', 'diaper', 'feeding', 'sleep', 'timers'],
+      off: ['feeding'],
+    } as const;
+    await repo.updateSettings({ dashboardLayout: { order: [...layout.order], off: ['feeding'] } });
+    expect((await repo.getSettings()).dashboardLayout).toEqual(layout);
+    await repo.updateSettings({
+      dashboardLayout: { order: ['diaper', 'weather'], off: ['weather'] } as never,
+    });
+    expect((await repo.getSettings()).dashboardLayout).toEqual({
+      order: ['diaper', 'timers', 'sleep', 'feeding', 'today'],
+      off: [],
+    });
+  });
+
+  it('migrates the layout stored by 0.5 and older', async () => {
+    const { db, repo } = await setup();
+    await db.runAsync('INSERT INTO settings (key, value) VALUES (?, ?)', [
+      'dashboardCards',
+      JSON.stringify(['diaper', 'sleep']),
     ]);
-    await repo.updateSettings({ dashboardCards: ['diaper', 'feeding'] });
-    expect((await repo.getSettings()).dashboardCards).toEqual(['diaper', 'feeding']);
-    await repo.updateSettings({ dashboardCards: ['diaper', 'weather'] as never });
-    expect((await repo.getSettings()).dashboardCards).toEqual(['diaper']);
+    expect((await repo.getSettings()).dashboardLayout).toEqual({
+      order: ['diaper', 'sleep', 'timers', 'feeding', 'today'],
+      off: ['timers', 'feeding', 'today'],
+    });
+    // Once a new layout is saved it wins over the old key.
+    await repo.updateSettings({ dashboardLayout: { order: ['sleep'], off: [] } });
+    expect((await repo.getSettings()).dashboardLayout.off).toEqual([]);
   });
 });

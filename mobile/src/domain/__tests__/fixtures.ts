@@ -29,6 +29,7 @@ export function entry<K extends EntryKind>(
     end,
     data,
     notes: '',
+    tags: [],
     createdAt: start,
     updatedAt: start,
     deletedAt: null,

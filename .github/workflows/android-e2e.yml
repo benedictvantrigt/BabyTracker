@@ -2,7 +2,7 @@ name: Android E2E
 
 on:
   push:
-    branches-ignore: [e2e-results]
+    branches-ignore: [e2e-results, e2e-results-ios]
     paths: ['mobile/**', 'relay/**', '.github/workflows/android-e2e.yml']
   workflow_dispatch:
 

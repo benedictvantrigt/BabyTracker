@@ -133,11 +133,13 @@ describe('partner sync', () => {
       end: t + 25 * 60_000,
       data: { nap: true },
       notes: 'from B',
+      tags: ['teething'],
     });
 
     await syncAll(a, b, a);
     assert.equal((await a.repo.getEntry(e.id))?.notes, 'from B');
     assert.equal((await b.repo.getEntry(e.id))?.notes, 'from B');
+    assert.deepEqual((await a.repo.getEntry(e.id))?.tags, ['teething']);
   });
 
   it('rejects reused invites, outsiders and phones that left', async () => {

@@ -1,19 +1,27 @@
 name: iOS build
 
 # Builds the acceptance app for the iOS Simulator (no Apple account or signing needed) to
-# check that the iOS project compiles. Started by hand only: macOS runners use the
-# repository's Actions minutes at a much higher rate than Linux.
+# check that the iOS project compiles, then runs the Maestro flows on an iPhone Simulator
+# with a local relay. Results (summary and screenshots) are uploaded and published to the
+# e2e-results-ios branch. Runs on every push that changes the app or this workflow (free
+# for a public repository), and can be started by hand.
 on:
+  push:
+    branches-ignore: [e2e-results, e2e-results-ios]
+    paths: ['mobile/**', 'relay/**', '.github/workflows/ios-build.yml']
   workflow_dispatch:
 
 concurrency:
   group: ios-build-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: write
+
 jobs:
   simulator:
     runs-on: macos-latest
-    timeout-minutes: 60
+    timeout-minutes: 120
     defaults:
       run:
         working-directory: mobile
@@ -23,8 +31,16 @@ jobs:
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: mobile/package-lock.json
+          cache-dependency-path: |
+            mobile/package-lock.json
+            relay/package-lock.json
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
       - run: npm ci
+      - run: npm ci
+        working-directory: relay
       - run: xcodebuild -version
 
       - name: Generate the iOS project
@@ -52,3 +68,62 @@ jobs:
           name: babytracker-ios-simulator
           path: mobile/babytracker-simulator.zip
           if-no-files-found: error
+
+      - name: Boot an iPhone Simulator
+        id: sim
+        run: |
+          udid=$(xcrun simctl list devices available -j | python3 -c '
+          import json, sys
+          devices = json.load(sys.stdin)["devices"]
+          for runtime in sorted(devices, reverse=True):
+              if "iOS" in runtime:
+                  for d in devices[runtime]:
+                      if d["name"].startswith("iPhone"):
+                          print(d["udid"]); sys.exit()
+          ')
+          xcrun simctl list devices | grep "$udid"
+          xcrun simctl boot "$udid"
+          xcrun simctl bootstatus "$udid" -b
+          echo "udid=$udid" >> "$GITHUB_OUTPUT"
+
+      - name: Install Maestro
+        run: |
+          curl -Ls "https://get.maestro.mobile.dev" | bash
+          echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
+
+      - name: Run E2E on the Simulator
+        timeout-minutes: 75
+        run: |
+          app=$(ls -d build/Build/Products/Release-iphonesimulator/*.app | head -n 1)
+          bash e2e/run-e2e-ios.sh "$app" "${{ steps.sim.outputs.udid }}" "$GITHUB_WORKSPACE/e2e-out"
+
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-results-ios
+          path: e2e-out
+          if-no-files-found: ignore
+
+      - name: Publish results to the e2e-results-ios branch
+        if: always()
+        working-directory: ${{ github.workspace }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p e2e-out
+          cd e2e-out
+          [ -f summary.md ] || echo "# iOS Simulator E2E results: no summary (run failed before the tests)" > summary.md
+          {
+            echo ""
+            echo "Commit: ${GITHUB_SHA}"
+            echo "Run: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          } >> summary.md
+          cat summary.md >> "$GITHUB_STEP_SUMMARY"
+          find . -name "*.mp4" -delete
+          [ -f device-log.txt ] && tail -n 5000 device-log.txt > log.tmp && mv log.tmp device-log.txt
+          git init -q -b e2e-results-ios
+          git add -A
+          git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+            commit -q -m "iOS E2E results for ${GITHUB_SHA::7}"
+          git push -f -q "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" e2e-results-ios

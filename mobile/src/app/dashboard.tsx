@@ -7,65 +7,46 @@ import { Button, Card, Icon } from '@/components/ui';
 import { MaxContentWidth, Spacing } from '@/constants/theme';
 import { useAction, useAppData } from '@/data/app-data';
 import {
-  ALL_CARDS,
   DASHBOARD_CARDS,
   DEFAULT_DASHBOARD,
+  isCardOn,
   moveCard,
   setCardVisible,
   type DashboardCardId,
+  type DashboardLayout,
 } from '@/domain/dashboard';
 import { useTheme } from '@/hooks/use-theme';
 
 export default function CustomizeDashboardScreen() {
   const { repo, settings } = useAppData();
   const run = useAction((message) => Alert.alert('Could not save', message));
-  const visible = settings.dashboardCards;
-  const hidden = ALL_CARDS.filter((id) => !visible.includes(id));
-  const save = (dashboardCards: DashboardCardId[]) =>
-    run(() => repo.updateSettings({ dashboardCards }));
+  const layout = settings.dashboardLayout;
+  const save = (dashboardLayout: DashboardLayout) =>
+    run(() => repo.updateSettings({ dashboardLayout }));
 
   return (
     <ThemedView style={styles.fill}>
       <ScrollView contentContainerStyle={styles.content}>
         <ThemedText type="small" themeColor="textSecondary">
-          Choose which cards the Today screen shows and in what order. Hidden cards keep their data;
-          reminders keep working.
+          Choose which cards the Today screen shows and in what order. A card that is turned off
+          keeps its place and its data, and its settings are hidden from the Settings tab; reminders
+          keep working.
         </ThemedText>
 
         <Card>
-          <ThemedText type="smallBold" themeColor="textSecondary">
-            SHOWN
-          </ThemedText>
-          {visible.length === 0 && (
-            <ThemedText themeColor="textSecondary">No cards shown.</ThemedText>
-          )}
-          {visible.map((id, index) => (
+          {layout.order.map((id, index) => (
             <CardRow
               key={id}
               id={id}
-              visible
-              onToggle={() => save(setCardVisible(visible, id, false))}
-              onUp={index > 0 ? () => save(moveCard(visible, id, -1)) : undefined}
-              onDown={index < visible.length - 1 ? () => save(moveCard(visible, id, 1)) : undefined}
+              visible={isCardOn(layout, id)}
+              onToggle={(on) => save(setCardVisible(layout, id, on))}
+              onUp={index > 0 ? () => save(moveCard(layout, id, -1)) : undefined}
+              onDown={
+                index < layout.order.length - 1 ? () => save(moveCard(layout, id, 1)) : undefined
+              }
             />
           ))}
         </Card>
-
-        {hidden.length > 0 && (
-          <Card>
-            <ThemedText type="smallBold" themeColor="textSecondary">
-              HIDDEN
-            </ThemedText>
-            {hidden.map((id) => (
-              <CardRow
-                key={id}
-                id={id}
-                visible={false}
-                onToggle={() => save(setCardVisible(visible, id, true))}
-              />
-            ))}
-          </Card>
-        )}
 
         <Button label="Reset to default" onPress={() => save(DEFAULT_DASHBOARD)} />
       </ScrollView>
@@ -82,35 +63,31 @@ function CardRow({
 }: {
   id: DashboardCardId;
   visible: boolean;
-  onToggle: () => void;
+  onToggle: (on: boolean) => void;
   onUp?: () => void;
   onDown?: () => void;
 }) {
   const { title, description } = DASHBOARD_CARDS[id];
   return (
-    <View style={styles.row}>
-      <View style={styles.grow}>
+    <View style={styles.row} testID={`card-row-${id}`}>
+      <View style={[styles.grow, !visible && styles.off]}>
         <ThemedText>{title}</ThemedText>
         <ThemedText type="small" themeColor="textSecondary">
           {description}
         </ThemedText>
       </View>
-      {visible && (
-        <>
-          <MoveButton
-            label={`Move ${title} up`}
-            testID={`move-up-${id}`}
-            icon={{ ios: 'chevron.up', android: 'arrow_upward' }}
-            onPress={onUp}
-          />
-          <MoveButton
-            label={`Move ${title} down`}
-            testID={`move-down-${id}`}
-            icon={{ ios: 'chevron.down', android: 'arrow_downward' }}
-            onPress={onDown}
-          />
-        </>
-      )}
+      <MoveButton
+        label={`Move ${title} up`}
+        testID={`move-up-${id}`}
+        icon={{ ios: 'chevron.up', android: 'arrow_upward' }}
+        onPress={onUp}
+      />
+      <MoveButton
+        label={`Move ${title} down`}
+        testID={`move-down-${id}`}
+        icon={{ ios: 'chevron.down', android: 'arrow_downward' }}
+        onPress={onDown}
+      />
       <Switch
         value={visible}
         onValueChange={onToggle}
@@ -171,6 +148,9 @@ const styles = StyleSheet.create({
   },
   grow: {
     flex: 1,
+  },
+  off: {
+    opacity: 0.4,
   },
   move: {
     width: 40,

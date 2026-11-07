@@ -2,7 +2,7 @@
   "expo": {
     "name": "Baby Tracker",
     "slug": "babytracker",
-    "version": "0.5.1",
+    "version": "0.6.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "babytracker",
@@ -23,7 +23,7 @@
       },
       "predictiveBackGestureEnabled": false,
       "package": "com.babytracker.app",
-      "versionCode": 6,
+      "versionCode": 7,
       "permissions": [
         "android.permission.SCHEDULE_EXACT_ALARM",
         "android.permission.POST_NOTIFICATIONS"
@@ -60,7 +60,27 @@
           "barcodeScannerEnabled": true
         }
       ],
-      "./plugins/with-local-cleartext"
+      "./plugins/with-local-cleartext",
+      [
+        "react-native-android-widget",
+        {
+          "widgets": [
+            {
+              "name": "Summary",
+              "label": "Baby Tracker",
+              "description": "Last feed, sleep and diaper, with quick logging",
+              "minWidth": "250dp",
+              "minHeight": "110dp",
+              "targetCellWidth": 4,
+              "targetCellHeight": 2,
+              "maxResizeWidth": "500dp",
+              "maxResizeHeight": "250dp",
+              "resizeMode": "horizontal|vertical",
+              "updatePeriodMillis": 1800000
+            }
+          ]
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

@@ -75,19 +75,40 @@ export function formatDate(ms: number): string {
   return `${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
 }
 
-/** "3 days", "5 weeks", "4 months" from an ISO birth date. */
+const plural = (n: number, unit: string) => `${n} ${unit}${n === 1 ? '' : 's'}`;
+
+/** "5 weeks 3 days": a unit count plus the remaining days, if any. */
+const withDays = (n: number, unit: string, days: number) =>
+  days > 0 ? `${plural(n, unit)} ${plural(days, 'day')}` : plural(n, unit);
+
+/** Whole local days from one local midnight to another (23- or 25-hour days round). */
+const daysBetween = (from: number, to: number) => Math.round((to - from) / DAY);
+
+/**
+ * Local midnight `months` months after a date, kept inside the target month: one month
+ * after 31 January is 28 (or 29) February.
+ */
+function addMonths(y: number, monthIndex: number, day: number, months: number): number {
+  const lastDay = new Date(y, monthIndex + months + 1, 0).getDate();
+  return new Date(y, monthIndex + months, Math.min(day, lastDay)).getTime();
+}
+
+/**
+ * Age from an ISO birth date: "3 days" up to 2 weeks, "5 weeks 3 days" up to 13 weeks,
+ * then "4 months 12 days".
+ */
 export function formatAge(birthDate: string, now: number): string {
   const [y, mo, d] = birthDate.split('-').map(Number);
   const born = new Date(y, mo - 1, d).getTime();
-  // Round: across a DST change local midnights are 23 or 25 hours apart.
-  const days = Math.round((startOfLocalDay(now) - born) / DAY);
+  const today = startOfLocalDay(now);
+  const days = daysBetween(born, today);
   if (days < 0) return '';
-  if (days < 14) return days === 1 ? '1 day' : `${days} days`;
-  if (days < 7 * 13) return `${Math.floor(days / 7)} weeks`;
-  const nowDate = new Date(now);
+  if (days < 14) return plural(days, 'day');
+  if (days < 7 * 13) return withDays(Math.floor(days / 7), 'week', days % 7);
+  const nowDate = new Date(today);
   let months = (nowDate.getFullYear() - y) * 12 + (nowDate.getMonth() - (mo - 1));
-  if (nowDate.getDate() < d) months -= 1;
-  return months === 1 ? '1 month' : `${months} months`;
+  if (addMonths(y, mo - 1, d, months) > today) months -= 1;
+  return withDays(months, 'month', daysBetween(addMonths(y, mo - 1, d, months), today));
 }
 
 export function toIsoDate(ms: number): string {

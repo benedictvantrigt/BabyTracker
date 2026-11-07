@@ -2,12 +2,14 @@ import { Stack, router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Alert, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 
+import { TagEditor } from '@/components/tags';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Button, DateTimeField, Field, Segmented, ToggleRow } from '@/components/ui';
 import { MaxContentWidth, Spacing } from '@/constants/theme';
 import { useAction, useAppData } from '@/data/app-data';
 import { FEEDING_METHOD_LABEL, KIND_LABEL, isNapStart } from '@/domain/entries';
+import { addTag } from '@/domain/tags';
 import { MINUTE } from '@/domain/time';
 import type {
   DiaperColor,
@@ -52,6 +54,9 @@ interface FormState {
   solid: boolean;
   color: DiaperColor | 'none';
   notes: string;
+  tags: string[];
+  /** A tag typed but not yet added; saved with the entry. */
+  tagDraft: string;
 }
 
 function initialState(
@@ -72,6 +77,8 @@ function initialState(
     solid: false,
     color: 'none',
     notes: '',
+    tags: [],
+    tagDraft: '',
   };
 }
 
@@ -81,6 +88,7 @@ function stateFromEntry(entry: Entry): FormState {
     start: entry.start,
     end: entry.end,
     notes: entry.notes,
+    tags: entry.tags,
   };
   switch (entry.kind) {
     case 'feeding':
@@ -104,6 +112,7 @@ function stateFromEntry(entry: Entry): FormState {
 
 function toInput(kind: EntryKind, s: FormState): EntryInput {
   const notes = s.notes;
+  const tags = addTag(s.tags, s.tagDraft);
   switch (kind) {
     case 'feeding': {
       const amount = s.amount.trim() ? Number(s.amount.replace(',', '.')) : undefined;
@@ -112,6 +121,7 @@ function toInput(kind: EntryKind, s: FormState): EntryInput {
         start: s.start,
         end: s.end,
         notes,
+        tags,
         data: {
           type: s.feedingType,
           method: s.feedingMethod,
@@ -120,13 +130,14 @@ function toInput(kind: EntryKind, s: FormState): EntryInput {
       };
     }
     case 'sleep':
-      return { kind, start: s.start, end: s.end, notes, data: { nap: s.nap } };
+      return { kind, start: s.start, end: s.end, notes, tags, data: { nap: s.nap } };
     case 'diaper':
       return {
         kind,
         start: s.start,
         end: s.start,
         notes,
+        tags,
         data: { wet: s.wet, solid: s.solid, ...(s.color !== 'none' && { color: s.color }) },
       };
   }
@@ -148,6 +159,11 @@ export default function EntryScreen() {
       : null,
   );
   const [missing, setMissing] = useState(false);
+  const [knownTags, setKnownTags] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (activeChild) repo.listTags(activeChild.id).then(setKnownTags, () => {});
+  }, [repo, activeChild]);
 
   useEffect(() => {
     if (!params.id) return;
@@ -304,6 +320,15 @@ export default function EntryScreen() {
               styles.notes,
               { color: theme.text, borderColor: theme.border },
             ]}
+          />
+        </Field>
+
+        <Field label="Tags">
+          <TagEditor
+            tags={form.tags}
+            draft={form.tagDraft}
+            known={knownTags}
+            onChange={({ tags, draft }) => set({ tags, tagDraft: draft })}
           />
         </Field>
 

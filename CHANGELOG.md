@@ -3,8 +3,32 @@
 All notable changes to Baby Tracker. Versions follow [Semantic Versioning](https://semver.org/);
 before 1.0.0 a minor version marks a phase of the plan.
 
-## Unreleased
+## [0.6.0] — 2026-11-07 — Today screen, total sleep, tags and Android widget
 
+- Today screen layout (#35): a turned-off card stays in its place, dimmed, and can still be
+  moved; turning it back on restores it there. The separate "Hidden" list is gone. While the
+  Sleep or Feeding card is off, its settings are hidden from the Settings tab (the Daytime
+  settings when both are off); stored values and reminders stay as they were. Layouts saved
+  by older versions are migrated.
+- Sleep card (#30): "Sleep today 9h 40m of 16h" — the stage's day plus night sleep target
+  against what was slept, without opening the plan. The day's total is the night that
+  ended this morning plus today's naps, with a running sleep counted up to now; sleep
+  starting after the latest nap end (17:00 with a 07:00 day start) counts toward the next
+  day. The plan also shows the night against its target.
+- Age under the baby's name (#29) includes the remaining days: "5 weeks 3 days",
+  "4 months 12 days". Months count from the same day of the month (the last day in a
+  shorter month).
+- Home-screen widget on Android (#16): last feed, sleep and diaper as clock times ("Fed
+  13:05 · next 17:05", "Awake since 10:00 · nap 12:00", "Diaper 10:15"), with buttons to
+  start or stop sleep and log a wet or solid diaper without opening the app; "Feed" opens
+  the feeding screen. A tap while the app is closed also updates reminders and syncs with
+  the partner phone. The widget refreshes on every change, when a partner's change arrives
+  by push, and every 30 minutes. Needs a new build (native module
+  `react-native-android-widget`). iOS widgets follow later.
+- Tags on entries (#12), next to the existing notes: add them on the entry screen (typed,
+  or picked from tags used before, most used first), see them in the timeline, and filter
+  the timeline by a tag. Tags sync with the partner phone; a phone on an older version
+  drops the tags of an entry it edits, so update both phones.
 - License: Functional Source License 1.1 with Apache 2.0 future license (`LICENSE.md`).
 - iOS build started (#5): an EAS `simulator` profile and a manual "iOS build" workflow that
   builds the acceptance app for the iOS Simulator. On an iPhone, reminders are scheduled on

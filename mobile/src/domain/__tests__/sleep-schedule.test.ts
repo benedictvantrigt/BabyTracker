@@ -1,6 +1,13 @@
 /// <reference types="jest" />
 import { computeReminders } from '../reminders';
-import { SCHEDULE_STAGES, isNewStage, planDay, scheduleStatus, stageFor } from '../sleep-schedule';
+import {
+  SCHEDULE_STAGES,
+  isNewStage,
+  planDay,
+  scheduleStatus,
+  stageFor,
+  totalSleepTarget,
+} from '../sleep-schedule';
 import { HOUR, MINUTE } from '../time';
 
 import { at, entry, kid, settings } from './fixtures';
@@ -77,6 +84,37 @@ describe('scheduleStatus', () => {
     expect(status.current).toBeNull();
     expect(status.daySleptMs).toBe(55 * MINUTE);
     expect(status.advice).toBeNull();
+  });
+
+  it('adds the night that ended this morning to the day total', () => {
+    // Night from 19:00 with a wake-up 02:00–02:30, then a nap 09:05–10:00.
+    const entries = [
+      entry('sleep', at(19, 0, -1), at(2), { nap: false }),
+      entry('sleep', at(2, 30), at(7), { nap: false }),
+      nap(9, 5, 10),
+      // The previous day's nap and an afternoon nap two days ago do not count.
+      entry('sleep', at(12, 0, -1), at(14, 0, -1), { nap: true }),
+    ];
+    const status = scheduleStatus(entries, fourMonths, settings, at(11))!;
+    expect(status.nightSleptMs).toBe(11.5 * HOUR);
+    expect(status.daySleptMs).toBe(55 * MINUTE);
+    expect(status.totalSleptMs).toBe(11.5 * HOUR + 55 * MINUTE);
+  });
+
+  it('counts a running night up to now, and tonight toward tomorrow', () => {
+    const running = entry('sleep', at(19, 0, -1), null, { nap: false });
+    const status = scheduleStatus([running], fourMonths, settings, at(5))!;
+    expect(status.nightSleptMs).toBe(10 * HOUR);
+    expect(status.totalSleptMs).toBe(10 * HOUR);
+    const tonight = entry('sleep', at(19), null, { nap: false });
+    const evening = scheduleStatus([night, nap(9, 0, 10), tonight], fourMonths, settings, at(21))!;
+    expect(evening.totalSleptMs).toBe(13 * HOUR);
+  });
+
+  it('gives the target for the whole day', () => {
+    const m4 = SCHEDULE_STAGES.find((s) => s.id === 'm4')!;
+    expect(totalSleepTarget(m4)).toEqual([16 * 60, 16 * 60]);
+    expect(totalSleepTarget(SCHEDULE_STAGES[0])).toEqual([330 + 780, 450 + 780]);
   });
 
   it('gives the planned end of a running nap', () => {

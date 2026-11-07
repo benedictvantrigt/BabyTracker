@@ -340,6 +340,13 @@ export interface ScheduleStatus {
   next: PlanSlot | null;
   /** Daytime sleep logged so far against the stage's target, in ms. */
   daySleptMs: number;
+  /**
+   * The night that ended this morning, in ms: sleep starting from yesterday's latest nap
+   * end until an hour before today's day start. A night still running counts up to now.
+   */
+  nightSleptMs: number;
+  /** Total sleep for the day so far, in ms: last night plus today's naps. */
+  totalSleptMs: number;
   /** The next start of the day (wake-up time), for night sleep. */
   morningAt: number;
   advice: SleepAdvice | null;
@@ -409,6 +416,15 @@ export function scheduleStatus(
   for (const e of daySleeps) {
     daySleptMs += overlap(e.start, e.end ?? now, dayStart - HOUR, latestNapEnd);
   }
+  // The night belongs to the day it ends in, so tonight's sleep counts toward tomorrow.
+  // Yesterday's times are taken from an hour before midnight, safe across DST changes.
+  const nightFrom = scheduleTime(settings, startOfLocalDay(now) - HOUR, LATEST_NAP_END);
+  let nightSleptMs = 0;
+  for (const e of sleeps) {
+    if (e.start >= nightFrom && e.start < dayStart - HOUR) {
+      nightSleptMs += Math.max(0, Math.min(e.end ?? now, now) - e.start);
+    }
+  }
 
   return {
     plan,
@@ -417,6 +433,8 @@ export function scheduleStatus(
     current,
     next,
     daySleptMs,
+    nightSleptMs,
+    totalSleptMs: nightSleptMs + daySleptMs,
     morningAt: now < dayStart ? dayStart : scheduleTime(settings, now + DAY, BASE_DAY_START),
     advice: adviceFor(plan, settings, slots, sleeps, running, current, now),
   };
@@ -467,6 +485,12 @@ function adviceFor(
     return { kind: 'catch-up', from, to: latestNapEnd };
   }
   return null;
+}
+
+/** Target sleep for a whole day (night plus day sleep), in minutes, as [min, max]. */
+export function totalSleepTarget(stage: ScheduleStage): [number, number] {
+  const night = stage.nightSleepHours * 60;
+  return [stage.daySleep[0] + night, stage.daySleep[1] + night];
 }
 
 /** Whether a stage started recently enough to point it out (only for age-based stages). */

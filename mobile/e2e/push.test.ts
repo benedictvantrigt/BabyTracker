@@ -8,6 +8,7 @@ import { createServer, type Server } from 'node:http';
 import type { AddressInfo } from 'node:net';
 import { after, before, describe, it } from 'node:test';
 
+import { DEFAULT_DASHBOARD } from '../src/domain/dashboard';
 import { openReminder, publishReminders } from '../src/sync/reminders';
 import { createFamily, joinFamily, loadEngine } from '../src/sync/setup';
 import { phone, type Phone } from './phone';
@@ -241,7 +242,10 @@ describe('push through the relay', () => {
 
   it('shares reminder rules between phones but keeps per-phone choices', async () => {
     const [a, b] = await family();
-    await b.repo.updateSettings({ remindersOnThisPhone: false, dashboardCards: ['diaper'] });
+    await b.repo.updateSettings({
+      remindersOnThisPhone: false,
+      dashboardLayout: { order: DEFAULT_DASHBOARD.order, off: ['sleep'] },
+    });
     await a.repo.updateSettings({
       awakeWindowMinutes: 120,
       feedAlarmNight: false,
@@ -258,6 +262,6 @@ describe('push through the relay', () => {
     assert.equal(s.scheduleStage, 'm6');
     assert.equal(s.napLeadMinutes, 25);
     assert.equal(s.remindersOnThisPhone, false);
-    assert.deepEqual(s.dashboardCards, ['diaper']);
+    assert.deepEqual(s.dashboardLayout.off, ['sleep']);
   });
 });

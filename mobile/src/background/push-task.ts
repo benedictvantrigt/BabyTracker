@@ -12,6 +12,7 @@ import { presentPushedReminder } from '@/notifications/scheduler';
 import { openReminder } from '@/sync/reminders';
 import { secureStore } from '@/sync/secure-store';
 import { loadEngine } from '@/sync/setup';
+import { updateWidgets } from '@/widget/widget-task';
 
 export const PUSH_TASK = 'babytracker-push';
 
@@ -51,6 +52,7 @@ async function handle(message: Message): Promise<boolean> {
   if (message.type === 'sync') {
     const { pulled } = await engine.sync();
     await refreshNotifications(repo);
+    if (pulled > 0) await updateWidgets(repo).catch(() => {});
     return pulled > 0;
   }
   return false;
