@@ -3,7 +3,7 @@
 All notable changes to Baby Tracker. Versions follow [Semantic Versioning](https://semver.org/);
 before 1.0.0 a minor version marks a phase of the plan.
 
-## Unreleased
+## [0.6.0] — 2026-11-07 — Today screen, total sleep, tags and Android widget
 
 - Today screen layout (#35): a turned-off card stays in its place, dimmed, and can still be
   moved; turning it back on restores it there. The separate "Hidden" list is gone. While the
