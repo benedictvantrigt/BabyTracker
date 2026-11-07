@@ -23,11 +23,13 @@ per phone. The app is React Native (Expo), Android first, iOS later.
 | 1. Local MVP | Data model; feeding, sleep and diaper entry; timers; "time since last" dashboard; local reminders | ✅ Done in 0.1.0 (plus customizable Today screen, emulator E2E tests) |
 | 2. Sync | QR pairing, encrypted change log, Cloudflare relay, device removal, retention | ✅ 0.2.0 pairing, encryption and relay; 0.5.0 device removal with key rotation, retention, delete family; data import dropped |
 | 3. Notifications | Scheduled pushes through the relay, iOS Notification Service Extension, Android exact alarms, awake-window and feed rules | 🟡 0.3.0: done for Android; iOS started (#5: build config, local reminders) |
-| 4. Extras | Record types still missing (tummy time, pumping, growth, …), NFC tags, Live Activities / Live Updates, widgets, charts, growth curves, PDF/CSV export | ⬜ Not started |
+| 4. Extras | Record types still missing (tummy time, pumping, growth, …), NFC tags, Live Activities / Live Updates, widgets, charts, growth curves, PDF/CSV export | 🟡 Started: sleep schedule (0.4.0); unreleased: #29, #30, #35, tags (#12), Android widget (#16) |
 | 5. Hardening | Key recovery, backups, privacy statement, store submission | ⬜ Not started |
 
 Current position: phases 1–3 are done for Android (Phase 2 completed in 0.5.0). Phase 4 has
-started with the age-based sleep schedule (#28, version 0.4.0).
+started with the age-based sleep schedule (#28, version 0.4.0); unreleased so far: the Today
+screen layout (#35), total sleep (#30), age in days (#29), tags (#12) and the Android
+home-screen widget (#16, iOS still to do).
 
 The server side runs in two environments, acceptance and production, each with its own
 relay Worker, Firebase project and app package (README: "Environments: acceptance and
@@ -69,7 +71,7 @@ phase table above when a milestone is done. Problems found while testing are iss
 
 - #5 iOS app build (in progress: Simulator profile and build workflow, iPhone schedules its own reminders; not yet tested on a device)
 - #6 iOS Notification Service Extension to decrypt pushed reminders
-- #7 iOS night-feed alarm
+- #7 iOS night-feed alarm (time-sensitive notification done with #5; AlarmKit on iOS 26+ not started)
 
 ### Phase 4: Extras — [milestone](https://github.com/benedictvantrigt/BabyTracker/milestone/4)
 
