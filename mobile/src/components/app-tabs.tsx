@@ -10,6 +10,9 @@ export default function AppTabs() {
   return (
     <NativeTabs
       backgroundColor={colors.background}
+      // iOS 18 and earlier: keep the bar's background when the content is scrolled to its
+      // edge, so the screen does not show through the icons. (iOS 26+ draws its own bar.)
+      disableTransparentOnScrollEdge
       indicatorColor={colors.backgroundElement}
       labelStyle={{ selected: { color: colors.text } }}>
       <NativeTabs.Trigger name="index">
