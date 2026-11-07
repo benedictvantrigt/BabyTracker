@@ -1,13 +1,15 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, SectionList, StyleSheet, View } from 'react-native';
+import { Pressable, ScrollView, SectionList, StyleSheet, View } from 'react-native';
 
 import { TabScreen } from '@/components/tab-screen';
+import { TagChip } from '@/components/tags';
 import { ThemedText } from '@/components/themed-text';
 import { Button, Icon, KIND_ICON } from '@/components/ui';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useAppData, useEntries, useNow } from '@/data/app-data';
 import { entryDurationLabel, entryTitle, groupByDay, isTimedKind } from '@/domain/entries';
+import { hasTag, tagsByUse } from '@/domain/tags';
 import { DAY, formatClock, formatDayLabel, startOfLocalDay } from '@/domain/time';
 import type { Entry } from '@/domain/types';
 import { useTheme } from '@/hooks/use-theme';
@@ -20,8 +22,14 @@ export default function TimelineScreen() {
   const [days, setDays] = useState(PAGE_DAYS);
   const since = startOfLocalDay(now) - (days - 1) * DAY;
   const { entries, loaded } = useEntries(activeChild?.id, since);
+  const [tag, setTag] = useState<string | null>(null);
+  const tags = tagsByUse(entries);
+  // A filter tag no longer in the list (its entries were edited) stops filtering.
+  const filter =
+    tag && tags.some((t) => t.toLocaleLowerCase() === tag.toLocaleLowerCase()) ? tag : null;
+  const shown = filter ? entries.filter((e) => hasTag(e, filter)) : entries;
 
-  const sections = groupByDay(entries).map((g) => ({
+  const sections = groupByDay(shown).map((g) => ({
     title: formatDayLabel(g.dayStart, now),
     data: g.entries,
   }));
@@ -33,7 +41,30 @@ export default function TimelineScreen() {
         keyExtractor={(e) => e.id}
         contentContainerStyle={styles.content}
         stickySectionHeadersEnabled={false}
-        ListHeaderComponent={<ThemedText type="subtitle">Timeline</ThemedText>}
+        ListHeaderComponent={
+          <View style={styles.header}>
+            <ThemedText type="subtitle">Timeline</ThemedText>
+            {tags.length > 0 && (
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.tags}>
+                {tags.map((t) => (
+                  <TagChip
+                    key={t}
+                    label={t}
+                    selected={t === filter}
+                    accessibilityLabel={
+                      t === filter ? `Show all entries` : `Show entries tagged ${t}`
+                    }
+                    testID={`filter-tag-${t}`}
+                    onPress={() => setTag(t === filter ? null : t)}
+                  />
+                ))}
+              </ScrollView>
+            )}
+          </View>
+        }
         renderSectionHeader={({ section }) => (
           <ThemedText type="smallBold" themeColor="textSecondary" style={styles.sectionHeader}>
             {section.title.toUpperCase()}
@@ -43,7 +74,9 @@ export default function TimelineScreen() {
         ListEmptyComponent={
           loaded ? (
             <ThemedText themeColor="textSecondary" style={styles.empty}>
-              Nothing logged in the last {days} days.
+              {filter
+                ? `Nothing tagged #${filter} in the last ${days} days.`
+                : `Nothing logged in the last ${days} days.`}
             </ThemedText>
           ) : undefined
         }
@@ -88,6 +121,7 @@ function EntryRow({ entry, now }: { entry: Entry; now: number }) {
         <ThemedText type="small" themeColor="textSecondary" numberOfLines={1}>
           {running ? `Running since ${formatClock(entry.start)}` : time}
           {entry.notes ? ` · ${entry.notes}` : ''}
+          {entry.tags.length > 0 ? ` · ${entry.tags.map((t) => `#${t}`).join(' ')}` : ''}
         </ThemedText>
       </View>
       {duration && (
@@ -111,6 +145,12 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: MaxContentWidth,
     alignSelf: 'center',
+  },
+  header: {
+    gap: Spacing.three,
+  },
+  tags: {
+    gap: Spacing.two,
   },
   sectionHeader: {
     marginTop: Spacing.three,

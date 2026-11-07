@@ -25,6 +25,10 @@ before 1.0.0 a minor version marks a phase of the plan.
   the partner phone. The widget refreshes on every change, when a partner's change arrives
   by push, and every 30 minutes. Needs a new build (native module
   `react-native-android-widget`). iOS widgets follow later.
+- Tags on entries (#12), next to the existing notes: add them on the entry screen (typed,
+  or picked from tags used before, most used first), see them in the timeline, and filter
+  the timeline by a tag. Tags sync with the partner phone; a phone on an older version
+  drops the tags of an entry it edits, so update both phones.
 - License: Functional Source License 1.1 with Apache 2.0 future license (`LICENSE.md`).
 - iOS build started (#5): an EAS `simulator` profile and a manual "iOS build" workflow that
   builds the acceptance app for the iOS Simulator. On an iPhone, reminders are scheduled on

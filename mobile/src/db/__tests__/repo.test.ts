@@ -71,6 +71,54 @@ describe('Repo', () => {
     expect(listed[1].end).toBeNull();
   });
 
+  it('stores tags, keeps them when an edit leaves them out, and lists them by use', async () => {
+    const { repo, child, now, advance } = await setup();
+    const diaper = (tags?: string[]) =>
+      ({
+        kind: 'diaper',
+        start: now(),
+        end: now(),
+        data: { wet: true, solid: false },
+        tags,
+      }) as const;
+    const a = await repo.addEntry(child.id, diaper(['#Teething', ' teething ', '', 'Daycare']));
+    expect(a.tags).toEqual(['Teething', 'Daycare']);
+    expect((await repo.getEntry(a.id))?.tags).toEqual(['Teething', 'Daycare']);
+
+    advance(60_000);
+    await repo.updateEntry(a.id, { ...diaper(), notes: 'edited' });
+    expect((await repo.getEntry(a.id))?.tags).toEqual(['Teething', 'Daycare']);
+    await repo.updateEntry(a.id, diaper(['daycare']));
+    expect((await repo.getEntry(a.id))?.tags).toEqual(['daycare']);
+
+    advance(60_000);
+    await repo.addEntry(child.id, diaper(['grandma']));
+    await repo.addEntry(child.id, diaper(['grandma']));
+    advance(60_000);
+    await repo.addEntry(child.id, diaper(['Daycare', 'grandma']));
+    const deleted = await repo.addEntry(child.id, diaper(['gone']));
+    await repo.deleteEntry(deleted.id);
+    expect(await repo.listTags(child.id)).toEqual(['grandma', 'Daycare']);
+  });
+
+  it('accepts entries from phones without tags', async () => {
+    const { repo, child, now } = await setup();
+    const row = {
+      id: 'remote-1',
+      childId: child.id,
+      kind: 'diaper',
+      start: now(),
+      end: now(),
+      data: { wet: true, solid: false },
+      notes: '',
+      createdAt: now(),
+      updatedAt: now(),
+      deletedAt: null,
+    };
+    await repo.applyRemote([{ type: 'entry', row: row as never }], 1);
+    expect((await repo.getEntry('remote-1'))?.tags).toEqual([]);
+  });
+
   it('switching sides stops the running feed and starts a new one', async () => {
     const { repo, child, advance, now } = await setup();
     const left = await repo.startTimer(child.id, 'feeding', {

@@ -11,13 +11,28 @@ name: Timeline lists entries; edit and delete
 - assertVisible: 'Feeding · Left'
 - assertVisible: 'Diaper · Wet'
 - takeScreenshot: 04-timeline
-# Edit the diaper: also solid.
+# Edit the diaper: also solid, and tag it (typed, saved without pressing enter).
 - tapOn: 'Diaper · Wet'
 - assertVisible: 'Edit diaper'
 - tapOn:
     id: 'toggle-solid'
+- scrollUntilVisible:
+    element:
+      id: 'tag-input'
+- tapOn:
+    id: 'tag-input'
+- inputText: 'teething'
+- hideKeyboard
 - tapOn: 'Save'
 - assertVisible: 'Diaper · Wet \+ solid'
+- assertVisible: '.*#teething.*'
+# Filter the timeline by the tag: the feed (untagged) disappears.
+- tapOn:
+    id: 'filter-tag-teething'
+- assertNotVisible: 'Feeding · Left'
+- tapOn:
+    id: 'filter-tag-teething'
+- assertVisible: 'Feeding · Left'
 # Delete the feed (Android alert: second button is the positive one).
 - tapOn: 'Feeding · Left'
 - assertVisible: 'Edit feeding'

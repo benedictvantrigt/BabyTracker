@@ -78,7 +78,7 @@ Records:
 - #9 Pumping
 - #10 Temperature
 - #11 Growth measurements: weight, height, head circumference
-- #12 Notes and tags on entries
+- #12 Notes and tags on entries (done)
 - #13 Multiple children in one family
 
 Other extras:

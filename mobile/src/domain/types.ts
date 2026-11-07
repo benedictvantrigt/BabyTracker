@@ -43,6 +43,8 @@ interface EntryBase<K extends EntryKind> {
   end: number | null;
   data: EntryDataMap[K];
   notes: string;
+  /** Free-form labels, e.g. "teething"; see `normalizeTags`. */
+  tags: string[];
   createdAt: number;
   updatedAt: number;
   deletedAt: number | null;
@@ -63,6 +65,8 @@ export type EntryInput<K extends EntryKind = EntryKind> = {
     end: number | null;
     data: EntryDataMap[P];
     notes?: string;
+    /** Left out when editing: the entry keeps its tags. */
+    tags?: string[];
   };
 }[K];
 

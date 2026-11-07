@@ -1,4 +1,5 @@
 import { normalizeDashboard } from '@/domain/dashboard';
+import { normalizeTags, tagsByUse } from '@/domain/tags';
 import { validateEntry } from '@/domain/entries';
 import {
   DEFAULT_SETTINGS,
@@ -21,6 +22,7 @@ interface EntryRow {
   end: number | null;
   data: string;
   notes: string;
+  tags: string;
   created_at: number;
   updated_at: number;
   deleted_at: number | null;
@@ -45,6 +47,7 @@ function toEntry(row: EntryRow): Entry {
     end: row.end,
     data: JSON.parse(row.data),
     notes: row.notes,
+    tags: normalizeTags(parseJson(row.tags)),
     createdAt: row.created_at,
     updatedAt: row.updated_at,
     deletedAt: row.deleted_at,
@@ -64,7 +67,15 @@ function toChild(row: ChildRow): Child {
 }
 
 const ENTRY_COLUMNS =
-  'id, child_id, kind, start, "end", data, notes, created_at, updated_at, deleted_at';
+  'id, child_id, kind, start, "end", data, notes, tags, created_at, updated_at, deleted_at';
+
+function parseJson(text: string): unknown {
+  try {
+    return JSON.parse(text);
+  } catch {
+    return null;
+  }
+}
 
 export class ValidationError extends Error {}
 
@@ -184,6 +195,17 @@ export class Repo {
     return rows.map(toEntry);
   }
 
+  /** Tags used on a child's entries, most used first; from the latest 500 tagged entries. */
+  async listTags(childId: string): Promise<string[]> {
+    const rows = await this.db.getAllAsync<{ tags: string; start: number }>(
+      `SELECT tags, start FROM entries
+       WHERE child_id = ? AND deleted_at IS NULL AND tags != '[]'
+       ORDER BY start DESC LIMIT 500`,
+      [childId],
+    );
+    return tagsByUse(rows.map((r) => ({ start: r.start, tags: normalizeTags(parseJson(r.tags)) })));
+  }
+
   async getEntry(id: string): Promise<Entry | null> {
     const row = await this.db.getFirstAsync<EntryRow>(
       `SELECT ${ENTRY_COLUMNS} FROM entries WHERE id = ?`,
@@ -204,6 +226,7 @@ export class Repo {
       end: input.end,
       data: input.data,
       notes: input.notes?.trim() ?? '',
+      tags: normalizeTags(input.tags),
       createdAt: now,
       updatedAt: now,
       deletedAt: null,
@@ -222,13 +245,14 @@ export class Repo {
     if (error) throw new ValidationError(error);
     await this.db.withTransactionAsync(async () => {
       await this.db.runAsync(
-        'UPDATE entries SET kind = ?, start = ?, "end" = ?, data = ?, notes = ?, updated_at = ? WHERE id = ?',
+        'UPDATE entries SET kind = ?, start = ?, "end" = ?, data = ?, notes = ?, tags = COALESCE(?, tags), updated_at = ? WHERE id = ?',
         [
           input.kind,
           input.start,
           input.end,
           JSON.stringify(input.data),
           input.notes?.trim() ?? '',
+          input.tags === undefined ? null : JSON.stringify(normalizeTags(input.tags)),
           now,
           id,
         ],
@@ -380,7 +404,7 @@ export class Repo {
 
   private async writeEntryRow(e: Entry): Promise<void> {
     await this.db.runAsync(
-      `INSERT OR REPLACE INTO entries (${ENTRY_COLUMNS}) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT OR REPLACE INTO entries (${ENTRY_COLUMNS}) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         e.id,
         e.childId,
@@ -389,6 +413,8 @@ export class Repo {
         e.end,
         JSON.stringify(e.data),
         e.notes,
+        // Rows from versions before tags have none.
+        JSON.stringify(normalizeTags(e.tags)),
         e.createdAt,
         e.updatedAt,
         e.deletedAt,
