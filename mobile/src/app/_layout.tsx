@@ -8,6 +8,7 @@ import { AppDataProvider, useAppData } from '@/data/app-data';
 import { migrate } from '@/db/schema';
 import { NotificationSync } from '@/notifications/notification-sync';
 import { SyncProvider } from '@/sync/app-sync';
+import { WidgetSync } from '@/widget/widget-sync';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -27,6 +28,7 @@ export default function RootLayout() {
         <AppDataProvider>
           <HideSplashWhenLoaded />
           <NotificationSync />
+          <WidgetSync />
           <SyncProvider>
             <Stack>
               <Stack.Screen name="(tabs)" options={{ headerShown: false }} />

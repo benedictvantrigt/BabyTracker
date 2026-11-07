@@ -60,7 +60,27 @@
           "barcodeScannerEnabled": true
         }
       ],
-      "./plugins/with-local-cleartext"
+      "./plugins/with-local-cleartext",
+      [
+        "react-native-android-widget",
+        {
+          "widgets": [
+            {
+              "name": "Summary",
+              "label": "Baby Tracker",
+              "description": "Last feed, sleep and diaper, with quick logging",
+              "minWidth": "250dp",
+              "minHeight": "110dp",
+              "targetCellWidth": 4,
+              "targetCellHeight": 2,
+              "maxResizeWidth": "500dp",
+              "maxResizeHeight": "250dp",
+              "resizeMode": "horizontal|vertical",
+              "updatePeriodMillis": 1800000
+            }
+          ]
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

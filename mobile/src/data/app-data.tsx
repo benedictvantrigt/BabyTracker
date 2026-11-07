@@ -10,6 +10,7 @@ import {
   type ReactNode,
 } from 'react';
 
+import { setAppRepo } from '@/data/app-repo';
 import { Repo } from '@/db/repo';
 import { DEFAULT_SETTINGS, type Child, type Entry, type Settings } from '@/domain/types';
 
@@ -26,6 +27,10 @@ const AppDataContext = createContext<AppData | null>(null);
 export function AppDataProvider({ children: content }: { children: ReactNode }) {
   const db = useSQLiteContext();
   const repo = useMemo(() => new Repo(db, { uuid: randomUUID, now: Date.now }), [db]);
+  useEffect(() => {
+    setAppRepo(repo);
+    return () => setAppRepo(null);
+  }, [repo]);
   const [state, setState] = useState<{ settings: Settings; children: Child[]; loaded: boolean }>({
     settings: DEFAULT_SETTINGS,
     children: [],

@@ -84,7 +84,7 @@ Records:
 Other extras:
 - #14 NFC tags that log an entry
 - #15 Live timer on the lock screen
-- #16 Home-screen widgets
+- #16 Home-screen widgets (Android done; iOS still to do)
 - #17 Weekly charts
 - #18 Growth curves
 - #19 PDF / CSV export

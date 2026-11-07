@@ -18,6 +18,13 @@ before 1.0.0 a minor version marks a phase of the plan.
 - Age under the baby's name (#29) includes the remaining days: "5 weeks 3 days",
   "4 months 12 days". Months count from the same day of the month (the last day in a
   shorter month).
+- Home-screen widget on Android (#16): last feed, sleep and diaper as clock times ("Fed
+  13:05 · next 17:05", "Awake since 10:00 · nap 12:00", "Diaper 10:15"), with buttons to
+  start or stop sleep and log a wet or solid diaper without opening the app; "Feed" opens
+  the feeding screen. A tap while the app is closed also updates reminders and syncs with
+  the partner phone. The widget refreshes on every change, when a partner's change arrives
+  by push, and every 30 minutes. Needs a new build (native module
+  `react-native-android-widget`). iOS widgets follow later.
 - License: Functional Source License 1.1 with Apache 2.0 future license (`LICENSE.md`).
 - iOS build started (#5): an EAS `simulator` profile and a manual "iOS build" workflow that
   builds the acceptance app for the iOS Simulator. On an iPhone, reminders are scheduled on
