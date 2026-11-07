@@ -21,6 +21,7 @@ import { nextFeedAt, nextNapAt } from '@/domain/reminders';
 import {
   isNewStage,
   scheduleStatus,
+  totalSleepTarget,
   type ScheduleStatus,
   type SleepAdvice,
   type SlotState,
@@ -110,6 +111,11 @@ function SleepCard({ child, settings, entries, now, repo, run, logged }: Dashboa
           </ThemedText>
         )
       )}
+      {schedule && (
+        <ThemedText type="small" themeColor="textSecondary" testID="sleep-total">
+          {`Sleep today ${formatDuration(schedule.totalSleptMs)} of ${formatTarget(totalSleepTarget(schedule.stage.stage))}`}
+        </ThemedText>
+      )}
       {!sleeping && (
         <Button label="Start sleep" variant="primary" color={theme.sleep} onPress={startSleep} />
       )}
@@ -187,11 +193,7 @@ const SLOT_STATUS_LABEL: Record<SlotState['status'], string> = {
 /** Today's planned naps and bedtime with what was slept, and day sleep against the target. */
 function DayPlan({ schedule, now }: { schedule: ScheduleStatus; now: number }) {
   const [open, setOpen] = useState(false);
-  const [min, max] = schedule.stage.stage.daySleep;
-  const target =
-    min === max
-      ? formatDuration(min * MINUTE)
-      : `${formatDuration(min * MINUTE)}–${formatDuration(max * MINUTE)}`;
+  const { daySleep, nightSleepHours } = schedule.stage.stage;
   return (
     <View style={styles.plan}>
       <Pressable
@@ -233,12 +235,21 @@ function DayPlan({ schedule, now }: { schedule: ScheduleStatus; now: number }) {
             </ThemedText>
           </View>
           <ThemedText type="small" themeColor="textSecondary">
-            {`Day sleep ${formatDuration(schedule.daySleptMs)} of ${target}`}
+            {`Night ${formatDuration(schedule.nightSleptMs)} of ${formatTarget([nightSleepHours * 60, nightSleepHours * 60])}`}
+          </ThemedText>
+          <ThemedText type="small" themeColor="textSecondary">
+            {`Day sleep ${formatDuration(schedule.daySleptMs)} of ${formatTarget(daySleep)}`}
           </ThemedText>
         </>
       )}
     </View>
   );
+}
+
+/** A target in minutes, or a range of them: "16h", "4h 30m", "15h 30m–17h 30m". */
+function formatTarget([min, max]: [number, number]): string {
+  const one = (m: number) => (m % 60 === 0 ? `${m / 60}h` : formatDuration(m * MINUTE));
+  return min === max ? one(min) : `${one(min)}–${one(max)}`;
 }
 
 function FeedingCard({ child, settings, entries, now, repo, run, logged }: DashboardCardProps) {

@@ -10,6 +10,11 @@ before 1.0.0 a minor version marks a phase of the plan.
   Sleep or Feeding card is off, its settings are hidden from the Settings tab (the Daytime
   settings when both are off); stored values and reminders stay as they were. Layouts saved
   by older versions are migrated.
+- Sleep card (#30): "Sleep today 9h 40m of 16h" — the stage's day plus night sleep target
+  against what was slept, without opening the plan. The day's total is the night that
+  ended this morning plus today's naps, with a running sleep counted up to now; sleep
+  starting after the latest nap end (17:00 with a 07:00 day start) counts toward the next
+  day. The plan also shows the night against its target.
 - License: Functional Source License 1.1 with Apache 2.0 future license (`LICENSE.md`).
 - iOS build started (#5): an EAS `simulator` profile and a manual "iOS build" workflow that
   builds the acceptance app for the iOS Simulator. On an iPhone, reminders are scheduled on
