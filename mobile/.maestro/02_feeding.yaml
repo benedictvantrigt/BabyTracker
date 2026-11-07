@@ -24,7 +24,10 @@ name: Breast feeding timers switch sides, bottle feed with amount
 - tapOn:
     id: 'feed-amount'
 - inputText: '120'
-- hideKeyboard
+- runFlow:
+    file: subflows/dismiss-keyboard.yaml
+    env:
+      LABEL: 'Amount \(ml\)'
 - tapOn: 'Save'
 # A form entry starts 15 minutes back by default, so "Last" still shows the breast feed.
 - assertVisible: 'Last: Right, .* ago'

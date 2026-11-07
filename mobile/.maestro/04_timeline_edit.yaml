@@ -22,7 +22,10 @@ name: Timeline lists entries; edit and delete
 - tapOn:
     id: 'tag-input'
 - inputText: 'teething'
-- hideKeyboard
+- runFlow:
+    file: subflows/dismiss-keyboard.yaml
+    env:
+      LABEL: 'Tags'
 - tapOn: 'Save'
 - assertVisible: 'Diaper · Wet \+ solid'
 - assertVisible: '.*#teething.*'

@@ -9,7 +9,10 @@ appId: com.babytracker.app.acc
 - tapOn:
     id: 'child-name'
 - inputText: 'Micky'
-- hideKeyboard
+- runFlow:
+    file: dismiss-keyboard.yaml
+    env:
+      LABEL: 'Welcome'
 - tapOn: 'Start tracking'
 # iOS asks for notifications in a system alert (Android has the permission granted above).
 - runFlow:

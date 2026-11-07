@@ -7,12 +7,22 @@ name: Join a partner's family and sync both ways
     permissions:
       all: allow
 - assertVisible: 'Welcome'
+# iOS: the name field takes focus and its keyboard covers "Join your partner".
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn: 'Welcome'
 - tapOn: 'Join your partner'
-- assertVisible: 'Join your partner'
+# The join screen's own text (the welcome screen has a "Join your partner" button too).
+- assertVisible: 'OR PASTE THE CODE'
 - tapOn:
     id: 'invite-code'
 - inputText: ${INVITE}
-- hideKeyboard
+- runFlow:
+    file: subflows/dismiss-keyboard.yaml
+    env:
+      LABEL: 'OR PASTE THE CODE'
 - tapOn: 'Join'
 - takeScreenshot: 07-after-join-tap
 # The partner's child and feed arrive from the relay; the emulator can be slow here.
