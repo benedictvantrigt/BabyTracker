@@ -47,6 +47,7 @@ name: Join a partner's family and sync both ways
 # The card lists the family's phones, so its buttons sit lower.
 - scrollUntilVisible:
     element: 'Sync now'
+    centerElement: true
 - tapOn: 'Sync now'
 - scrollUntilVisible:
     element:
