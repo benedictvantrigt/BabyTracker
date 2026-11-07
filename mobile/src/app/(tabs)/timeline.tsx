@@ -107,7 +107,13 @@ function EntryRow({ entry, now }: { entry: Entry; now: number }) {
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={`Edit ${entryTitle(entry)} at ${formatClock(entry.start)}`}
+      accessibilityLabel={[
+        `Edit ${entryTitle(entry)} at ${formatClock(entry.start)}`,
+        entry.notes,
+        entry.tags.map((t) => `#${t}`).join(' '),
+      ]
+        .filter(Boolean)
+        .join(', ')}
       onPress={() =>
         router.push({ pathname: '/entry/[kind]', params: { kind: entry.kind, id: entry.id } })
       }

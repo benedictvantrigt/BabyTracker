@@ -6,6 +6,8 @@ name: Join a partner's family and sync both ways
     clearState: true
     permissions:
       all: allow
+- runFlow:
+    file: subflows/system-dialogs.yaml
 - assertVisible: 'Welcome'
 # iOS: the name field takes focus and its keyboard covers "Join your partner".
 - runFlow:

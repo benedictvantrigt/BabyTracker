@@ -3,17 +3,17 @@ name: Breast feeding timers switch sides, bottle feed with amount
 ---
 - runFlow: subflows/onboard.yaml
 - tapOn: 'Left'
-- assertVisible: 'Feeding · Left'
+- assertVisible: '(Edit )?Feeding · Left( at .*)?'
 - takeScreenshot: 02-feeding-left-running
 # The undo bar can cover the buttons, depending on how tall the cards above are.
 - extendedWaitUntil:
     notVisible: 'UNDO'
     timeout: 10000
 - tapOn: 'Right'
-- assertVisible: 'Feeding · Right'
-- assertNotVisible: 'Feeding · Left'
+- assertVisible: '(Edit )?Feeding · Right( at .*)?'
+- assertNotVisible: '(Edit )?Feeding · Left( at .*)?'
 - tapOn: 'Stop'
-- assertNotVisible: 'Feeding · Right'
+- assertNotVisible: '(Edit )?Feeding · Right( at .*)?'
 - assertVisible: 'Last: Right, .* ago'
 - assertVisible: 'Next due at .*'
 - extendedWaitUntil:
@@ -33,7 +33,7 @@ name: Breast feeding timers switch sides, bottle feed with amount
 - assertVisible: 'Last: Right, .* ago'
 - takeScreenshot: 02-feeding-after-bottle
 - tapOn: 'Timeline'
-- assertVisible: 'Feeding · Bottle 120 ml · Formula'
-- assertVisible: 'Feeding · Right'
-- assertVisible: 'Feeding · Left'
+- assertVisible: '(Edit )?Feeding · Bottle 120 ml · Formula( at .*)?'
+- assertVisible: '(Edit )?Feeding · Right( at .*)?'
+- assertVisible: '(Edit )?Feeding · Left( at .*)?'
 - takeScreenshot: 02-feeding-timeline

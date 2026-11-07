@@ -5,6 +5,8 @@ appId: com.babytracker.app.acc
     clearState: true
     permissions:
       all: allow
+- runFlow:
+    file: system-dialogs.yaml
 - assertVisible: 'Welcome'
 - tapOn:
     id: 'child-name'
@@ -14,11 +16,13 @@ appId: com.babytracker.app.acc
     env:
       LABEL: 'Welcome'
 - tapOn: 'Start tracking'
-# iOS asks for notifications in a system alert (Android has the permission granted above).
+# iOS may ask for notifications in a system alert (usually not: permissions are granted at
+# launch). Optional, as a "visible" check can see the alert just before it goes.
 - runFlow:
     when:
       platform: iOS
-      visible: 'Allow'
     commands:
-      - tapOn: 'Allow'
+      - tapOn:
+          text: 'Allow'
+          optional: true
 - assertVisible: 'Micky'
