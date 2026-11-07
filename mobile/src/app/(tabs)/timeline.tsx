@@ -1,10 +1,9 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, SectionList, StyleSheet, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { TabScreen } from '@/components/tab-screen';
 import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
 import { Button, Icon, KIND_ICON } from '@/components/ui';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useAppData, useEntries, useNow } from '@/data/app-data';
@@ -28,39 +27,37 @@ export default function TimelineScreen() {
   }));
 
   return (
-    <ThemedView style={styles.fill}>
-      <SafeAreaView edges={['top']} style={styles.fill}>
-        <SectionList
-          sections={sections}
-          keyExtractor={(e) => e.id}
-          contentContainerStyle={styles.content}
-          stickySectionHeadersEnabled={false}
-          ListHeaderComponent={<ThemedText type="subtitle">Timeline</ThemedText>}
-          renderSectionHeader={({ section }) => (
-            <ThemedText type="smallBold" themeColor="textSecondary" style={styles.sectionHeader}>
-              {section.title.toUpperCase()}
+    <TabScreen>
+      <SectionList
+        sections={sections}
+        keyExtractor={(e) => e.id}
+        contentContainerStyle={styles.content}
+        stickySectionHeadersEnabled={false}
+        ListHeaderComponent={<ThemedText type="subtitle">Timeline</ThemedText>}
+        renderSectionHeader={({ section }) => (
+          <ThemedText type="smallBold" themeColor="textSecondary" style={styles.sectionHeader}>
+            {section.title.toUpperCase()}
+          </ThemedText>
+        )}
+        renderItem={({ item }) => <EntryRow entry={item} now={now} />}
+        ListEmptyComponent={
+          loaded ? (
+            <ThemedText themeColor="textSecondary" style={styles.empty}>
+              Nothing logged in the last {days} days.
             </ThemedText>
-          )}
-          renderItem={({ item }) => <EntryRow entry={item} now={now} />}
-          ListEmptyComponent={
-            loaded ? (
-              <ThemedText themeColor="textSecondary" style={styles.empty}>
-                Nothing logged in the last {days} days.
-              </ThemedText>
-            ) : undefined
-          }
-          ListFooterComponent={
-            activeChild ? (
-              <Button
-                label={`Show ${PAGE_DAYS} more days`}
-                style={styles.more}
-                onPress={() => setDays((d) => d + PAGE_DAYS)}
-              />
-            ) : undefined
-          }
-        />
-      </SafeAreaView>
-    </ThemedView>
+          ) : undefined
+        }
+        ListFooterComponent={
+          activeChild ? (
+            <Button
+              label={`Show ${PAGE_DAYS} more days`}
+              style={styles.more}
+              onPress={() => setDays((d) => d + PAGE_DAYS)}
+            />
+          ) : undefined
+        }
+      />
+    </TabScreen>
   );
 }
 

@@ -1,10 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Alert, AppState, Platform, ScrollView, StyleSheet, TextInput, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { TabScreen } from '@/components/tab-screen';
 import { ThemedText } from '@/components/themed-text';
 import { PartnerSyncCard } from '@/components/partner-sync-card';
-import { ThemedView } from '@/components/themed-view';
 import {
   Button,
   Card,
@@ -48,90 +47,88 @@ export default function SettingsScreen() {
   const sync = useSync();
 
   return (
-    <ThemedView style={styles.fill}>
-      <SafeAreaView edges={['top']} style={styles.fill}>
-        <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-          <ThemedText type="subtitle">Settings</ThemedText>
+    <TabScreen>
+      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+        <ThemedText type="subtitle">Settings</ThemedText>
 
-          {activeChild && <ChildCard key={activeChild.id} child={activeChild} />}
+        {activeChild && <ChildCard key={activeChild.id} child={activeChild} />}
 
-          <PartnerSyncCard />
+        <PartnerSyncCard />
 
-          <PermissionsCard />
+        <PermissionsCard />
 
-          <Card>
-            <ThemedText type="smallBold" themeColor="textSecondary">
-              THIS PHONE
-            </ThemedText>
-            <ToggleRow
-              label="Reminders on this phone"
-              description={
-                sync.status.enabled
-                  ? 'The reminder rules below are shared with your partner; each phone chooses whether to show them.'
-                  : 'Nap and feed reminders as set below.'
-              }
-              value={settings.remindersOnThisPhone}
-              onChange={(v) => update({ remindersOnThisPhone: v })}
-              testID="toggle-reminders-here"
+        <Card>
+          <ThemedText type="smallBold" themeColor="textSecondary">
+            THIS PHONE
+          </ThemedText>
+          <ToggleRow
+            label="Reminders on this phone"
+            description={
+              sync.status.enabled
+                ? 'The reminder rules below are shared with your partner; each phone chooses whether to show them.'
+                : 'Nap and feed reminders as set below.'
+            }
+            value={settings.remindersOnThisPhone}
+            onChange={(v) => update({ remindersOnThisPhone: v })}
+            testID="toggle-reminders-here"
+          />
+        </Card>
+
+        <SleepCard child={activeChild} settings={settings} update={update} />
+
+        <Card>
+          <ThemedText type="smallBold" themeColor="textSecondary">
+            FEEDING
+          </ThemedText>
+          <Stepper
+            label="Feed every"
+            value={settings.feedIntervalMinutes}
+            format={formatMinutes}
+            step={15}
+            min={60}
+            max={8 * 60}
+            onChange={(v) => update({ feedIntervalMinutes: v })}
+          />
+          <ToggleRow
+            label="Daytime reminder"
+            description="Notification when a feed is due during the day"
+            value={settings.feedRemindersDay}
+            testID="toggle-feed-day"
+            onChange={(v) => update({ feedRemindersDay: v })}
+          />
+          <ToggleRow
+            label="Night alarm"
+            description="Alarm when a feed is due at night"
+            value={settings.feedAlarmNight}
+            onChange={(v) => update({ feedAlarmNight: v })}
+          />
+        </Card>
+
+        <Card>
+          <ThemedText type="smallBold" themeColor="textSecondary">
+            DAYTIME
+          </ThemedText>
+          <ThemedText type="small" themeColor="textSecondary">
+            Sleep starting in this window counts as a nap. Outside it, feeding reminders become
+            alarms.
+          </ThemedText>
+          <View style={styles.row}>
+            <ThemedText style={styles.grow}>Day starts</ThemedText>
+            <TimeOfDayField
+              minute={settings.dayStartMinute}
+              onChange={(m) => update({ dayStartMinute: m })}
             />
-          </Card>
-
-          <SleepCard child={activeChild} settings={settings} update={update} />
-
-          <Card>
-            <ThemedText type="smallBold" themeColor="textSecondary">
-              FEEDING
-            </ThemedText>
-            <Stepper
-              label="Feed every"
-              value={settings.feedIntervalMinutes}
-              format={formatMinutes}
-              step={15}
-              min={60}
-              max={8 * 60}
-              onChange={(v) => update({ feedIntervalMinutes: v })}
+          </View>
+          <View style={styles.row}>
+            <ThemedText style={styles.grow}>Day ends</ThemedText>
+            <TimeOfDayField
+              minute={settings.dayEndMinute}
+              onChange={(m) => update({ dayEndMinute: m })}
             />
-            <ToggleRow
-              label="Daytime reminder"
-              description="Notification when a feed is due during the day"
-              value={settings.feedRemindersDay}
-              testID="toggle-feed-day"
-              onChange={(v) => update({ feedRemindersDay: v })}
-            />
-            <ToggleRow
-              label="Night alarm"
-              description="Alarm when a feed is due at night"
-              value={settings.feedAlarmNight}
-              onChange={(v) => update({ feedAlarmNight: v })}
-            />
-          </Card>
-
-          <Card>
-            <ThemedText type="smallBold" themeColor="textSecondary">
-              DAYTIME
-            </ThemedText>
-            <ThemedText type="small" themeColor="textSecondary">
-              Sleep starting in this window counts as a nap. Outside it, feeding reminders become
-              alarms.
-            </ThemedText>
-            <View style={styles.row}>
-              <ThemedText style={styles.grow}>Day starts</ThemedText>
-              <TimeOfDayField
-                minute={settings.dayStartMinute}
-                onChange={(m) => update({ dayStartMinute: m })}
-              />
-            </View>
-            <View style={styles.row}>
-              <ThemedText style={styles.grow}>Day ends</ThemedText>
-              <TimeOfDayField
-                minute={settings.dayEndMinute}
-                onChange={(m) => update({ dayEndMinute: m })}
-              />
-            </View>
-          </Card>
-        </ScrollView>
-      </SafeAreaView>
-    </ThemedView>
+          </View>
+        </Card>
+      </ScrollView>
+    </TabScreen>
   );
 }
 

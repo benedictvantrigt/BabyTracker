@@ -73,5 +73,6 @@ export const Spacing = {
   six: 64,
 } as const;
 
-export const BottomTabInset = Platform.select({ ios: 50, android: 80 }) ?? 0;
+// Space kept free above the tab bar. On iOS TabScreen already ends the screen above it.
+export const BottomTabInset = Platform.select({ ios: 0, android: 80 }) ?? 0;
 export const MaxContentWidth = 800;

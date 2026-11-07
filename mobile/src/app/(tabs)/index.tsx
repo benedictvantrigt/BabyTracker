@@ -1,8 +1,8 @@
 import { router } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { TabScreen } from '@/components/tab-screen';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { DASHBOARD_CARD_COMPONENTS, type DashboardCardProps } from '@/components/dashboard-cards';
@@ -22,17 +22,15 @@ export default function TodayScreen() {
   const { activeChild, loaded } = useAppData();
   if (!loaded) return <ThemedView style={styles.fill} />;
   return (
-    <ThemedView style={styles.fill}>
-      <SafeAreaView edges={['top']} style={styles.fill}>
-        {activeChild ? (
-          <Dashboard child={activeChild} />
-        ) : (
-          <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-            <AddChild />
-          </ScrollView>
-        )}
-      </SafeAreaView>
-    </ThemedView>
+    <TabScreen>
+      {activeChild ? (
+        <Dashboard child={activeChild} />
+      ) : (
+        <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+          <AddChild />
+        </ScrollView>
+      )}
+    </TabScreen>
   );
 }
 
