@@ -10,6 +10,11 @@ before 1.0.0 a minor version marks a phase of the plan.
   builds the acceptance app for the iOS Simulator. On an iPhone, reminders are scheduled on
   the phone itself (its push token is an APNs token, which the FCM-only relay cannot use);
   night feeds are time-sensitive notifications (entitlement added).
+- Live timers (#15): a running sleep or breastfeeding timer counts up outside the app without
+  the app updating it. Android: ongoing notification with a chronometer, requested as a Live
+  Update on Android 16+ (status bar chip, lock screen), from a small native module
+  (`mobile/modules/timer-notification`). iPhone: a Live Activity on the lock screen and in the
+  Dynamic Island (`expo-widgets`), falling back to a plain notification when switched off.
 
 ## [0.5.1] — 2026-10-28 — Acceptance and production environments
 

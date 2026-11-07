@@ -60,7 +60,8 @@
           "barcodeScannerEnabled": true
         }
       ],
-      "./plugins/with-local-cleartext"
+      "./plugins/with-local-cleartext",
+      "expo-widgets"
     ],
     "experiments": {
       "typedRoutes": true,
