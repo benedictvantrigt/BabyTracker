@@ -15,6 +15,9 @@ before 1.0.0 a minor version marks a phase of the plan.
   ended this morning plus today's naps, with a running sleep counted up to now; sleep
   starting after the latest nap end (17:00 with a 07:00 day start) counts toward the next
   day. The plan also shows the night against its target.
+- Age under the baby's name (#29) includes the remaining days: "5 weeks 3 days",
+  "4 months 12 days". Months count from the same day of the month (the last day in a
+  shorter month).
 - License: Functional Source License 1.1 with Apache 2.0 future license (`LICENSE.md`).
 - iOS build started (#5): an EAS `simulator` profile and a manual "iOS build" workflow that
   builds the acceptance app for the iOS Simulator. On an iPhone, reminders are scheduled on

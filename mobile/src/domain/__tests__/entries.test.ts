@@ -109,12 +109,32 @@ describe('time formatting', () => {
     expect(formatStopwatch(65_000)).toBe('1:05');
   });
 
-  it('formats age in days, weeks then months', () => {
+  it('formats age in days, weeks then months, with the remaining days', () => {
+    expect(formatAge('2026-10-26', at(12))).toBe('0 days');
+    expect(formatAge('2026-10-25', at(12))).toBe('1 day');
     expect(formatAge('2026-10-20', at(12))).toBe('6 days');
-    expect(formatAge('2026-09-01', at(12))).toBe('7 weeks');
+    expect(formatAge('2026-10-12', at(12))).toBe('2 weeks');
+    expect(formatAge('2026-09-01', at(12))).toBe('7 weeks 6 days');
+    expect(formatAge('2026-08-29', at(12))).toBe('8 weeks 2 days');
+    expect(formatAge('2026-07-28', at(12))).toBe('12 weeks 6 days');
+    expect(formatAge('2026-07-27', at(12))).toBe('2 months 29 days');
+    expect(formatAge('2026-10-27', at(12))).toBe('');
     // Spans the spring DST change (29 Mar 2026): still 8 whole days.
     expect(formatAge('2026-03-25', new Date(2026, 3, 2, 12).getTime())).toBe('8 days');
     expect(formatAge('2026-04-26', at(12))).toBe('6 months');
-    expect(formatAge('2026-04-27', at(12))).toBe('5 months');
+    expect(formatAge('2026-04-27', at(12))).toBe('5 months 29 days');
+    expect(formatAge('2026-06-14', at(12))).toBe('4 months 12 days');
+    expect(formatAge('2025-09-25', at(12))).toBe('13 months 1 day');
+    // Across the autumn DST change (25 Oct 2026).
+    expect(formatAge('2026-07-20', at(12))).toBe('3 months 6 days');
+  });
+
+  it('counts months from the last day of a shorter month', () => {
+    // Four months after 30 October is 28 February (2026 is no leap year).
+    const born = '2025-10-30';
+    expect(formatAge(born, new Date(2026, 1, 27, 12).getTime())).toBe('3 months 28 days');
+    expect(formatAge(born, new Date(2026, 1, 28, 12).getTime())).toBe('4 months');
+    expect(formatAge('2025-10-31', new Date(2026, 1, 28, 12).getTime())).toBe('4 months');
+    expect(formatAge('2025-10-31', new Date(2026, 2, 3, 12).getTime())).toBe('4 months 3 days');
   });
 });

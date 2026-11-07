@@ -91,7 +91,7 @@ Other extras:
 - #20 Daily reset at 20:00
 - #21 Roles per phone (read-only babysitter)
 - #28 Age-based sleep schedule in the sleep timer (0.4.0)
-- #29 Show days in the age under the baby's name
+- #29 Show days in the age under the baby's name (done)
 - #30 Show total sleep needed per the schedule and total slept that day (done)
 - #35 Today screen layout: keep turned-off cards in place, and hide their settings (done)
 
