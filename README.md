@@ -141,7 +141,8 @@ from the relay only reach Android so far (#6). Night feeds use a time-sensitive 
 which can break through a Focus when allowed in the iPhone settings.
 
 - **Simulator:** `npx eas-cli@latest build -p ios --profile simulator` (free Expo account), or
-  run the "iOS build" workflow by hand (Actions tab), which uploads the Simulator app as
+  the "iOS build" workflow (runs on every push that changes the app, or by hand from the
+  Actions tab), which uploads the Simulator app as
   `babytracker-ios-simulator`. Neither needs an Apple account; installing needs a Mac with Xcode.
   The workflow also runs the Maestro flows on an iPhone Simulator (partner sync against a local
   relay included) and publishes the summary and screenshots to the `e2e-results-ios` branch;

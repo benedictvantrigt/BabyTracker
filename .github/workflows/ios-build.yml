@@ -3,8 +3,12 @@ name: iOS build
 # Builds the acceptance app for the iOS Simulator (no Apple account or signing needed) to
 # check that the iOS project compiles, then runs the Maestro flows on an iPhone Simulator
 # with a local relay. Results (summary and screenshots) are uploaded and published to the
-# e2e-results-ios branch. Started by hand only, as the Simulator run takes a while.
+# e2e-results-ios branch. Runs on every push that changes the app or this workflow (free
+# for a public repository), and can be started by hand.
 on:
+  push:
+    branches-ignore: [e2e-results, e2e-results-ios]
+    paths: ['mobile/**', 'relay/**', '.github/workflows/ios-build.yml']
   workflow_dispatch:
 
 concurrency:
