@@ -125,6 +125,10 @@ jobs:
           } >> summary.md
           cat summary.md >> "$GITHUB_STEP_SUMMARY"
           find . -name "*.mp4" -delete
+          # Maestro's Simulator logs reach 100+ MB per flow, over GitHub's file limit; the
+          # workflow artifact keeps them.
+          find . -type d -name logs -path '*/maestro-output/*' -prune -exec rm -rf {} +
+          find . -type f -size +20M -delete
           [ -f device-log.txt ] && tail -n 5000 device-log.txt > log.tmp && mv log.tmp device-log.txt
           git init -q -b e2e-results-ios
           git add -A
