@@ -38,8 +38,19 @@ name: Timeline lists entries; edit and delete
 - assertVisible: 'Edit feeding'
 - tapOn: 'Delete'
 - assertVisible: 'Delete entry\?'
-- tapOn:
-    id: 'android:id/button1'
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - tapOn:
+          id: 'android:id/button1'
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn:
+          text: 'Delete'
+          below: 'Delete entry\?'
 - assertNotVisible: 'Feeding · Left'
 - assertVisible: 'Diaper · Wet \+ solid'
 - takeScreenshot: 04-timeline-after-edit

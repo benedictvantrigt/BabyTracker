@@ -19,7 +19,8 @@ name: Turn off, reorder and reset dashboard cards
 - tapOn:
     id: 'move-up-diaper'
 - takeScreenshot: 05-customize
-- back
+- runFlow:
+    file: subflows/close-modal.yaml
 - assertNotVisible:
     id: 'card-sleep'
 - assertVisible:
@@ -42,6 +43,7 @@ name: Turn off, reorder and reset dashboard cards
 - tapOn:
     id: 'customize-dashboard'
 - tapOn: 'Reset to default'
-- back
+- runFlow:
+    file: subflows/close-modal.yaml
 - assertVisible:
     id: 'card-sleep'

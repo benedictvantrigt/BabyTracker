@@ -11,4 +11,11 @@ appId: com.babytracker.app.acc
 - inputText: 'Micky'
 - hideKeyboard
 - tapOn: 'Start tracking'
+# iOS asks for notifications in a system alert (Android has the permission granted above).
+- runFlow:
+    when:
+      platform: iOS
+      visible: 'Allow'
+    commands:
+      - tapOn: 'Allow'
 - assertVisible: 'Micky'
