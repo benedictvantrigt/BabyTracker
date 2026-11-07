@@ -33,7 +33,11 @@ name: Join a partner's family and sync both ways
     timeout: 40000
 - assertVisible: 'Last: Left, .* ago'
 - takeScreenshot: 07-joined
-# Log a diaper here; the test machine checks the partner receives it.
+# Log a diaper here; the test machine checks the partner receives it. Centre the button
+# first: on iOS the floating tab bar covers the bottom of the screen.
+- scrollUntilVisible:
+    element: 'Wet'
+    centerElement: true
 - tapOn: 'Wet'
 - assertVisible: 'Diaper logged: wet'
 - tapOn: 'Settings'

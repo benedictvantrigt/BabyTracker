@@ -52,9 +52,10 @@ name: Timeline lists entries; edit and delete
     when:
       platform: iOS
     commands:
+      # The alert's button, not the screen's own Delete button under the alert.
       - tapOn:
           text: 'Delete'
-          below: 'Delete entry\?'
+          rightOf: 'Cancel'
 - assertNotVisible: '(Edit )?Feeding · Left( at .*)?'
 - assertVisible: '(Edit )?Diaper · Wet \+ solid( at .*)?'
 - takeScreenshot: 04-timeline-after-edit
