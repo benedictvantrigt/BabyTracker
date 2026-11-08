@@ -1,0 +1,9 @@
+# Clears system dialogs that are not the app's: an emulator component that "isn't
+# responding" (seen on the CI emulator, e.g. Pixel Launcher) is told to wait.
+appId: com.babytracker.app.acc
+---
+- runFlow:
+    when:
+      visible: ".* isn't responding"
+    commands:
+      - tapOn: 'Wait'

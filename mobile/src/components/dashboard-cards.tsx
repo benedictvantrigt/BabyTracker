@@ -387,33 +387,34 @@ function KindCard({
 function RunningTimer({ entry, now, onStop }: { entry: Entry; now: number; onStop: () => void }) {
   const theme = useTheme();
   const color = theme[entry.kind];
+  // Only the header opens the entry: a button inside a pressable card would be hidden from
+  // screen readers on iOS, so Stop stays a separate control.
   return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={`Edit ${entryTitle(entry)}`}
-      onPress={() =>
-        router.push({ pathname: '/entry/[kind]', params: { kind: entry.kind, id: entry.id } })
-      }>
-      <Card style={[styles.running, { borderColor: color }]}>
-        <View style={styles.cardHeader}>
-          <Icon name={KIND_ICON[entry.kind]} color={color} />
-          <View style={styles.grow}>
-            <ThemedText type="smallBold">{entryTitle(entry)}</ThemedText>
-            <ThemedText type="small" themeColor="textSecondary">
-              Since {formatClock(entry.start)}
-            </ThemedText>
-          </View>
-          <ThemedText style={styles.stopwatch}>{formatStopwatch(now - entry.start)}</ThemedText>
+    <Card style={[styles.running, { borderColor: color }]}>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={`Edit ${entryTitle(entry)}`}
+        onPress={() =>
+          router.push({ pathname: '/entry/[kind]', params: { kind: entry.kind, id: entry.id } })
+        }
+        style={styles.cardHeader}>
+        <Icon name={KIND_ICON[entry.kind]} color={color} />
+        <View style={styles.grow}>
+          <ThemedText type="smallBold">{entryTitle(entry)}</ThemedText>
+          <ThemedText type="small" themeColor="textSecondary">
+            Since {formatClock(entry.start)}
+          </ThemedText>
         </View>
-        <Button
-          label="Stop"
-          variant="primary"
-          color={color}
-          icon={{ ios: 'stop.fill', android: 'stop' }}
-          onPress={onStop}
-        />
-      </Card>
-    </Pressable>
+        <ThemedText style={styles.stopwatch}>{formatStopwatch(now - entry.start)}</ThemedText>
+      </Pressable>
+      <Button
+        label="Stop"
+        variant="primary"
+        color={color}
+        icon={{ ios: 'stop.fill', android: 'stop' }}
+        onPress={onStop}
+      />
+    </Card>
   );
 }
 

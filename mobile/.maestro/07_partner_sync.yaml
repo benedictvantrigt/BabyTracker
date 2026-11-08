@@ -6,13 +6,25 @@ name: Join a partner's family and sync both ways
     clearState: true
     permissions:
       all: allow
+- runFlow:
+    file: subflows/system-dialogs.yaml
 - assertVisible: 'Welcome'
+# iOS: the name field takes focus and its keyboard covers "Join your partner".
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn: 'Welcome'
 - tapOn: 'Join your partner'
-- assertVisible: 'Join your partner'
+# The join screen's own text (the welcome screen has a "Join your partner" button too).
+- assertVisible: 'OR PASTE THE CODE'
 - tapOn:
     id: 'invite-code'
 - inputText: ${INVITE}
-- hideKeyboard
+- runFlow:
+    file: subflows/dismiss-keyboard.yaml
+    env:
+      LABEL: 'OR PASTE THE CODE'
 - tapOn: 'Join'
 - takeScreenshot: 07-after-join-tap
 # The partner's child and feed arrive from the relay; the emulator can be slow here.
@@ -21,7 +33,11 @@ name: Join a partner's family and sync both ways
     timeout: 40000
 - assertVisible: 'Last: Left, .* ago'
 - takeScreenshot: 07-joined
-# Log a diaper here; the test machine checks the partner receives it.
+# Log a diaper here; the test machine checks the partner receives it. Centre the button
+# first: on iOS the floating tab bar covers the bottom of the screen.
+- scrollUntilVisible:
+    element: 'Wet'
+    centerElement: true
 - tapOn: 'Wet'
 - assertVisible: 'Diaper logged: wet'
 - tapOn: 'Settings'
@@ -31,6 +47,7 @@ name: Join a partner's family and sync both ways
 # The card lists the family's phones, so its buttons sit lower.
 - scrollUntilVisible:
     element: 'Sync now'
+    centerElement: true
 - tapOn: 'Sync now'
 - scrollUntilVisible:
     element:

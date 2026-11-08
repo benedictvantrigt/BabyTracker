@@ -3,6 +3,14 @@
 All notable changes to Baby Tracker. Versions follow [Semantic Versioning](https://semver.org/);
 before 1.0.0 a minor version marks a phase of the plan.
 
+## Unreleased
+
+- Screen readers: the Stop button of a running timer on the Today screen is now reachable
+  on iOS (it sat inside the tappable card, which hid it from VoiceOver); timeline rows read
+  out their notes and tags.
+- iOS: the "iOS build" workflow runs on every push that changes the app and runs the Maestro
+  flows on an iPhone Simulator, results on the `e2e-results-ios` branch.
+
 ## [0.6.0] — 2026-11-07 — Today screen, total sleep, tags and Android widget
 
 - Today screen layout (#35): a turned-off card stays in its place, dimmed, and can still be

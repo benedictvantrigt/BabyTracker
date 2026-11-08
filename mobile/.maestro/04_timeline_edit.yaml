@@ -4,15 +4,16 @@ name: Timeline lists entries; edit and delete
 - runFlow: subflows/onboard.yaml
 - tapOn: 'Wet'
 - tapOn: 'Left'
-- assertVisible: 'Feeding · Left'
+- assertVisible: '(Edit )?Feeding · Left( at .*)?'
 - tapOn: 'Stop'
 - tapOn: 'Timeline'
 - assertVisible: 'TODAY'
-- assertVisible: 'Feeding · Left'
-- assertVisible: 'Diaper · Wet'
+- assertVisible: '(Edit )?Feeding · Left( at .*)?'
+- assertVisible: '(Edit )?Diaper · Wet( at .*)?'
 - takeScreenshot: 04-timeline
+# Entry rows: Android exposes the row's texts, iOS its label ("Edit Diaper · Wet at 10:15").
 # Edit the diaper: also solid, and tag it (typed, saved without pressing enter).
-- tapOn: 'Diaper · Wet'
+- tapOn: '(Edit )?Diaper · Wet( at .*)?'
 - assertVisible: 'Edit diaper'
 - tapOn:
     id: 'toggle-solid'
@@ -22,19 +23,22 @@ name: Timeline lists entries; edit and delete
 - tapOn:
     id: 'tag-input'
 - inputText: 'teething'
-- hideKeyboard
+- runFlow:
+    file: subflows/dismiss-keyboard.yaml
+    env:
+      LABEL: 'Tags'
 - tapOn: 'Save'
-- assertVisible: 'Diaper · Wet \+ solid'
+- assertVisible: '(Edit )?Diaper · Wet \+ solid( at .*)?'
 - assertVisible: '.*#teething.*'
 # Filter the timeline by the tag: the feed (untagged) disappears.
 - tapOn:
     id: 'filter-tag-teething'
-- assertNotVisible: 'Feeding · Left'
+- assertNotVisible: '(Edit )?Feeding · Left( at .*)?'
 - tapOn:
     id: 'filter-tag-teething'
-- assertVisible: 'Feeding · Left'
+- assertVisible: '(Edit )?Feeding · Left( at .*)?'
 # Delete the feed (Android alert: second button is the positive one).
-- tapOn: 'Feeding · Left'
+- tapOn: '(Edit )?Feeding · Left( at .*)?'
 - assertVisible: 'Edit feeding'
 - tapOn: 'Delete'
 - assertVisible: 'Delete entry\?'
@@ -48,9 +52,10 @@ name: Timeline lists entries; edit and delete
     when:
       platform: iOS
     commands:
+      # The alert's button, not the screen's own Delete button under the alert.
       - tapOn:
           text: 'Delete'
-          below: 'Delete entry\?'
-- assertNotVisible: 'Feeding · Left'
-- assertVisible: 'Diaper · Wet \+ solid'
+          rightOf: 'Cancel'
+- assertNotVisible: '(Edit )?Feeding · Left( at .*)?'
+- assertVisible: '(Edit )?Diaper · Wet \+ solid( at .*)?'
 - takeScreenshot: 04-timeline-after-edit

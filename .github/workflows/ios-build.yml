@@ -1,6 +1,6 @@
 name: iOS build
 
-# Builds the acceptance app for the iOS Simulator (no Apple account or signing needed) to
+# Builds the acceptance app for the iOS Simulator (signed locally, no Apple account needed) to
 # check that the iOS project compiles, then runs the Maestro flows on an iPhone Simulator
 # with a local relay. Results (summary and screenshots) are uploaded and published to the
 # e2e-results-ios branch. Runs on every push that changes the app or this workflow (free
@@ -49,6 +49,8 @@ jobs:
           EXPO_PUBLIC_RELAY_URL: ${{ vars.RELAY_URL_ACC }}
         run: npx expo prebuild --platform ios
 
+      # Signed locally ("-", no Apple account): an unsigned app has no entitlements, and the
+      # keychain (expo-secure-store, used for the family key) then refuses to store anything.
       - name: Build for the Simulator
         env:
           APP_VARIANT: acceptance
@@ -59,7 +61,9 @@ jobs:
           scheme=$(basename "$workspace" .xcworkspace)
           xcodebuild -workspace "$workspace" -scheme "$scheme" -configuration Release \
             -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' \
-            -derivedDataPath build CODE_SIGNING_ALLOWED=NO | tail -n 200
+            -derivedDataPath build \
+            CODE_SIGN_IDENTITY=- CODE_SIGN_STYLE=Manual DEVELOPMENT_TEAM= \
+            PROVISIONING_PROFILE_SPECIFIER= | tail -n 200
           app=$(ls -d build/Build/Products/Release-iphonesimulator/*.app | head -n 1)
           ditto -c -k --keepParent "$app" babytracker-simulator.zip
 
@@ -121,6 +125,10 @@ jobs:
           } >> summary.md
           cat summary.md >> "$GITHUB_STEP_SUMMARY"
           find . -name "*.mp4" -delete
+          # Maestro's Simulator logs reach 100+ MB per flow, over GitHub's file limit; the
+          # workflow artifact keeps them.
+          find . -type d -name logs -path '*/maestro-output/*' -prune -exec rm -rf {} +
+          find . -type f -size +20M -delete
           [ -f device-log.txt ] && tail -n 5000 device-log.txt > log.tmp && mv log.tmp device-log.txt
           git init -q -b e2e-results-ios
           git add -A
