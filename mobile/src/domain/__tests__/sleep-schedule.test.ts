@@ -111,6 +111,23 @@ describe('scheduleStatus', () => {
     expect(evening.totalSleptMs).toBe(13 * HOUR);
   });
 
+  it('counts sleep after the latest nap end as day sleep when it ends by bedtime', () => {
+    // 4 months: latest nap end 17:00, bedtime 19:00. A short nap, then an extra hour.
+    const late = [night, nap(16, 15, 16, 22), nap(17, 5, 18, 5)];
+    const status = scheduleStatus(late, fourMonths, settings, at(18, 30))!;
+    expect(status.daySleptMs).toBe(67 * MINUTE);
+    expect(status.totalSleptMs).toBe(12 * HOUR + 67 * MINUTE);
+    // Running on to after 19:30, it is the night and counts toward tomorrow.
+    const into = scheduleStatus([night, nap(18, 0, null)], fourMonths, settings, at(20))!;
+    expect(into.daySleptMs).toBe(0);
+    // Next morning the evening nap is not part of last night.
+    const yesterday = [
+      entry('sleep', at(17, 5, -1), at(18, 5, -1), { nap: true }),
+      entry('sleep', at(19, 0, -1), at(7), { nap: false }),
+    ];
+    expect(scheduleStatus(yesterday, fourMonths, settings, at(8))!.nightSleptMs).toBe(12 * HOUR);
+  });
+
   it('gives the target for the whole day', () => {
     const m4 = SCHEDULE_STAGES.find((s) => s.id === 'm4')!;
     expect(totalSleepTarget(m4)).toEqual([16 * 60, 16 * 60]);

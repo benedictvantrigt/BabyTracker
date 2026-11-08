@@ -14,6 +14,10 @@ before 1.0.0 a minor version marks a phase of the plan.
   Likewise the later bedtime: 18:30 at 9–12 weeks, 19:00 at 12–16 weeks.
 - Sleep card: "Today's plan" shows the guide's day and night sleep for the baby's age
   under the times.
+- Sleep totals: a sleep after the latest nap time (17:00 by default) now counts as day
+  sleep when it started before bedtime and ended by half an hour after it. Before, it was
+  left out of today's day sleep and total (or cut off at 17:00), and counted as part of
+  the next night. A sleep that runs on is still the night.
 - New records (#8, #9, #10, #11): tummy time (a timer), pumping (side and amount),
   temperature (°C and where it was measured) and growth (weight, length and head
   circumference). They are in the timeline, sync to the partner phone and take notes and

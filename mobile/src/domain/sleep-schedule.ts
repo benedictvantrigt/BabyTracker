@@ -340,11 +340,15 @@ export interface ScheduleStatus {
   current: { slot: PlanSlot | null; endAt: number; startedAt: number } | null;
   /** The next planned nap not yet slept, while awake. */
   next: PlanSlot | null;
-  /** Daytime sleep logged so far against the stage's target, in ms. */
+  /**
+   * Daytime sleep logged so far against the stage's target, in ms: the naps, and evening
+   * catnaps over by shortly after bedtime.
+   */
   daySleptMs: number;
   /**
    * The night that ended this morning, in ms: sleep starting from yesterday's latest nap
-   * end until an hour before today's day start. A night still running counts up to now.
+   * end until an hour before today's day start, without yesterday's evening catnaps. A
+   * night still running counts up to now.
    */
   nightSleptMs: number;
   /** Total sleep for the day so far, in ms: last night plus today's naps. */
@@ -356,6 +360,17 @@ export interface ScheduleStatus {
 
 function overlap(a0: number, a1: number, b0: number, b1: number): number {
   return Math.max(0, Math.min(a1, b1) - Math.max(a0, b0));
+}
+
+/** How long after the planned bedtime an evening catnap may end and still be day sleep. */
+const EVENING_NAP_SLACK = 30 * MINUTE;
+
+/**
+ * A sleep that started before bedtime and was over by bedtime + EVENING_NAP_SLACK, e.g.
+ * an extra nap after 17:00. Running past that, it is the night.
+ */
+function isEveningNap(e: EntryOf<'sleep'>, bedtimeAt: number, now: number): boolean {
+  return e.start < bedtimeAt && (e.end ?? now) <= bedtimeAt + EVENING_NAP_SLACK;
 }
 
 /**
@@ -414,16 +429,27 @@ export function scheduleStatus(
     ? null
     : (slots.find((s) => s.status === 'now' || s.status === 'upcoming') ?? null);
 
+  // Day sleep for the totals: the naps above, plus a sleep after the latest nap end that
+  // started before bedtime and was over by bedtime + EVENING_NAP_SLACK (an evening catnap).
+  // A sleep that runs on is the night, which belongs to the day it ends in.
   let daySleptMs = 0;
-  for (const e of daySleeps) {
-    daySleptMs += overlap(e.start, e.end ?? now, dayStart - HOUR, latestNapEnd);
+  for (const e of sleeps) {
+    if (e.start < dayStart - HOUR) continue;
+    if (e.start < latestNapEnd || isEveningNap(e, plan.bedtimeAt, now)) {
+      const until = plan.bedtimeAt + EVENING_NAP_SLACK;
+      daySleptMs += overlap(e.start, e.end ?? now, dayStart - HOUR, until);
+    }
   }
-  // The night belongs to the day it ends in, so tonight's sleep counts toward tomorrow.
-  // Yesterday's times are taken from an hour before midnight, safe across DST changes.
-  const nightFrom = scheduleTime(settings, startOfLocalDay(now) - HOUR, LATEST_NAP_END);
+  // Last night: sleep from yesterday's latest nap end until an hour before today's day
+  // start, except yesterday's evening catnaps (counted on that day). Yesterday's times are
+  // taken from an hour before midnight, safe across DST changes.
+  const yesterday = startOfLocalDay(now) - HOUR;
+  const nightFrom = scheduleTime(settings, yesterday, LATEST_NAP_END);
+  const yesterdayBed = scheduleTime(settings, yesterday, stage.stage.bedtime);
   let nightSleptMs = 0;
   for (const e of sleeps) {
-    if (e.start >= nightFrom && e.start < dayStart - HOUR) {
+    const lastNight = e.start >= nightFrom && e.start < dayStart - HOUR;
+    if (lastNight && !isEveningNap(e, yesterdayBed, now)) {
       nightSleptMs += Math.max(0, Math.min(e.end ?? now, now) - e.start);
     }
   }
