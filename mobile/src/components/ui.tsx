@@ -1,6 +1,6 @@
 import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import { SymbolView } from 'expo-symbols';
-import type { ComponentProps, ReactNode } from 'react';
+import { useState, type ComponentProps, type ReactNode } from 'react';
 import {
   Platform,
   Pressable,
@@ -156,7 +156,7 @@ export function ToggleRow({
   label: string;
   description?: string;
   value: boolean;
-  onChange: (value: boolean) => void;
+  onChange: (value: boolean) => unknown;
   testID?: string;
 }) {
   return (
@@ -169,8 +169,46 @@ export function ToggleRow({
           </ThemedText>
         )}
       </View>
-      <Switch value={value} onValueChange={onChange} accessibilityLabel={label} testID={testID} />
+      <SavedSwitch value={value} onChange={onChange} accessibilityLabel={label} testID={testID} />
     </View>
+  );
+}
+
+/**
+ * A Switch for a value that is saved asynchronously. A plain controlled Switch snaps back
+ * to the old `value` until the save and the reload are done, then flips again: a flicker.
+ * This one keeps the new position until `value` follows, and only returns when `onChange`
+ * reports a failed save (resolves to false or rejects, as `useAction` does).
+ */
+export function SavedSwitch({
+  value,
+  onChange,
+  accessibilityLabel,
+  testID,
+}: {
+  value: boolean;
+  onChange: (value: boolean) => unknown;
+  accessibilityLabel?: string;
+  testID?: string;
+}) {
+  // The tapped position, with the saved value it was tapped on: it no longer applies once
+  // `value` has moved on.
+  const [pending, setPending] = useState<{ from: boolean; to: boolean } | null>(null);
+  const shown = pending && pending.from === value ? pending.to : value;
+  const change = (next: boolean) => {
+    setPending({ from: value, to: next });
+    Promise.resolve(onChange(next)).then(
+      (ok) => ok === false && setPending(null),
+      () => setPending(null),
+    );
+  };
+  return (
+    <Switch
+      value={shown}
+      onValueChange={change}
+      accessibilityLabel={accessibilityLabel}
+      testID={testID}
+    />
   );
 }
 

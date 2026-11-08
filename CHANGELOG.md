@@ -3,6 +3,12 @@
 All notable changes to Baby Tracker. Versions follow [Semantic Versioning](https://semver.org/);
 before 1.0.0 a minor version marks a phase of the plan.
 
+## Unreleased
+
+- Switches no longer flicker when tapped (Customize Today, Settings): they showed the old
+  position again until the setting was saved and reloaded, then flipped. They now keep the
+  new position, and only go back when saving fails.
+
 ## [0.7.0] — 2026-11-08 — Live timers and security fixes
 
 - Live timers (#15): a running sleep or breastfeeding timer counts up outside the app without
