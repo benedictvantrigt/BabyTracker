@@ -226,7 +226,7 @@ describe('isNewStage', () => {
   });
 });
 
-describe('the guide's nap times', () => {
+describe('nap times and bedtimes from the guide', () => {
   // In-bed times per stage. Where the guide gives two times, the shorter nap: later start,
   // earlier end (the other one is optional extra sleep).
   const GUIDE: Record<string, string> = {
