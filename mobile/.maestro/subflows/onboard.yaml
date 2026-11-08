@@ -11,6 +11,13 @@ appId: com.babytracker.app.acc
 - tapOn:
     id: 'child-name'
 - inputText: 'Micky'
+# The iOS Simulator sometimes drops typed characters (the baby became "M"): type it again.
+- runFlow:
+    when:
+      notVisible: 'Micky'
+    commands:
+      - eraseText: 20
+      - inputText: 'Micky'
 - runFlow:
     file: dismiss-keyboard.yaml
     env:
