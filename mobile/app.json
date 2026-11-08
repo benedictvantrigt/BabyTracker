@@ -61,6 +61,7 @@
         }
       ],
       "./plugins/with-local-cleartext",
+      "./plugins/with-release-signing",
       [
         "react-native-android-widget",
         {

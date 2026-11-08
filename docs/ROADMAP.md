@@ -24,7 +24,7 @@ per phone. The app is React Native (Expo), Android first, iOS later.
 | 2. Sync | QR pairing, encrypted change log, Cloudflare relay, device removal, retention | ✅ 0.2.0 pairing, encryption and relay; 0.5.0 device removal with key rotation, retention, delete family; data import dropped |
 | 3. Notifications | Scheduled pushes through the relay, iOS Notification Service Extension, Android exact alarms, awake-window and feed rules | 🟡 0.3.0: done for Android; iOS started (#5: build config, local reminders) |
 | 4. Extras | Record types still missing (tummy time, pumping, growth, …), NFC tags, Live Activities / Live Updates, widgets, charts, growth curves, PDF/CSV export | 🟡 Started: sleep schedule (0.4.0); 0.6.0: #29, #30, #35, tags (#12), Android widget (#16) |
-| 5. Hardening | Key recovery, backups, privacy statement, store submission | ⬜ Not started |
+| 5. Hardening | Key recovery, backups, privacy statement, store submission, security review fixes | 🟡 Started: release signing with our own keys (#40) |
 
 Current position: phases 1–3 are done for Android (Phase 2 completed in 0.5.0). Phase 4 has
 started with the age-based sleep schedule (#28, version 0.4.0); 0.6.0 added the Today
@@ -104,3 +104,6 @@ Other extras:
 - #24 Backups / data export for safekeeping
 - #25 Privacy statement
 - #26 Final package name and store submission
+- #40 Sign release APKs with our own key, not the template debug keystore (done; keys set up per README)
+- #41 Don't trust the relay's device list for key wrapping
+- #42 Other apps can trigger widget actions via the exported widget receiver

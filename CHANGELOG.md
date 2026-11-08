@@ -5,6 +5,11 @@ before 1.0.0 a minor version marks a phase of the plan.
 
 ## Unreleased
 
+- Security (#40): release APKs are signed with our own keys instead of the public debug key
+  of the Expo template, which let anyone build an APK that installs over the app. The
+  production key is only available to release builds from `main` (GitHub environment
+  `production`); CI refuses to release a production APK signed with the debug key. Phones
+  with 0.6.0 or earlier must reinstall once and rejoin the family (README, "Signing keys").
 - Screen readers: the Stop button of a running timer on the Today screen is now reachable
   on iOS (it sat inside the tappable card, which hid it from VoiceOver); timeline rows read
   out their notes and tags.
