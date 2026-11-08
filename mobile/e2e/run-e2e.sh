@@ -92,6 +92,8 @@ partner_attempt() {
   (cd "$HERE/.." && npx tsx e2e/partner.ts create "$PARTNER" "http://localhost:$RELAY_PORT") \
     2>&1 | tee -a "$OUT/partner.txt"
   [ -f "$PARTNER/invite.txt" ] || return 1
+  # The port mapping is lost when adb restarts (e.g. after a Maestro driver fault).
+  adb reverse tcp:$RELAY_PORT tcp:$RELAY_PORT
   run_maestro 07_partner_sync "$FLOWS/07_partner_sync.yaml" -e "INVITE=$(cat "$PARTNER/invite.txt")"
 }
 echo "== 07_partner_sync =="

@@ -426,7 +426,7 @@ export default function EntryScreen() {
         {kind === 'temperature' && (
           <>
             <Field label="Temperature (°C)">
-              {numberInput(form.celsius, (celsius) => set({ celsius }), 'temperature', 'e.g. 37.2')}
+              {numberInput(form.celsius, (celsius) => set({ celsius }), 'temperature-input', 'e.g. 37.2')}
             </Field>
             <Field label="Measured">
               <Segmented options={SITE_OPTIONS} value={form.site} onChange={(site) => set({ site })} />

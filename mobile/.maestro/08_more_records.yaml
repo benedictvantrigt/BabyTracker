@@ -26,8 +26,16 @@ name: Tummy time timer, temperature and growth
       LABEL: 'Temperature'
 - assertVisible: 'Add temperature'
 - tapOn:
-    id: 'temperature'
+    id: 'temperature-input'
 - inputText: '37.4'
+# The form can still be sliding in when the field is tapped (iOS Simulator): type again.
+- runFlow:
+    when:
+      notVisible: '37.4'
+    commands:
+      - tapOn:
+          id: 'temperature-input'
+      - inputText: '37.4'
 - runFlow:
     file: subflows/dismiss-keyboard.yaml
     env:
@@ -43,6 +51,14 @@ name: Tummy time timer, temperature and growth
 - tapOn:
     id: 'growth-weight'
 - inputText: '4.25'
+# The form can still be sliding in when the field is tapped (iOS Simulator): type again.
+- runFlow:
+    when:
+      notVisible: '4.25'
+    commands:
+      - tapOn:
+          id: 'growth-weight'
+      - inputText: '4.25'
 - runFlow:
     file: subflows/dismiss-keyboard.yaml
     env:
