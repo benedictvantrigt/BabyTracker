@@ -24,7 +24,7 @@ before 1.0.0 a minor version marks a phase of the plan.
   tags. A new Today card, "More records", starts and stops tummy time, opens the other
   forms and shows today's tummy time, pumped milk and the latest temperature and growth.
   It can be turned off or moved like the other cards. Phones on 0.7.0 skip these records:
-  update both phones.
+  update both phones. A new temperature or growth entry opens with the keyboard ready.
 
 ## [0.7.0] — 2026-11-08 — Live timers and security fixes
 

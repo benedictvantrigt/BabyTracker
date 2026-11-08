@@ -300,10 +300,13 @@ export default function EntryScreen() {
     onChange: (text: string) => void,
     testID: string,
     placeholder: string,
+    // A new reading or measurement opens with its first field ready for typing.
+    autoFocus = false,
   ) => (
     <TextInput
       value={value}
       onChangeText={onChange}
+      autoFocus={autoFocus && !editing}
       testID={testID}
       keyboardType="decimal-pad"
       placeholder={placeholder}
@@ -426,7 +429,7 @@ export default function EntryScreen() {
         {kind === 'temperature' && (
           <>
             <Field label="Temperature (°C)">
-              {numberInput(form.celsius, (celsius) => set({ celsius }), 'temperature-input', 'e.g. 37.2')}
+              {numberInput(form.celsius, (celsius) => set({ celsius }), 'temperature-input', 'e.g. 37.2', true)}
             </Field>
             <Field label="Measured">
               <Segmented options={SITE_OPTIONS} value={form.site} onChange={(site) => set({ site })} />
@@ -437,7 +440,13 @@ export default function EntryScreen() {
         {kind === 'growth' && (
           <>
             <Field label="Weight (kg)">
-              {numberInput(form.weight, (weight) => set({ weight }), 'growth-weight', 'e.g. 4.25')}
+              {numberInput(
+                form.weight,
+                (weight) => set({ weight }),
+                'growth-weight',
+                'e.g. 4.25',
+                true,
+              )}
             </Field>
             <Field label="Length (cm)">
               {numberInput(form.length, (length) => set({ length }), 'growth-length', 'e.g. 55')}
