@@ -5,18 +5,25 @@ name: Tummy time timer, temperature and growth
 - scrollUntilVisible:
     element:
       id: 'card-records'
-- tapOn: 'Tummy time'
+- runFlow:
+    file: subflows/tap-today.yaml
+    env:
+      LABEL: 'Tummy time'
 - assertVisible: 'Stop tummy time'
 - takeScreenshot: 08-tummy-running
 # The undo bar can cover the buttons.
 - extendedWaitUntil:
     notVisible: 'UNDO'
     timeout: 10000
-- scrollUntilVisible:
-    element: 'Stop tummy time'
-- tapOn: 'Stop tummy time'
+- runFlow:
+    file: subflows/tap-today.yaml
+    env:
+      LABEL: 'Stop tummy time'
 - assertVisible: 'Tummy time today .*'
-- tapOn: 'Temperature'
+- runFlow:
+    file: subflows/tap-today.yaml
+    env:
+      LABEL: 'Temperature'
 - assertVisible: 'Add temperature'
 - tapOn:
     id: 'temperature'
@@ -28,7 +35,10 @@ name: Tummy time timer, temperature and growth
 - tapOn: 'Save'
 - scrollUntilVisible:
     element: 'Temperature 37.4 °C · .*'
-- tapOn: 'Growth'
+- runFlow:
+    file: subflows/tap-today.yaml
+    env:
+      LABEL: 'Growth'
 - assertVisible: 'Add growth'
 - tapOn:
     id: 'growth-weight'

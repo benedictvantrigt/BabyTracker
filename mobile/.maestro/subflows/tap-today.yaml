@@ -1,0 +1,9 @@
+# Taps a button on the Today screen (LABEL, a regex). Scrolls it to the centre first: on
+# iOS the floating tab bar covers the bottom of the screen, and taller cards above can push
+# the button under it.
+appId: com.babytracker.app.acc
+---
+- scrollUntilVisible:
+    element: ${LABEL}
+    centerElement: true
+- tapOn: ${LABEL}
