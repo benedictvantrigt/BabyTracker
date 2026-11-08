@@ -11,6 +11,7 @@ before 1.0.0 a minor version marks a phase of the plan.
 - Sleep schedule: nap times no longer include the guide's optional extra sleep. Where the
   guide gives two times ("15.30/15.45 - 17.00"), the shorter nap is used: later start,
   earlier end. Changes for 3–6 weeks to 12–16 weeks, 5 and 6 months, and 2–3 years.
+  Likewise the later bedtime: 18:30 at 9–12 weeks, 19:00 at 12–16 weeks.
 - Sleep card: "Today's plan" shows the guide's day and night sleep for the baby's age
   under the times.
 

@@ -257,4 +257,14 @@ describe('the guide's nap times', () => {
     );
     expect(plans).toEqual(GUIDE);
   });
+
+  it('take the later of two bedtimes', () => {
+    const bed = (id: string) => hhmm(SCHEDULE_STAGES.find((s) => s.id === id)!.bedtime);
+    expect([bed('w6'), bed('w9'), bed('w12'), bed('m4')]).toEqual([
+      '18:15',
+      '18:30',
+      '19:00',
+      '19:00',
+    ]);
+  });
 });

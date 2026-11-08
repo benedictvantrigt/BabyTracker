@@ -5,7 +5,7 @@ import type { Entry, EntryOf, Settings } from './types';
 // a different `dayStartMinute` shifts the whole day. Nap times are in-bed times: the baby
 // goes into bed at `start` and is taken out at `end`, also after a shorter sleep. Where the
 // guide gives two times ("15.30/15.45 - 17.00"), the later start and the earlier end are used:
-// the other one is optional extra sleep.
+// the other one is optional extra sleep. Likewise the later of two bedtimes.
 
 /** Reference wake-up time the schedule times are written for. */
 const BASE_DAY_START = 7 * 60;
@@ -73,7 +73,7 @@ const STAGES: (ScheduleStage & { from: Age })[] = [
     label: '9–12 weeks',
     from: { weeks: 9 },
     naps: [nap(t(9), t(10)), nap(t(11, 30), t(14)), nap(t(16), t(17))],
-    bedtime: t(18, 15),
+    bedtime: t(18, 30),
     wakeWindow: [90, 105],
     awakeBeforeBed: null,
     daySleep: [300, 300],
@@ -84,7 +84,7 @@ const STAGES: (ScheduleStage & { from: Age })[] = [
     label: '12–16 weeks',
     from: { weeks: 12 },
     naps: [nap(t(9), t(10)), nap(t(11, 45), t(14)), nap(t(16), t(17))],
-    bedtime: t(18, 30),
+    bedtime: t(19),
     wakeWindow: [90, 120],
     awakeBeforeBed: null,
     daySleep: [270, 270],
