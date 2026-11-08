@@ -3,7 +3,7 @@
 All notable changes to Baby Tracker. Versions follow [Semantic Versioning](https://semver.org/);
 before 1.0.0 a minor version marks a phase of the plan.
 
-## Unreleased
+## [0.7.0] — 2026-11-08 — Live timers and security fixes
 
 - Live timers (#15): a running sleep or breastfeeding timer counts up outside the app without
   the app updating it. Android: ongoing notification with a chronometer, requested as a Live

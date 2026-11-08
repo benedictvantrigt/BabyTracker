@@ -29,7 +29,8 @@ per phone. The app is React Native (Expo), Android first, iOS later.
 Current position: phases 1–3 are done for Android (Phase 2 completed in 0.5.0). Phase 4 has
 started with the age-based sleep schedule (#28, version 0.4.0); 0.6.0 added the Today
 screen layout (#35), total sleep (#30), age in days (#29), tags (#12) and the Android
-home-screen widget (#16, iOS still to do).
+home-screen widget (#16, iOS still to do); 0.7.0 adds live timers on the lock screen (#15,
+not yet tested on a real iPhone) and the security fixes #40–#42 (Phase 5).
 
 The server side runs in two environments, acceptance and production, each with its own
 relay Worker, Firebase project and app package (README: "Environments: acceptance and
@@ -85,7 +86,7 @@ Records:
 
 Other extras:
 - #14 NFC tags that log an entry
-- #15 Live timer on the lock screen (in progress: Android Live Updates, iOS Live Activities)
+- #15 Live timer on the lock screen (0.7.0: Android Live Updates, iOS Live Activities; iPhone test in #49)
 - #16 Home-screen widgets (Android done; iOS still to do)
 - #17 Weekly charts
 - #18 Growth curves
