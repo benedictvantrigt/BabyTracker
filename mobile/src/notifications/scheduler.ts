@@ -2,10 +2,11 @@ import * as Notifications from 'expo-notifications';
 import { AndroidAudioContentType, AndroidAudioUsage, AndroidImportance } from 'expo-notifications';
 import { Platform } from 'react-native';
 
-import { KIND_LABEL, entryTitle } from '@/domain/entries';
 import type { Reminder } from '@/domain/reminders';
-import { formatClock } from '@/domain/time';
 import type { Entry } from '@/domain/types';
+
+import { liveTimerFor } from './live-timer-content';
+import { syncLiveTimers } from './live-timers';
 
 const CHANNEL_REMINDERS = 'reminders';
 const CHANNEL_ALARMS = 'alarms';
@@ -79,14 +80,18 @@ export async function requestExactAlarmPermission(): Promise<boolean> {
 }
 
 /**
- * Replaces all pending reminders with `reminders` and shows one ongoing
- * notification per running timer. Idempotent; call after every change.
+ * Replaces all pending reminders with `reminders` and shows each running timer outside the app:
+ * as a live timer where the platform has one, otherwise as an ongoing notification. Idempotent;
+ * call after every change.
  */
 export async function syncNotifications(
   reminders: Reminder[],
   running: Entry[],
   childName: string,
 ): Promise<void> {
+  const timers = running.map((e) => liveTimerFor(e, childName));
+  // Live Activities need no notification permission, so these go first.
+  const live = await syncLiveTimers(timers, CHANNEL_TIMERS).catch(() => false);
   if (!(await Notifications.getPermissionsAsync()).granted) return;
 
   const scheduled = await Notifications.getAllScheduledNotificationsAsync();
@@ -116,7 +121,9 @@ export async function syncNotifications(
     });
   }
 
-  const runningIds = new Set(running.map((e) => TIMER_PREFIX + e.id));
+  // Plain notifications for running timers, only where live timers are not available.
+  const plain = live ? [] : timers;
+  const runningIds = new Set(plain.map((t) => TIMER_PREFIX + t.id));
   const presented = await Notifications.getPresentedNotificationsAsync();
   const presentedIds = new Set(presented.map((n) => n.request.identifier));
   await Promise.all(
@@ -124,20 +131,19 @@ export async function syncNotifications(
       .filter((id) => id.startsWith(TIMER_PREFIX) && !runningIds.has(id))
       .map((id) => Notifications.dismissNotificationAsync(id)),
   );
-  for (const e of running) {
-    const identifier = TIMER_PREFIX + e.id;
+  for (const t of plain) {
+    const identifier = TIMER_PREFIX + t.id;
     if (presentedIds.has(identifier)) continue;
-    const what = e.kind === 'sleep' ? `${childName} is asleep` : entryTitle(e);
     await Notifications.scheduleNotificationAsync({
       identifier,
       content: {
-        title: what,
-        body: `${KIND_LABEL[e.kind]} timer running since ${formatClock(e.start)}`,
+        title: t.title,
+        body: t.text,
         sticky: true,
         autoDismiss: false,
         sound: false,
         priority: Notifications.AndroidNotificationPriority.LOW,
-        data: { entryId: e.id },
+        data: { entryId: t.id },
       },
       trigger: { channelId: CHANNEL_TIMERS },
     });
