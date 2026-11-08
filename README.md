@@ -40,6 +40,17 @@ See [docs/ROADMAP.md](docs/ROADMAP.md) for the plan and the feature backlog.
   family key, wrapped for each remaining phone with X25519 on its device key, so neither the
   relay nor the removed phone can open it; the old log is dropped and the remover uploads a
   snapshot. "Delete family" wipes the family from the relay; every phone keeps its own log.
+- **A relay that lies (#41):** the phones do not take the relay's word for who is in the family.
+  Each phone keeps a member list that travels in the encrypted log (a `member` change, which
+  only holders of the family key can write): a joining phone announces itself and trusts the
+  phone that invited it (its id is in the invite code). A new family key is only accepted when
+  a trusted phone wrapped it, and "Remove" only wraps the new key for trusted phones; a phone
+  only the relay lists shows as "Unknown phone" with a warning. Everything sealed is bound to
+  its purpose as associated data (change + family + key epoch, reminder, device name, key
+  wrap + epoch + recipient), so the relay cannot replay an old wrapped key or move ciphertext
+  around. Partner sync shows a safety code of the trusted phones that both parents can
+  compare. Families from before 0.7 trust the relay's list once, on the first sync after the
+  update.
 - **Retention:** the relay deletes changes every phone has received. Inviting a phone first
   uploads a snapshot, and nothing is deleted while an invite is open.
 

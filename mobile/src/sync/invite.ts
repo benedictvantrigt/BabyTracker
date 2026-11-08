@@ -1,4 +1,4 @@
-import { b64url, bytesUtf8, utf8Bytes } from './crypto';
+import { b64url, bytesUtf8, isDeviceId, utf8Bytes } from './crypto';
 
 const PREFIX = 'BT1.';
 
@@ -11,6 +11,11 @@ export interface Invite {
   keyEpoch: number;
   /** Single-use secret; the relay only knows its hash. */
   inviteSecret: string;
+  /**
+   * The inviting phone's device id: the joining phone trusts it from the start (#41).
+   * Missing in codes from before 0.7.
+   */
+  inviterId: string | null;
 }
 
 export function encodeInvite(invite: Invite): string {
@@ -20,6 +25,7 @@ export function encodeInvite(invite: Invite): string {
     k: b64url.encode(invite.familyKey),
     e: invite.keyEpoch,
     i: invite.inviteSecret,
+    d: invite.inviterId ?? undefined,
   });
   return PREFIX + b64url.encode(utf8Bytes(payload));
 }
@@ -47,7 +53,9 @@ export function decodeInvite(code: string): Invite {
     }
     const keyEpoch = p.e === undefined ? 0 : p.e;
     if (!Number.isInteger(keyEpoch) || keyEpoch < 0) throw new InvalidInviteError();
-    return { relayUrl: p.u, familyId: p.f, familyKey, keyEpoch, inviteSecret: p.i };
+    if (p.d !== undefined && !isDeviceId(p.d)) throw new InvalidInviteError();
+    const inviterId = p.d ?? null;
+    return { relayUrl: p.u, familyId: p.f, familyKey, keyEpoch, inviteSecret: p.i, inviterId };
   } catch {
     throw new InvalidInviteError();
   }

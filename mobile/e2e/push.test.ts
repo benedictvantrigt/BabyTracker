@@ -149,7 +149,7 @@ describe('push through the relay', () => {
 
     sent = [];
     const basis = (await a.repo.getSyncState())!.lastSeq;
-    const body = ea.seal(
+    const body = ea.sealReminder(
       JSON.stringify({ title: 'Nap time', body: 'Micky has been awake 1h 30m', alarm: false }),
     );
     assert.deepEqual(
@@ -198,7 +198,7 @@ describe('push through the relay', () => {
       {
         tag: 'feed-0',
         fireAt: Date.now() + 1000,
-        body: ea.seal('{"title":"Feed","body":"x","alarm":true}'),
+        body: ea.sealReminder('{"title":"Feed","body":"x","alarm":true}'),
       },
     ]);
     await until(() => sent.some((m) => m.data.type === 'reminder'), 10_000);

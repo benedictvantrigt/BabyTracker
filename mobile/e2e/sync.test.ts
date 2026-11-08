@@ -5,6 +5,8 @@ import assert from 'node:assert/strict';
 import { after, before, describe, it } from 'node:test';
 
 import { RelayClient, RelayError } from '../src/sync/client';
+import { deviceIdFor, sealContext, wrapKey } from '../src/sync/crypto';
+import { UntrustedKeyError } from '../src/sync/engine';
 import {
   createFamily,
   deleteFamily,
@@ -220,7 +222,7 @@ describe('partner sync', () => {
     await assert.rejects(engineC.sync(), (e: unknown) => isRemovedError(e));
     const { changes } = await engineA.client.pull(0);
     assert.ok(changes.length > 0);
-    for (const ch of changes) assert.throws(() => engineC.open(ch.body));
+    for (const ch of changes) assert.throws(() => engineC.openChange(ch.body));
   });
 
   it('drops changes every phone has received; a later partner still gets everything', async () => {
@@ -271,5 +273,94 @@ describe('partner sync', () => {
       engineA.client.revoke(engineB.client.deviceId),
       (e: unknown) => (e as RelayError).code === 'use_rotate',
     );
+  });
+});
+
+type Json = Record<string, unknown>;
+
+/**
+ * The real relay, with its answers to this phone changed by `tamper` (method, path below
+ * the family, response JSON, request JSON): a compromised relay.
+ */
+function lyingRelay(tamper: (method: string, path: string, res: Json, req?: Json) => void) {
+  return async (input: string | URL | Request, init?: RequestInit) => {
+    const response = await fetch(input, init);
+    if (!response.ok) return response;
+    const path = new URL(String(input)).pathname.replace(/^\/v1\/families\/[^/]+/, '');
+    const res = (await response.json()) as Json;
+    const req = init?.body ? (JSON.parse(String(init.body)) as Json) : undefined;
+    tamper(init?.method ?? 'GET', path, res, req);
+    return Response.json(res, { status: response.status });
+  };
+}
+
+describe('a compromised relay (#41)', () => {
+  it('cannot hand a phone a family key of its own', async () => {
+    const [a, b] = [await phone(), await phone()];
+    await a.repo.addChild('Micky', null);
+    const engineA = await createFamily(a, relay.url);
+    await joinFamily(b, (await engineA.createInvite()).code);
+    const engineB = (await loadEngine(b))!;
+
+    // The relay invents a phone and a new key "from" it for B.
+    const ghost = random(32);
+    const ghostId = deviceIdFor(ghost);
+    const context = sealContext.wrap(engineB.client.familyId, 1, engineB.client.deviceId);
+    const wrap = wrapKey(ghost, engineB.client.deviceId, random(32), random, context);
+    b.fetch = lyingRelay((method, path, res) => {
+      if (path === '/devices') {
+        (res.devices as Json[]).push({ id: ghostId, createdAt: 0, lastSeenAt: null, label: null });
+      }
+      if (path.startsWith('/changes') && method === 'GET') res.epoch = 1;
+      if (path === '/key') {
+        Object.assign(res, { epoch: 1, wrap: { epoch: 1, from: ghostId, body: wrap } });
+      }
+    }) as typeof fetch;
+
+    const lied = (await loadEngine(b))!;
+    await assert.rejects(lied.sync(), (e: unknown) => e instanceof UntrustedKeyError);
+    assert.equal((await loadEngine(b))!.epoch, 0, 'B kept its key');
+    const ghostRow = (await lied.devices()).find((d) => d.id === ghostId);
+    assert.deepEqual([ghostRow?.trusted, ghostRow?.name], [false, null]);
+  });
+
+  it('cannot get the new key for an invented phone when a phone is removed', async () => {
+    const [a, b, c] = [await phone(), await phone(), await phone()];
+    await a.repo.addChild('Micky', null);
+    const engineA = await createFamily(a, relay.url);
+    await joinFamily(b, (await engineA.createInvite()).code);
+    await joinFamily(c, (await engineA.createInvite()).code);
+    await syncAll(a, b, c, a);
+    const idB = (await loadEngine(b))!.client.deviceId;
+    const idC = (await loadEngine(c))!.client.deviceId;
+
+    // The phones learnt each other from the encrypted member list.
+    const codes = await Promise.all(
+      [a, b, c].map(async (p) => (await loadEngine(p))!.safetyCode()),
+    );
+    assert.equal(new Set(codes).size, 1, 'all phones trust the same phones');
+
+    const ghostId = deviceIdFor(random(32));
+    let rotate: Json | undefined;
+    a.fetch = lyingRelay((method, path, res, req) => {
+      if (path === '/devices') {
+        (res.devices as Json[]).push({ id: ghostId, createdAt: 0, lastSeenAt: null, label: null });
+      }
+      if (path === '/rotate') rotate = req;
+    }) as typeof fetch;
+
+    await (await loadEngine(a))!.removeDevice(idC);
+    const wraps = Object.keys((rotate!.wraps ?? {}) as Json).sort();
+    assert.deepEqual(wraps, [engineA.client.deviceId, idB].sort(), 'no key for the ghost');
+    assert.deepEqual(rotate!.remove, [idC, ghostId]);
+
+    // B follows the rotation (A is trusted) and drops C from its list too.
+    await syncAll(b);
+    const [engineA2, engineB] = [(await loadEngine(a))!, (await loadEngine(b))!];
+    assert.equal(engineB.epoch, 1);
+    assert.equal(await engineB.safetyCode(), await engineA2.safetyCode());
+    assert.notEqual(await engineB.safetyCode(), codes[0], 'C is no longer trusted');
+    const membersB = await b.repo.listMembers();
+    assert.ok(membersB.find((m) => m.id === idC)?.removedAt, 'C stays removed on B');
   });
 });

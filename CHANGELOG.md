@@ -15,6 +15,14 @@ before 1.0.0 a minor version marks a phase of the plan.
   production key is only available to release builds from `main` (GitHub environment
   `production`); CI refuses to release a production APK signed with the debug key. Phones
   with 0.6.0 or earlier must reinstall once and rejoin the family (README, "Signing keys").
+- Security (#41): end-to-end encryption now holds against a compromised relay. Phones keep
+  a member list in the encrypted log and only accept a new family key wrapped by a member;
+  removing a phone wraps the new key for members only. Phones the relay lists but no member
+  added show as "Unknown phone" with a warning. Sealed data is bound to its family, purpose
+  and key epoch (XChaCha20-Poly1305 associated data, `v2.` format), so old wrapped keys
+  cannot be replayed. Partner sync shows a safety code to compare between the phones.
+  Invite codes carry the inviting phone's id. Phones on 0.6 cannot read changes from 0.7:
+  update both phones (they reinstall for #40 anyway).
 - Security (#42): checked that other apps cannot trigger the widget's buttons. The
   widget library declares its click receiver `android:exported="false"`, so a broadcast
   from another app never reaches it; CI now reads each APK's manifest and fails if that
