@@ -20,7 +20,9 @@ See [docs/ROADMAP.md](docs/ROADMAP.md) for the plan and the feature backlog.
   - before each planned nap and bedtime, and when a nap should end (or, with the schedule
     off, when the awake window has passed)
   - feed reminder during the day (optional) and an alarm-style notification at night
-  - ongoing notification while a timer runs
+  - a live timer while a sleep or breastfeeding timer runs, counting up on its own: an ongoing
+    notification on Android (a Live Update in the status bar and on the lock screen from
+    Android 16), a Live Activity on the iPhone lock screen and in the Dynamic Island
 
 ## Phase 2 — partner sync
 
@@ -172,7 +174,9 @@ On a phone:
 
 On an iPhone (work in progress, #5): the iPhone schedules its reminders itself, because pushes
 from the relay only reach Android so far (#6). Night feeds use a time-sensitive notification,
-which can break through a Focus when allowed in the iPhone settings.
+which can break through a Focus when allowed in the iPhone settings. Running timers show as a
+Live Activity (`expo-widgets`); if Live Activities are switched off for the app, as a plain
+notification. A partner's timer appears when the app is opened, not by push (#6).
 
 - **Simulator:** `npx eas-cli@latest build -p ios --profile simulator` (free Expo account), or
   the "iOS build" workflow (runs on every push that changes the app, or by hand from the

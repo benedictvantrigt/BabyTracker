@@ -91,8 +91,16 @@ jobs:
           echo "udid=$udid" >> "$GITHUB_OUTPUT"
 
       - name: Install Maestro
+        # The installer exits 0 even when its download fails (seen: HTTP 504), so check for
+        # the binary and retry.
         run: |
-          curl -Ls "https://get.maestro.mobile.dev" | bash
+          for attempt in 1 2 3; do
+            curl -Ls "https://get.maestro.mobile.dev" | bash
+            [ -x "$HOME/.maestro/bin/maestro" ] && break
+            echo "Maestro download failed (attempt $attempt), retrying"
+            sleep 30
+          done
+          "$HOME/.maestro/bin/maestro" --version
           echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
 
       - name: Run E2E on the Simulator

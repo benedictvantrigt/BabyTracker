@@ -81,7 +81,8 @@
             }
           ]
         }
-      ]
+      ],
+      "expo-widgets"
     ],
     "experiments": {
       "typedRoutes": true,

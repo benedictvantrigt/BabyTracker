@@ -1,0 +1,20 @@
+plugins {
+  id 'com.android.library'
+  id 'expo-module-gradle-plugin'
+}
+
+group = 'com.babytracker'
+version = '1.0.0'
+
+android {
+  namespace "expo.modules.timernotification"
+  defaultConfig {
+    versionCode 1
+    versionName '1.0.0'
+  }
+}
+
+dependencies {
+  // NotificationCompat.Builder.setRequestPromotedOngoing (Android 16 Live Updates).
+  implementation 'androidx.core:core:1.17.0'
+}

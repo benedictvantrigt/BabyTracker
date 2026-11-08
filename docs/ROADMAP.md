@@ -85,7 +85,7 @@ Records:
 
 Other extras:
 - #14 NFC tags that log an entry
-- #15 Live timer on the lock screen
+- #15 Live timer on the lock screen (in progress: Android Live Updates, iOS Live Activities)
 - #16 Home-screen widgets (Android done; iOS still to do)
 - #17 Weekly charts
 - #18 Growth curves
