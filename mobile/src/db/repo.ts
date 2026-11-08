@@ -9,6 +9,7 @@ import {
   type Entry,
   type EntryInput,
   type EntryKind,
+  type EntryOf,
   type Settings,
 } from '@/domain/types';
 
@@ -225,6 +226,17 @@ export class Repo {
     return rows.map(toEntry);
   }
 
+  /** A child's most recent entry of a kind (by start), however long ago. */
+  async latestEntry<K extends EntryKind>(childId: string, kind: K): Promise<EntryOf<K> | null> {
+    const row = await this.db.getFirstAsync<EntryRow>(
+      `SELECT ${ENTRY_COLUMNS} FROM entries
+       WHERE child_id = ? AND kind = ? AND deleted_at IS NULL
+       ORDER BY start DESC LIMIT 1`,
+      [childId, kind],
+    );
+    return row ? (toEntry(row) as EntryOf<K>) : null;
+  }
+
   /** Tags used on a child's entries, most used first; from the latest 500 tagged entries. */
   async listTags(childId: string): Promise<string[]> {
     const rows = await this.db.getAllAsync<{ tags: string; start: number }>(
@@ -296,7 +308,7 @@ export class Repo {
    * Starts a running timer (an entry without end). A running timer of the same kind
    * is stopped first, so switching breast sides is a single tap.
    */
-  async startTimer<K extends 'feeding' | 'sleep'>(
+  async startTimer<K extends 'feeding' | 'sleep' | 'tummy'>(
     childId: string,
     kind: K,
     data: EntryInput<K>['data'],

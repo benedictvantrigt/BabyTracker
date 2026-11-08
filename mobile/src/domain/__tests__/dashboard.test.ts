@@ -15,7 +15,10 @@ describe('dashboard layout', () => {
     expect(normalizeDashboard('diaper')).toEqual(DEFAULT_DASHBOARD);
     expect(
       normalizeDashboard({ order: ['diaper', 'weather', 'diaper', 7, 'sleep'], off: ['sleep', 1] }),
-    ).toEqual({ order: ['diaper', 'sleep', 'timers', 'feeding', 'today'], off: ['sleep'] });
+    ).toEqual({
+      order: ['diaper', 'sleep', 'timers', 'feeding', 'records', 'today'],
+      off: ['sleep'],
+    });
     // A card the stored layout does not know yet is appended, turned on.
     expect(normalizeDashboard({ order: ['today'], off: [] }).order).toEqual([
       'today',
@@ -23,13 +26,14 @@ describe('dashboard layout', () => {
       'sleep',
       'feeding',
       'diaper',
+      'records',
     ]);
   });
 
   it('migrates the visible-cards list of older versions', () => {
     expect(normalizeDashboard(['diaper', 'weather', 'diaper', 7, 'sleep'])).toEqual({
-      order: ['diaper', 'sleep', 'timers', 'feeding', 'today'],
-      off: ['timers', 'feeding', 'today'],
+      order: ['diaper', 'sleep', 'timers', 'feeding', 'records', 'today'],
+      off: ['timers', 'feeding', 'records', 'today'],
     });
     expect(normalizeDashboard([])).toEqual({
       order: DEFAULT_DASHBOARD.order,

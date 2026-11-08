@@ -1,10 +1,14 @@
-export type DashboardCardId = 'timers' | 'sleep' | 'feeding' | 'diaper' | 'today';
+export type DashboardCardId = 'timers' | 'sleep' | 'feeding' | 'diaper' | 'records' | 'today';
 
 export const DASHBOARD_CARDS: Record<DashboardCardId, { title: string; description: string }> = {
   timers: { title: 'Running timers', description: 'Live clock and stop button for running timers' },
   sleep: { title: 'Sleep', description: 'Awake since, next nap, start sleep' },
   feeding: { title: 'Feeding', description: 'Last feed, next due, left / right / bottle' },
   diaper: { title: 'Diapers', description: 'Last change, one-tap wet / solid / both' },
+  records: {
+    title: 'More records',
+    description: 'Tummy time timer; pumping, temperature and growth',
+  },
   today: { title: "Today's totals", description: 'Feeds, diapers and sleep so far today' },
 };
 

@@ -66,7 +66,7 @@ run_flow() { # flow file, extra maestro args...
   maestro_status=1
 }
 
-for flow in "$FLOWS"/0[1-6]_*.yaml; do run_flow "$flow"; done
+for flow in "$FLOWS"/0[1-6]_*.yaml "$FLOWS"/08_*.yaml; do run_flow "$flow"; done
 xcrun simctl io "$UDID" screenshot "$OUT/screenshots/99-final-state.png" || true
 
 PARTNER="$OUT/partner"

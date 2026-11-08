@@ -74,7 +74,7 @@ run_flow() { # flow file, extra maestro args...
 }
 
 # 01-06 run on a fresh install each; 06 leaves reminders scheduled for the checks below.
-for flow in "$FLOWS"/0[1-6]_*.yaml; do run_flow "$flow"; done
+for flow in "$FLOWS"/0[1-6]_*.yaml "$FLOWS"/08_*.yaml; do run_flow "$flow"; done
 free -m | tee "$OUT/memory.txt"
 
 # Notification sync is debounced; give it a moment after the last tap.

@@ -1,0 +1,49 @@
+appId: com.babytracker.app.acc
+name: Tummy time timer, temperature and growth
+---
+- runFlow: subflows/onboard.yaml
+- scrollUntilVisible:
+    element:
+      id: 'card-records'
+- tapOn: 'Tummy time'
+- assertVisible: 'Stop tummy time'
+- takeScreenshot: 08-tummy-running
+# The undo bar can cover the buttons.
+- extendedWaitUntil:
+    notVisible: 'UNDO'
+    timeout: 10000
+- scrollUntilVisible:
+    element: 'Stop tummy time'
+- tapOn: 'Stop tummy time'
+- assertVisible: 'Tummy time today .*'
+- tapOn: 'Temperature'
+- assertVisible: 'Add temperature'
+- tapOn:
+    id: 'temperature'
+- inputText: '37.4'
+- runFlow:
+    file: subflows/dismiss-keyboard.yaml
+    env:
+      LABEL: 'Temperature \(°C\)'
+- tapOn: 'Save'
+- scrollUntilVisible:
+    element: 'Temperature 37.4 °C · .*'
+- tapOn: 'Growth'
+- assertVisible: 'Add growth'
+- tapOn:
+    id: 'growth-weight'
+- inputText: '4.25'
+- runFlow:
+    file: subflows/dismiss-keyboard.yaml
+    env:
+      LABEL: 'Weight \(kg\)'
+- tapOn: 'Save'
+- scrollUntilVisible:
+    element: 'Growth 4.25 kg · .*'
+- takeScreenshot: 08-more-records
+# Timeline rows: Android exposes the row's texts, iOS its label ("Edit Growth · 4.25 kg at 10:15").
+- tapOn: 'Timeline'
+- assertVisible: '(Edit )?Growth · 4.25 kg( at .*)?'
+- assertVisible: '(Edit )?Temperature · 37.4 °C( at .*)?'
+- assertVisible: '(Edit )?Tummy time( at .*)?'
+- takeScreenshot: 08-timeline

@@ -2,6 +2,7 @@ import * as Notifications from 'expo-notifications';
 import { AndroidAudioContentType, AndroidAudioUsage, AndroidImportance } from 'expo-notifications';
 import { Platform } from 'react-native';
 
+import { LIVE_TIMER_KINDS } from '@/domain/entries';
 import type { Reminder } from '@/domain/reminders';
 import type { Entry } from '@/domain/types';
 
@@ -89,7 +90,10 @@ export async function syncNotifications(
   running: Entry[],
   childName: string,
 ): Promise<void> {
-  const timers = running.map((e) => liveTimerFor(e, childName));
+  // Tummy time stays in the app: the lock-screen styles exist for sleep and feeding only.
+  const timers = running
+    .filter((e) => LIVE_TIMER_KINDS.includes(e.kind))
+    .map((e) => liveTimerFor(e, childName));
   // Live Activities need no notification permission, so these go first.
   const live = await syncLiveTimers(timers, CHANNEL_TIMERS).catch(() => false);
   if (!(await Notifications.getPermissionsAsync()).granted) return;

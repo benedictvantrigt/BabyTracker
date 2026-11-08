@@ -1,4 +1,6 @@
 import type { Repo, SyncChange } from '@/db/repo';
+import { ENTRY_KINDS, LIVE_TIMER_KINDS } from '@/domain/entries';
+import type { EntryKind } from '@/domain/types';
 
 import { RelayClient, RelayError, type RelayDevice } from './client';
 import {
@@ -79,7 +81,8 @@ function isSyncChange(value: unknown): value is SyncChange {
   if (type === 'entry') {
     return (
       typeof row.childId === 'string' &&
-      (row.kind === 'feeding' || row.kind === 'sleep' || row.kind === 'diaper') &&
+      typeof row.kind === 'string' &&
+      ENTRY_KINDS.includes(row.kind as EntryKind) &&
       typeof row.start === 'number' &&
       typeof row.data === 'object'
     );
@@ -91,7 +94,8 @@ function isSyncChange(value: unknown): value is SyncChange {
 function touchesTimer(body: string): boolean {
   try {
     const change = JSON.parse(body) as SyncChange;
-    if (change.type !== 'entry' || change.row.kind === 'diaper') return false;
+    // Only sleep and feeding timers show outside the app.
+    if (change.type !== 'entry' || !LIVE_TIMER_KINDS.includes(change.row.kind)) return false;
     // Running, or stopped in the last couple of minutes.
     return change.row.end === null || change.row.updatedAt - change.row.end < 2 * 60_000;
   } catch {

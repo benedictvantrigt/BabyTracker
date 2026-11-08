@@ -8,7 +8,15 @@ import { ThemedView } from '@/components/themed-view';
 import { Button, DateTimeField, Field, Segmented, ToggleRow } from '@/components/ui';
 import { MaxContentWidth, Spacing } from '@/constants/theme';
 import { useAction, useAppData } from '@/data/app-data';
-import { FEEDING_METHOD_LABEL, KIND_LABEL, isNapStart } from '@/domain/entries';
+import {
+  ENTRY_KINDS,
+  FEEDING_METHOD_LABEL,
+  KIND_LABEL,
+  PUMPING_SIDE_LABEL,
+  TEMPERATURE_SITE_LABEL,
+  isNapStart,
+  isTimedKind,
+} from '@/domain/entries';
 import { addTag } from '@/domain/tags';
 import { MINUTE } from '@/domain/time';
 import type {
@@ -18,10 +26,10 @@ import type {
   EntryKind,
   FeedingMethod,
   FeedingType,
+  PumpingSide,
+  TemperatureSite,
 } from '@/domain/types';
 import { useTheme } from '@/hooks/use-theme';
-
-const KINDS: EntryKind[] = ['feeding', 'sleep', 'diaper'];
 
 function options<T extends string>(labels: Record<T, string>, keys: T[]) {
   return keys.map((value) => ({ value, label: labels[value] }));
@@ -42,6 +50,28 @@ const COLOR_OPTIONS: { value: DiaperColor | 'none'; label: string }[] = [
   { value: 'green', label: 'Green' },
   { value: 'black', label: 'Black' },
 ];
+const SIDE_OPTIONS = options(PUMPING_SIDE_LABEL, ['left', 'right', 'both']);
+const SITE_OPTIONS: { value: TemperatureSite | 'none'; label: string }[] = [
+  { value: 'none', label: '–' },
+  ...options(TEMPERATURE_SITE_LABEL, ['armpit', 'rectal', 'ear', 'forehead']),
+];
+/** Minutes a new entry of a timed kind lasts by default. */
+const DEFAULT_MINUTES: Partial<Record<EntryKind, number>> = {
+  sleep: 60,
+  feeding: 15,
+  tummy: 10,
+  pumping: 15,
+};
+
+/** A number typed by hand ("4,25" or "4.25"); undefined when left empty, NaN when invalid. */
+function parseNumber(text: string): number | undefined {
+  const trimmed = text.trim().replace(',', '.');
+  return trimmed ? Number(trimmed) : undefined;
+}
+
+function numberText(value: number | undefined, divisor = 1): string {
+  return value === undefined ? '' : String(Number((value / divisor).toFixed(3)));
+}
 
 interface FormState {
   start: number;
@@ -53,6 +83,13 @@ interface FormState {
   wet: boolean;
   solid: boolean;
   color: DiaperColor | 'none';
+  pumpingSide: PumpingSide;
+  celsius: string;
+  site: TemperatureSite | 'none';
+  /** Kilograms, as typed. */
+  weight: string;
+  length: string;
+  head: string;
   notes: string;
   tags: string[];
   /** A tag typed but not yet added; saved with the entry. */
@@ -65,7 +102,7 @@ function initialState(
   napNow: boolean,
 ): FormState {
   const now = Date.now();
-  const defaultLength = kind === 'sleep' ? 60 * MINUTE : kind === 'feeding' ? 15 * MINUTE : 0;
+  const defaultLength = (DEFAULT_MINUTES[kind] ?? 0) * MINUTE;
   return {
     start: now - defaultLength,
     end: now,
@@ -76,6 +113,12 @@ function initialState(
     wet: true,
     solid: false,
     color: 'none',
+    pumpingSide: 'both',
+    celsius: '',
+    site: 'none',
+    weight: '',
+    length: '',
+    head: '',
     notes: '',
     tags: [],
     tagDraft: '',
@@ -106,6 +149,27 @@ function stateFromEntry(entry: Entry): FormState {
         wet: entry.data.wet,
         solid: entry.data.solid,
         color: entry.data.color ?? 'none',
+      };
+    case 'tummy':
+      return base;
+    case 'pumping':
+      return {
+        ...base,
+        pumpingSide: entry.data.side,
+        amount: entry.data.amount ? String(entry.data.amount) : '',
+      };
+    case 'temperature':
+      return {
+        ...base,
+        celsius: entry.data.celsius.toFixed(1),
+        site: entry.data.site ?? 'none',
+      };
+    case 'growth':
+      return {
+        ...base,
+        weight: numberText(entry.data.weightGrams, 1000),
+        length: numberText(entry.data.lengthCm),
+        head: numberText(entry.data.headCm),
       };
   }
 }
@@ -140,12 +204,56 @@ function toInput(kind: EntryKind, s: FormState): EntryInput {
         tags,
         data: { wet: s.wet, solid: s.solid, ...(s.color !== 'none' && { color: s.color }) },
       };
+    case 'tummy':
+      return { kind, start: s.start, end: s.end, notes, tags, data: {} };
+    case 'pumping': {
+      const amount = parseNumber(s.amount);
+      return {
+        kind,
+        start: s.start,
+        end: s.end,
+        notes,
+        tags,
+        data: { side: s.pumpingSide, ...(amount !== undefined && { amount }) },
+      };
+    }
+    case 'temperature': {
+      // Left empty, it is NaN: validation then explains the range.
+      const celsius = Math.round((parseNumber(s.celsius) ?? NaN) * 10) / 10;
+      return {
+        kind,
+        start: s.start,
+        end: s.start,
+        notes,
+        tags,
+        data: { celsius, ...(s.site !== 'none' && { site: s.site }) },
+      };
+    }
+    case 'growth': {
+      const kg = parseNumber(s.weight);
+      const length = parseNumber(s.length);
+      const head = parseNumber(s.head);
+      return {
+        kind,
+        start: s.start,
+        end: s.start,
+        notes,
+        tags,
+        data: {
+          ...(kg !== undefined && { weightGrams: Math.round(kg * 1000) }),
+          ...(length !== undefined && { lengthCm: Math.round(length * 10) / 10 }),
+          ...(head !== undefined && { headCm: Math.round(head * 10) / 10 }),
+        },
+      };
+    }
   }
 }
 
 export default function EntryScreen() {
   const params = useLocalSearchParams<{ kind: string; id?: string; method?: string }>();
-  const kind = (KINDS as string[]).includes(params.kind) ? (params.kind as EntryKind) : null;
+  const kind = (ENTRY_KINDS as readonly string[]).includes(params.kind)
+    ? (params.kind as EntryKind)
+    : null;
   const { repo, activeChild, settings } = useAppData();
   const run = useAction((message) => Alert.alert('Could not save', message));
   const theme = useTheme();
@@ -186,6 +294,23 @@ export default function EntryScreen() {
   const editing = Boolean(params.id);
   const running = form.end === null;
   const isBreast = form.feedingType === 'breast_milk';
+  const timed = isTimedKind(kind);
+  const numberInput = (
+    value: string,
+    onChange: (text: string) => void,
+    testID: string,
+    placeholder: string,
+  ) => (
+    <TextInput
+      value={value}
+      onChangeText={onChange}
+      testID={testID}
+      keyboardType="decimal-pad"
+      placeholder={placeholder}
+      placeholderTextColor={theme.textSecondary}
+      style={[styles.textInput, { color: theme.text, borderColor: theme.border }]}
+    />
+  );
 
   const save = async () => {
     const input = toInput(kind, form);
@@ -283,11 +408,51 @@ export default function EntryScreen() {
           </>
         )}
 
-        <Field label={kind === 'diaper' ? 'Time' : 'Start'}>
+        {kind === 'pumping' && (
+          <>
+            <Field label="Side">
+              <Segmented
+                options={SIDE_OPTIONS}
+                value={form.pumpingSide}
+                onChange={(pumpingSide) => set({ pumpingSide })}
+              />
+            </Field>
+            <Field label="Amount (ml)">
+              {numberInput(form.amount, (amount) => set({ amount }), 'pump-amount', 'e.g. 90')}
+            </Field>
+          </>
+        )}
+
+        {kind === 'temperature' && (
+          <>
+            <Field label="Temperature (°C)">
+              {numberInput(form.celsius, (celsius) => set({ celsius }), 'temperature', 'e.g. 37.2')}
+            </Field>
+            <Field label="Measured">
+              <Segmented options={SITE_OPTIONS} value={form.site} onChange={(site) => set({ site })} />
+            </Field>
+          </>
+        )}
+
+        {kind === 'growth' && (
+          <>
+            <Field label="Weight (kg)">
+              {numberInput(form.weight, (weight) => set({ weight }), 'growth-weight', 'e.g. 4.25')}
+            </Field>
+            <Field label="Length (cm)">
+              {numberInput(form.length, (length) => set({ length }), 'growth-length', 'e.g. 55')}
+            </Field>
+            <Field label="Head circumference (cm)">
+              {numberInput(form.head, (head) => set({ head }), 'growth-head', 'e.g. 37.5')}
+            </Field>
+          </>
+        )}
+
+        <Field label={timed ? 'Start' : 'Time'}>
           <DateTimeField value={form.start} onChange={(start) => set({ start })} />
         </Field>
 
-        {kind !== 'diaper' && (
+        {timed && (
           <>
             {editing && (
               <ToggleRow

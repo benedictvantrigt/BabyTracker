@@ -14,6 +14,13 @@ before 1.0.0 a minor version marks a phase of the plan.
   Likewise the later bedtime: 18:30 at 9–12 weeks, 19:00 at 12–16 weeks.
 - Sleep card: "Today's plan" shows the guide's day and night sleep for the baby's age
   under the times.
+- New records (#8, #9, #10, #11): tummy time (a timer), pumping (side and amount),
+  temperature (°C and where it was measured) and growth (weight, length and head
+  circumference). They are in the timeline, sync to the partner phone and take notes and
+  tags. A new Today card, "More records", starts and stops tummy time, opens the other
+  forms and shows today's tummy time, pumped milk and the latest temperature and growth.
+  It can be turned off or moved like the other cards. Phones on 0.7.0 skip these records:
+  update both phones.
 
 ## [0.7.0] — 2026-11-08 — Live timers and security fixes
 

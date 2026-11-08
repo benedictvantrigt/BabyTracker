@@ -19,6 +19,10 @@ export const Colors = {
     feeding: '#D6409F',
     sleep: '#6E56CF',
     diaper: '#AB6400',
+    tummy: '#218358',
+    pumping: '#0D74CE',
+    temperature: '#CC4E00',
+    growth: '#008573',
   },
   dark: {
     text: '#ffffff',
@@ -33,6 +37,10 @@ export const Colors = {
     feeding: '#F38CC4',
     sleep: '#B1A9FF',
     diaper: '#FFCA16',
+    tummy: '#3DD68C',
+    pumping: '#70B8FF',
+    temperature: '#FF9E5E',
+    growth: '#0BD8B6',
   },
 } as const;
 

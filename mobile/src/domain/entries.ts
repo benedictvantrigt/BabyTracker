@@ -8,14 +8,58 @@ import type {
   FeedingData,
   FeedingMethod,
   FeedingType,
+  GrowthData,
+  PumpingData,
+  PumpingSide,
   Settings,
+  TemperatureData,
+  TemperatureSite,
 } from './types';
+
+export const ENTRY_KINDS: readonly EntryKind[] = [
+  'feeding',
+  'sleep',
+  'diaper',
+  'tummy',
+  'pumping',
+  'temperature',
+  'growth',
+];
+
+/** Kinds whose running timer shows outside the app (notification, Live Activity). */
+export const LIVE_TIMER_KINDS: readonly EntryKind[] = ['sleep', 'feeding'];
 
 export const KIND_LABEL: Record<EntryKind, string> = {
   feeding: 'Feeding',
   sleep: 'Sleep',
   diaper: 'Diaper',
+  tummy: 'Tummy time',
+  pumping: 'Pumping',
+  temperature: 'Temperature',
+  growth: 'Growth',
 };
+
+export const PUMPING_SIDE_LABEL: Record<PumpingSide, string> = {
+  left: 'Left',
+  right: 'Right',
+  both: 'Both',
+};
+
+export const TEMPERATURE_SITE_LABEL: Record<TemperatureSite, string> = {
+  armpit: 'Armpit',
+  rectal: 'Rectal',
+  ear: 'Ear',
+  forehead: 'Forehead',
+};
+
+/** Limits for measurements typed by hand, to catch typos (e.g. weight in grams for kg). */
+export const LIMITS = {
+  amountMl: [1, 1000],
+  celsius: [34, 43],
+  weightGrams: [300, 30000],
+  lengthCm: [30, 130],
+  headCm: [20, 60],
+} as const;
 
 export const FEEDING_TYPE_LABEL: Record<FeedingType, string> = {
   breast_milk: 'Breast milk',
@@ -32,9 +76,9 @@ export const FEEDING_METHOD_LABEL: Record<FeedingMethod, string> = {
   self: 'Self-fed',
 };
 
-/** Kinds with a duration; diapers are instant. */
+/** Kinds with a duration; diapers, temperatures and growth measurements are instant. */
 export function isTimedKind(kind: EntryKind): boolean {
-  return kind !== 'diaper';
+  return kind !== 'diaper' && kind !== 'temperature' && kind !== 'growth';
 }
 
 export function isRunning(entry: Entry): boolean {
@@ -57,6 +101,32 @@ export function feedingLabel(data: FeedingData): string {
   return FEEDING_METHOD_LABEL[data.method];
 }
 
+export function pumpingLabel(data: PumpingData): string {
+  const side = PUMPING_SIDE_LABEL[data.side];
+  return data.amount ? `${side} · ${data.amount} ml` : side;
+}
+
+/** "37.8 °C". */
+export function temperatureLabel(data: TemperatureData): string {
+  return `${data.celsius.toFixed(1)} °C`;
+}
+
+/** Up to `digits` decimals without trailing zeros: 4.25, 55, 37.5. */
+function decimal(value: number, digits: number): string {
+  return String(Number(value.toFixed(digits)));
+}
+
+/** "4.25 kg · 55 cm · head 37.5 cm", leaving out what was not measured. */
+export function growthLabel(data: GrowthData): string {
+  return [
+    data.weightGrams !== undefined && `${decimal(data.weightGrams / 1000, 3)} kg`,
+    data.lengthCm !== undefined && `${decimal(data.lengthCm, 1)} cm`,
+    data.headCm !== undefined && `head ${decimal(data.headCm, 1)} cm`,
+  ]
+    .filter(Boolean)
+    .join(' · ');
+}
+
 /** One-line description, e.g. "Feeding · Left" or "Nap". */
 export function entryTitle(entry: Entry): string {
   switch (entry.kind) {
@@ -66,6 +136,14 @@ export function entryTitle(entry: Entry): string {
       return entry.data.nap ? 'Nap' : 'Night sleep';
     case 'diaper':
       return `Diaper · ${diaperLabel(entry.data)}`;
+    case 'tummy':
+      return 'Tummy time';
+    case 'pumping':
+      return `Pumping · ${pumpingLabel(entry.data)}`;
+    case 'temperature':
+      return `Temperature · ${temperatureLabel(entry.data)}`;
+    case 'growth':
+      return `Growth · ${growthLabel(entry.data)}`;
   }
 }
 
@@ -91,11 +169,36 @@ export function validateEntry(input: EntryInput, now: number): string | null {
     if (input.end !== input.start) return 'A diaper change has no duration.';
     if (!input.data.wet && !input.data.solid) return 'Pick wet, solid or both.';
   }
-  if (input.kind === 'feeding' && input.data.amount !== undefined) {
-    if (!(input.data.amount > 0) || input.data.amount > 1000)
-      return 'Amount must be between 1 and 1000 ml.';
+  if ((input.kind === 'feeding' || input.kind === 'pumping') && input.data.amount !== undefined) {
+    if (!within(input.data.amount, LIMITS.amountMl)) return 'Amount must be between 1 and 1000 ml.';
+  }
+  if (input.kind === 'temperature') {
+    if (input.end !== input.start) return 'A temperature reading has no duration.';
+    if (!within(input.data.celsius, LIMITS.celsius)) {
+      return 'Temperature must be between 34 and 43 °C.';
+    }
+  }
+  if (input.kind === 'growth') {
+    if (input.end !== input.start) return 'A measurement has no duration.';
+    const { weightGrams, lengthCm, headCm } = input.data;
+    if (weightGrams === undefined && lengthCm === undefined && headCm === undefined) {
+      return 'Enter the weight, length or head circumference.';
+    }
+    if (weightGrams !== undefined && !within(weightGrams, LIMITS.weightGrams)) {
+      return 'Weight must be between 0.3 and 30 kg.';
+    }
+    if (lengthCm !== undefined && !within(lengthCm, LIMITS.lengthCm)) {
+      return 'Length must be between 30 and 130 cm.';
+    }
+    if (headCm !== undefined && !within(headCm, LIMITS.headCm)) {
+      return 'Head circumference must be between 20 and 60 cm.';
+    }
   }
   return null;
+}
+
+function within(value: number, [min, max]: readonly [number, number]): boolean {
+  return Number.isFinite(value) && value >= min && value <= max;
 }
 
 /** Most recent entry of a kind (by start), ignoring deleted rows. Entries may be in any order. */
@@ -134,6 +237,10 @@ export interface DaySummary {
   /** Sleep ms overlapping the day, counting running sleep up to `now`. */
   sleepMs: number;
   naps: number;
+  /** Tummy time ms started that day, counting a running session up to `now`. */
+  tummyMs: number;
+  /** Total pumped volume in ml. */
+  pumpedMl: number;
 }
 
 /** Totals for the local day containing `now`. */
@@ -148,6 +255,8 @@ export function summarizeDay(entries: Entry[], now: number): DaySummary {
     solid: 0,
     sleepMs: 0,
     naps: 0,
+    tummyMs: 0,
+    pumpedMl: 0,
   };
   for (const e of entries) {
     if (e.deletedAt !== null) continue;
@@ -173,6 +282,12 @@ export function summarizeDay(entries: Entry[], now: number): DaySummary {
         if (inDay && e.data.nap) s.naps += 1;
         break;
       }
+      case 'tummy':
+        if (inDay) s.tummyMs += Math.max(0, Math.min(e.end ?? now, now) - e.start);
+        break;
+      case 'pumping':
+        if (inDay) s.pumpedMl += e.data.amount ?? 0;
+        break;
     }
   }
   return s;

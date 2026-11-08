@@ -24,6 +24,10 @@ export const KIND_ICON: Record<EntryKind, SymbolName> = {
   feeding: { ios: 'waterbottle.fill', android: 'local_drink' },
   sleep: { ios: 'moon.zzz.fill', android: 'bedtime' },
   diaper: { ios: 'drop.fill', android: 'baby_changing_station' },
+  tummy: { ios: 'figure.child', android: 'child_care' },
+  pumping: { ios: 'drop.halffull', android: 'water_drop' },
+  temperature: { ios: 'thermometer.medium', android: 'thermostat' },
+  growth: { ios: 'ruler.fill', android: 'straighten' },
 };
 
 export function Icon({
