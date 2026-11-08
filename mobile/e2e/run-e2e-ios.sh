@@ -32,19 +32,38 @@ export MAESTRO_DRIVER_STARTUP_TIMEOUT=240000
 echo "== maestro $(maestro --version 2>&1 | tail -1) =="
 maestro_status=0
 
-run_flow() { # flow file, extra maestro args...
-  local flow="$1"
-  shift
-  local name
-  name="$(basename "$flow" .yaml)"
-  echo "== $name =="
+# Simulator faults rather than test failures: no report (Maestro hung before the flow ran)
+# or Maestro lost its driver on the Simulator. A flow that hit one is run once more, as on
+# Android (run-e2e.sh).
+infra_failure() { # report file
+  [ ! -s "$1" ] || grep -qE 'DeviceUnreachableException|XCTestDriverUnreachable' "$1"
+}
+
+run_maestro() { # name, flow file, extra maestro args...
+  local name="$1" flow="$2"
+  shift 2
   (
     cd "$OUT/screenshots" &&
       perl -e 'alarm shift; exec @ARGV' 600 maestro --device "$UDID" test --format junit \
         --output "$OUT/report-$name.xml" --test-output-dir "$OUT/maestro-output/$name" \
         "$@" "$flow" < /dev/null
   ) 2>&1 | tee -a "$OUT/maestro.txt"
-  [ "${PIPESTATUS[0]}" -eq 0 ] || maestro_status=1
+  return "${PIPESTATUS[0]}"
+}
+
+run_flow() { # flow file, extra maestro args...
+  local flow="$1"
+  shift
+  local name
+  name="$(basename "$flow" .yaml)"
+  echo "== $name =="
+  run_maestro "$name" "$flow" "$@" && return 0
+  if infra_failure "$OUT/report-$name.xml"; then
+    echo "== $name: Simulator fault, running it once more ==" | tee -a "$OUT/maestro.txt"
+    mv "$OUT/report-$name.xml" "$OUT/report-$name-attempt1.xml.txt" 2>/dev/null
+    run_maestro "$name" "$flow" "$@" && return 0
+  fi
+  maestro_status=1
 }
 
 for flow in "$FLOWS"/0[1-6]_*.yaml; do run_flow "$flow"; done
