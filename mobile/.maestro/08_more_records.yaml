@@ -38,7 +38,8 @@ name: Tummy time timer, temperature and growth
 - runFlow:
     file: subflows/dismiss-keyboard.yaml
     env:
-      LABEL: 'Temperature \(°C\)'
+      # A label in view: the field's own label scrolls under the header with the keyboard up.
+      LABEL: 'Measured'
 - tapOn: 'Save'
 - scrollUntilVisible:
     element: 'Temperature 37.4 °C · .*'
@@ -60,7 +61,7 @@ name: Tummy time timer, temperature and growth
 - runFlow:
     file: subflows/dismiss-keyboard.yaml
     env:
-      LABEL: 'Weight \(kg\)'
+      LABEL: 'Length \(cm\)'
 - tapOn: 'Save'
 - scrollUntilVisible:
     element: 'Growth 4.25 kg · .*'
