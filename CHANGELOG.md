@@ -5,6 +5,11 @@ before 1.0.0 a minor version marks a phase of the plan.
 
 ## Unreleased
 
+- Live timers (#15): a running sleep or breastfeeding timer counts up outside the app without
+  the app updating it. Android: ongoing notification with a chronometer, requested as a Live
+  Update on Android 16+ (status bar chip, lock screen), from a small native module
+  (`mobile/modules/timer-notification`). iPhone: a Live Activity on the lock screen and in the
+  Dynamic Island (`expo-widgets`), falling back to a plain notification when switched off.
 - Screen readers: the Stop button of a running timer on the Today screen is now reachable
   on iOS (it sat inside the tappable card, which hid it from VoiceOver); timeline rows read
   out their notes and tags.
