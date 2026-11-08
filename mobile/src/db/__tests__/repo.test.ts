@@ -219,4 +219,44 @@ describe('Repo', () => {
     await repo.updateSettings({ dashboardLayout: { order: ['sleep'], off: [] } });
     expect((await repo.getSettings()).dashboardLayout.off).toEqual([]);
   });
+
+  describe('family members (#41)', () => {
+    const state = { familyId: 'f', relayUrl: 'https://relay.example', lastSeq: 0 };
+
+    it('starts with the given members and announces them', async () => {
+      const { repo } = await setup();
+      await repo.startSync(state, true, [{ id: 'me', addedBy: 'inviter' }]);
+      expect((await repo.listMembers()).map((m) => [m.id, m.addedBy])).toEqual([
+        ['me', 'inviter'],
+      ]);
+      const bodies = (await repo.outboxBatch(10)).map((o) => JSON.parse(o.body));
+      expect(bodies).toEqual([{ type: 'member', row: expect.objectContaining({ id: 'me' }) }]);
+    });
+
+    it('keeps a removed phone removed, whatever copy arrives later', async () => {
+      const { repo, now, advance } = await setup();
+      await repo.startSync(state, true, [{ id: 'me', addedBy: null }]);
+      const ghost = { id: 'x', addedBy: 'me', updatedAt: now(), removedAt: null };
+      await repo.applyRemote([{ type: 'member', row: ghost }], 1);
+      expect((await repo.listMembers()).find((m) => m.id === 'x')?.removedAt).toBeNull();
+
+      advance(1000);
+      await repo.removeMember('x');
+      advance(1000);
+      // A newer copy without the removal (e.g. replayed) does not bring it back.
+      await repo.applyRemote([{ type: 'member', row: { ...ghost, updatedAt: now() } }], 2);
+      expect((await repo.listMembers()).find((m) => m.id === 'x')?.removedAt).not.toBeNull();
+    });
+
+    it('puts members in the snapshot and forgets them when sync stops', async () => {
+      const { repo } = await setup();
+      await repo.startSync(state, false, [{ id: 'me', addedBy: null }]);
+      await repo.ackOutbox(Number.MAX_SAFE_INTEGER);
+      await repo.enqueueSnapshot();
+      const types = (await repo.outboxBatch(100)).map((o) => JSON.parse(o.body).type);
+      expect(types).toContain('member');
+      await repo.stopSync();
+      expect(await repo.listMembers()).toEqual([]);
+    });
+  });
 });

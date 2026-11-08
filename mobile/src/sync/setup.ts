@@ -41,7 +41,9 @@ export async function createFamily(deps: SyncDeps, relayUrl: string): Promise<Sy
   const client = new RelayClient(relayUrl, familyId, deviceSecret, deps.fetch);
   await client.createFamily();
   await saveSecrets(store, familyKey, deviceSecret);
-  await repo.startSync({ familyId, relayUrl: relayUrl.replace(/\/+$/, ''), lastSeq: 0 }, false);
+  await repo.startSync({ familyId, relayUrl: relayUrl.replace(/\/+$/, ''), lastSeq: 0 }, false, [
+    { id: client.deviceId, addedBy: null },
+  ]);
   const engine = new SyncEngine(repo, client, familyKey, deviceSecret, store, random);
   await engine.sync();
   return engine;
@@ -59,9 +61,19 @@ export async function joinFamily(deps: SyncDeps, code: string): Promise<SyncEngi
   await client.join(invite.inviteSecret);
   const familyKey = { key: invite.familyKey, epoch: invite.keyEpoch };
   await saveSecrets(store, familyKey, deviceSecret);
+  // Trusted from the start: this phone and the one that invited it; the others follow from
+  // the member list in the family's snapshot. Codes from before 0.7 name no inviter: then
+  // the first sync trusts the phones the relay lists (SyncEngine.trustedIds).
+  const members = invite.inviterId
+    ? [
+        { id: client.deviceId, addedBy: invite.inviterId },
+        { id: invite.inviterId, addedBy: null },
+      ]
+    : [];
   await repo.startSync(
     { familyId: invite.familyId, relayUrl: invite.relayUrl.replace(/\/+$/, ''), lastSeq: 0 },
     true,
+    members,
   );
   const engine = new SyncEngine(repo, client, familyKey, deviceSecret, store, random);
   await engine.sync();

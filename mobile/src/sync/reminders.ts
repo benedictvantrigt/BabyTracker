@@ -29,7 +29,7 @@ export async function publishReminders(repo: Repo, engine: SyncEngine, now = Dat
       reminders.push({
         tag: `${r.id}-${index}`,
         fireAt: r.fireAt,
-        body: engine.seal(JSON.stringify(payload)),
+        body: engine.sealReminder(JSON.stringify(payload)),
       });
     }
   }
@@ -38,7 +38,7 @@ export async function publishReminders(repo: Repo, engine: SyncEngine, now = Dat
 
 export function openReminder(engine: SyncEngine, sealed: string): ReminderPayload | null {
   try {
-    const value = JSON.parse(engine.open(sealed));
+    const value = JSON.parse(engine.openReminder(sealed));
     if (typeof value.title !== 'string' || typeof value.body !== 'string') return null;
     return { title: value.title, body: value.body, alarm: value.alarm === true };
   } catch {

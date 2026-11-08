@@ -57,6 +57,8 @@ async function renderSummary(repo: Repo, now = Date.now()): Promise<WidgetRepres
   };
 }
 
+// Clicks only come from the widget's own buttons: the library's receiver is not exported,
+// so other apps cannot send it WIDGET_CLICK (#42; CI checks the APK's manifest).
 async function handleClick(repo: Repo, action?: string, data?: Record<string, unknown>) {
   const [settings, children] = await Promise.all([repo.getSettings(), repo.listChildren()]);
   const child = children.find((c) => c.id === settings.activeChildId) ?? children[0];

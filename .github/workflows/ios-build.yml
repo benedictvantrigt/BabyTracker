@@ -8,7 +8,7 @@ name: iOS build
 on:
   push:
     branches-ignore: [e2e-results, e2e-results-ios]
-    paths: ['mobile/**', 'relay/**', '.github/workflows/ios-build.yml']
+    paths: ['mobile/**', 'relay/**', '.github/scripts/**', '.github/workflows/ios-build.yml']
   workflow_dispatch:
 
 concurrency:
@@ -90,19 +90,15 @@ jobs:
           xcrun simctl bootstatus "$udid" -b
           echo "udid=$udid" >> "$GITHUB_OUTPUT"
 
-      - name: Install Maestro
-        # The installer exits 0 even when its download fails (seen: HTTP 504), so check for
-        # the binary and retry.
-        run: |
-          for attempt in 1 2 3; do
-            curl -Ls "https://get.maestro.mobile.dev" | bash
-            [ -x "$HOME/.maestro/bin/maestro" ] && break
-            echo "Maestro download failed (attempt $attempt), retrying"
-            sleep 30
-          done
-          "$HOME/.maestro/bin/maestro" --version
-          echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
+      - name: Cache Maestro
+        uses: actions/cache@v4
+        with:
+          path: ~/.maestro
+          key: maestro-2.12.1-${{ runner.os }}
 
+      - name: Install Maestro
+        working-directory: ${{ github.workspace }}
+        run: bash .github/scripts/install-maestro.sh 2.12.1 54dbb0716425626604973cbb374c585ca30272375d9ce15177a1152765ddd9d7
       - name: Run E2E on the Simulator
         timeout-minutes: 75
         run: |

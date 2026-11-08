@@ -49,6 +49,14 @@ const MIGRATIONS: string[] = [
   `
   ALTER TABLE entries ADD COLUMN tags TEXT NOT NULL DEFAULT '[]';
   `,
+  `
+  CREATE TABLE members (
+    id TEXT PRIMARY KEY NOT NULL,
+    added_by TEXT,
+    updated_at INTEGER NOT NULL,
+    removed_at INTEGER
+  );
+  `,
 ];
 
 export const SCHEMA_VERSION = MIGRATIONS.length;

@@ -40,6 +40,17 @@ See [docs/ROADMAP.md](docs/ROADMAP.md) for the plan and the feature backlog.
   family key, wrapped for each remaining phone with X25519 on its device key, so neither the
   relay nor the removed phone can open it; the old log is dropped and the remover uploads a
   snapshot. "Delete family" wipes the family from the relay; every phone keeps its own log.
+- **A relay that lies (#41):** the phones do not take the relay's word for who is in the family.
+  Each phone keeps a member list that travels in the encrypted log (a `member` change, which
+  only holders of the family key can write): a joining phone announces itself and trusts the
+  phone that invited it (its id is in the invite code). A new family key is only accepted when
+  a trusted phone wrapped it, and "Remove" only wraps the new key for trusted phones; a phone
+  only the relay lists shows as "Unknown phone" with a warning. Everything sealed is bound to
+  its purpose as associated data (change + family + key epoch, reminder, device name, key
+  wrap + epoch + recipient), so the relay cannot replay an old wrapped key or move ciphertext
+  around. Partner sync shows a safety code of the trusted phones that both parents can
+  compare. Families from before 0.7 trust the relay's list once, on the first sync after the
+  update.
 - **Retention:** the relay deletes changes every phone has received. Inviting a phone first
   uploads a snapshot, and nothing is deleted while an invite is open.
 
@@ -91,6 +102,40 @@ Each relay has its own Durable Object storage and secrets, so the two never shar
 
 Without the Cloudflare secrets the deploy is skipped; without a Firebase secret that relay
 runs without push and the app schedules reminders on the phone itself.
+
+### Signing keys
+
+Release APKs are signed with our own keys (`mobile/plugins/with-release-signing.js`), not the
+debug key in the Expo template, which is public: anyone holding it could build an APK that
+installs as an update over the app and reads its data. Each app has its own key:
+
+| | Acceptance (`com.babytracker.app.acc`) | Production (`com.babytracker.app`) |
+|---|---|---|
+| Where the secrets live | repository secrets | secrets of the GitHub environment `production`, deployment branches: `main` only |
+| Secrets | `ANDROID_KEYSTORE_ACC_BASE64`, `ANDROID_KEYSTORE_ACC_PASSWORD`, `ANDROID_KEY_ACC_ALIAS` | `ANDROID_KEYSTORE_PROD_BASE64`, `ANDROID_KEYSTORE_PROD_PASSWORD`, `ANDROID_KEY_PROD_ALIAS` |
+| Without them | the APK keeps the debug key, with a warning | the release fails |
+| Optional pin (repository variable) | `ANDROID_CERT_SHA256_ACC` | `ANDROID_CERT_SHA256_PROD` |
+
+The production key stays out of the repository secrets because every branch build can read
+those. To create a key (keep the file and password offline as well; a lost key means no
+more updates without reinstalling):
+
+```bash
+keytool -genkeypair -v -storetype PKCS12 -keystore babytracker-prod.keystore \
+  -alias babytracker -keyalg RSA -keysize 4096 -validity 10000
+base64 -w0 babytracker-prod.keystore   # value of ANDROID_KEYSTORE_PROD_BASE64
+keytool -list -v -keystore babytracker-prod.keystore | grep SHA256   # optional pin
+```
+
+With PKCS12 the key password is the keystore password. CI prints each APK's certificate
+SHA-256 in the run summary and refuses to release a production APK signed with the debug key
+or, when the pin is set, with any other key. Local release builds without
+`ANDROID_KEYSTORE_PATH` keep the debug key.
+
+Phones that installed an APK signed with the old debug key (0.6.0 and earlier) cannot update
+to one with the new key: Android requires the same signature. Move them one at a time: sync,
+uninstall, install the new APK, and join again from the other phone's invite; the log comes
+back from that phone.
 
 ## Versions and branches
 

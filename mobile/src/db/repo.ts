@@ -66,6 +66,35 @@ function toChild(row: ChildRow): Child {
   };
 }
 
+interface MemberRow {
+  id: string;
+  added_by: string | null;
+  updated_at: number;
+  removed_at: number | null;
+}
+
+/**
+ * A phone this phone trusts as part of the family (#41), by device id. The list travels in
+ * the encrypted log, so the relay cannot add a phone to it; only the family key's holders
+ * can. A removed phone stays removed.
+ */
+export interface Member {
+  id: string;
+  /** The phone that invited it; null for the phone that created the family. */
+  addedBy: string | null;
+  updatedAt: number;
+  removedAt: number | null;
+}
+
+function toMember(row: MemberRow): Member {
+  return {
+    id: row.id,
+    addedBy: row.added_by,
+    updatedAt: row.updated_at,
+    removedAt: row.removed_at,
+  };
+}
+
 const ENTRY_COLUMNS =
   'id, child_id, kind, start, "end", data, notes, tags, created_at, updated_at, deleted_at';
 
@@ -88,6 +117,7 @@ export interface RepoDeps {
 export type SyncChange =
   | { type: 'child'; row: Child }
   | { type: 'entry'; row: Entry }
+  | { type: 'member'; row: Member }
   | { type: 'settings'; row: { id: 'family'; updatedAt: number; values: SharedSettings } };
 
 export interface SyncState {
@@ -486,9 +516,13 @@ export class Repo {
    * wiped so it mirrors the family; otherwise (creating the family) everything already
    * logged is queued for upload.
    */
-  async startSync(state: SyncState, replaceLocalData: boolean): Promise<void> {
+  async startSync(
+    state: SyncState,
+    replaceLocalData: boolean,
+    members: Pick<Member, 'id' | 'addedBy'>[] = [],
+  ): Promise<void> {
     await this.db.withTransactionAsync(async () => {
-      await this.db.execAsync('DELETE FROM outbox; DELETE FROM sync_state;');
+      await this.db.execAsync('DELETE FROM outbox; DELETE FROM sync_state; DELETE FROM members;');
       if (replaceLocalData) {
         await this.db.execAsync('DELETE FROM entries; DELETE FROM children;');
         await this.db.runAsync('DELETE FROM settings WHERE key IN (?, ?)', [
@@ -497,9 +531,53 @@ export class Repo {
         ]);
       }
       await this.writeSyncState(state);
+      for (const m of members) await this.saveMember({ ...m, removedAt: null });
       if (!replaceLocalData) await this.enqueueEverything();
     });
     this.changed(true);
+  }
+
+  // Family members (#41)
+
+  async listMembers(): Promise<Member[]> {
+    const rows = await this.db.getAllAsync<MemberRow>('SELECT * FROM members ORDER BY id', []);
+    return rows.map(toMember);
+  }
+
+  /** Trusts `id` from now on and tells the other phones; no change when already known. */
+  async addMember(id: string, addedBy: string | null): Promise<void> {
+    await this.db.withTransactionAsync(async () => {
+      const row = await this.memberRow(id);
+      if (!row) await this.saveMember({ id, addedBy, removedAt: null });
+    });
+  }
+
+  /** Stops trusting `id` for good and tells the other phones. */
+  async removeMember(id: string): Promise<void> {
+    await this.db.withTransactionAsync(async () => {
+      const row = await this.memberRow(id);
+      if (row?.removed_at != null) return;
+      await this.saveMember({ id, addedBy: row?.added_by ?? null, removedAt: this.deps.now() });
+    });
+  }
+
+  private memberRow(id: string): Promise<MemberRow | null> {
+    return this.db.getFirstAsync<MemberRow>('SELECT * FROM members WHERE id = ?', [id]);
+  }
+
+  private async saveMember(m: Pick<Member, 'id' | 'addedBy' | 'removedAt'>): Promise<void> {
+    const member: Member = { ...m, updatedAt: this.deps.now() };
+    await this.writeMemberRow(member);
+    await this.enqueue({ type: 'member', row: member });
+  }
+
+  private async writeMemberRow(m: Member): Promise<void> {
+    await this.db.runAsync(
+      `INSERT INTO members (id, added_by, updated_at, removed_at) VALUES (?, ?, ?, ?)
+       ON CONFLICT(id) DO UPDATE SET added_by = excluded.added_by,
+         updated_at = excluded.updated_at, removed_at = excluded.removed_at`,
+      [m.id, m.addedBy, m.updatedAt, m.removedAt],
+    );
   }
 
   /**
@@ -520,11 +598,12 @@ export class Repo {
     );
     for (const e of entries) await this.enqueue({ type: 'entry', row: toEntry(e) });
     await this.enqueueSharedSettings(Math.max(0, await this.sharedUpdatedAt()));
+    for (const m of await this.listMembers()) await this.enqueue({ type: 'member', row: m });
   }
 
   /** Turns sync off on this phone; the local log stays. */
   async stopSync(): Promise<void> {
-    await this.db.execAsync('DELETE FROM outbox; DELETE FROM sync_state;');
+    await this.db.execAsync('DELETE FROM outbox; DELETE FROM sync_state; DELETE FROM members;');
     this.changed();
   }
 
@@ -561,6 +640,15 @@ export class Repo {
           ]);
           if (wins(change.row, row ? toChild(row) : null)) {
             await this.writeChildRow(change.row);
+            applied += 1;
+          }
+        } else if (change.type === 'member') {
+              const row = await this.memberRow(change.row.id);
+          const current = row ? toMember(row) : null;
+          // Removal is final: a copy from before it never brings the phone back.
+          if (current?.removedAt != null) continue;
+          if (change.row.removedAt != null || wins(change.row, current)) {
+            await this.writeMemberRow(change.row);
             applied += 1;
           }
         } else if (change.row.updatedAt > (await this.sharedUpdatedAt())) {

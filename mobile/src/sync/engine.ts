@@ -1,7 +1,18 @@
 import type { Repo, SyncChange } from '@/db/repo';
 
 import { RelayClient, RelayError, type RelayDevice } from './client';
-import { b64url, open, seal, sha256Hex, unwrapKey, wrapKey, type RandomBytes } from './crypto';
+import {
+  b64url,
+  isDeviceId,
+  open,
+  safetyCode,
+  seal,
+  sealContext,
+  sha256Hex,
+  unwrapKey,
+  wrapKey,
+  type RandomBytes,
+} from './crypto';
 import { encodeInvite } from './invite';
 
 const PUSH_BATCH = 100;
@@ -30,6 +41,21 @@ export interface FamilyDevice {
   createdAt: number;
   lastSeenAt: number | null;
   thisPhone: boolean;
+  /**
+   * Announced in the encrypted log by a phone of the family. False for a phone only the
+   * sync server lists: it never gets the family key from this phone (#41).
+   */
+  trusted: boolean;
+}
+
+/** The sync server handed over a family key from a phone this phone does not trust. */
+export class UntrustedKeyError extends Error {
+  constructor() {
+    super(
+      'The sync server offered a new encryption key from a phone that is not in your family. ' +
+        'This phone keeps using the current key.',
+    );
+  }
 }
 
 export interface SyncResult {
@@ -43,6 +69,13 @@ function isSyncChange(value: unknown): value is SyncChange {
   if (!row || typeof row.id !== 'string' || typeof row.updatedAt !== 'number') return false;
   if (type === 'child') return typeof row.name === 'string';
   if (type === 'settings') return row.id === 'family' && typeof row.values === 'object';
+  if (type === 'member') {
+    return (
+      isDeviceId(row.id) &&
+      (row.addedBy === null || isDeviceId(row.addedBy)) &&
+      (row.removedAt === null || typeof row.removedAt === 'number')
+    );
+  }
   if (type === 'entry') {
     return (
       typeof row.childId === 'string' &&
@@ -89,6 +122,26 @@ export class SyncEngine {
     return this.familyKey.epoch;
   }
 
+  private changeContext(): string {
+    return sealContext.change(this.client.familyId, this.familyKey.epoch);
+  }
+
+  /**
+   * The phones this phone trusts. A family set up before 0.7 has no list yet: then this
+   * phone trusts the phones the relay lists once (trust on first use; compare the safety
+   * codes to check) and announces them.
+   */
+  private async trustedIds(): Promise<Set<string>> {
+    let members = await this.repo.listMembers();
+    if (members.length === 0) {
+      const { devices } = await this.client.devices();
+      const ids = new Set([this.client.deviceId, ...devices.map((d) => d.id)]);
+      for (const id of ids) if (isDeviceId(id)) await this.repo.addMember(id, null);
+      members = await this.repo.listMembers();
+    }
+    return new Set(members.filter((m) => m.removedAt === null).map((m) => m.id));
+  }
+
   /** One full round; concurrent calls share the round in progress. */
   sync(): Promise<SyncResult> {
     if (!this.running) {
@@ -100,6 +153,7 @@ export class SyncEngine {
   }
 
   private async round(): Promise<SyncResult> {
+    await this.trustedIds();
     let pushed = 0;
     for (;;) {
       const batch = await this.repo.outboxBatch(PUSH_BATCH);
@@ -107,7 +161,7 @@ export class SyncEngine {
       const nudge = batch.some((b) => touchesTimer(b.body)) ? 'high' : 'normal';
       const send = () =>
         this.client.push(
-          batch.map((b) => seal(this.familyKey.key, b.body, this.random)),
+          batch.map((b) => seal(this.familyKey.key, b.body, this.random, this.changeContext())),
           this.familyKey.epoch,
           nudge,
         );
@@ -130,11 +184,14 @@ export class SyncEngine {
       const { changes, more, epoch } = await this.client.pull(state.lastSeq);
       if (epoch !== undefined && epoch > this.familyKey.epoch) await this.refreshKey();
       if (changes.length === 0) break;
+      // This phone's own changes come back too. They are not skipped on the relay's word
+      // (`device`); applying them again changes nothing (last write wins).
       const decoded: SyncChange[] = [];
       for (const c of changes) {
-        if (c.device === this.client.deviceId) continue;
         try {
-          const value = JSON.parse(open(this.familyKey.key, c.body));
+          const value = JSON.parse(
+            open(this.familyKey.key, c.body, this.changeContext(), { legacy: true }),
+          );
           if (isSyncChange(value)) decoded.push(value);
         } catch {
           // Not readable with our key (corrupt or foreign); skip rather than block sync.
@@ -146,23 +203,50 @@ export class SyncEngine {
     return { pushed, pulled };
   }
 
-  /** Fetches the family key another phone rotated to and stores it. */
+  /**
+   * Fetches the family key another phone rotated to and stores it. Only a key wrapped by a
+   * phone this phone trusts is taken: the relay cannot hand over a key of its own (#41).
+   */
   private async refreshKey(): Promise<void> {
     const { epoch, wrap } = await this.client.key();
     if (epoch <= this.familyKey.epoch) return;
     if (!wrap || wrap.epoch !== epoch) throw new Error('The new family key is not available.');
-    const key = unwrapKey(this.deviceSecret, wrap.from, wrap.body);
+    const trusted = await this.trustedIds();
+    if (!trusted.has(wrap.from) || wrap.from === this.client.deviceId) {
+      throw new UntrustedKeyError();
+    }
+    const context = sealContext.wrap(this.client.familyId, epoch, this.client.deviceId);
+    const key = unwrapKey(this.deviceSecret, wrap.from, wrap.body, context);
     await saveFamilyKey(this.store, { key, epoch });
     this.familyKey = { key, epoch };
   }
 
-  /** The family key, for sealing reminder texts and device names, and opening them. */
-  seal(plaintext: string): string {
-    return seal(this.familyKey.key, plaintext, this.random);
+  /** Seals a reminder text with the family key, for the relay to push. */
+  sealReminder(plaintext: string): string {
+    return seal(this.familyKey.key, plaintext, this.random, this.reminderContext());
   }
 
-  open(sealed: string): string {
-    return open(this.familyKey.key, sealed);
+  openReminder(sealed: string): string {
+    return open(this.familyKey.key, sealed, this.reminderContext(), { legacy: true });
+  }
+
+  private reminderContext(): string {
+    return sealContext.reminder(this.client.familyId);
+  }
+
+  /** Seals a phone's name (this phone's by default) for the relay's device list. */
+  sealLabel(name: string, deviceId = this.client.deviceId, key = this.familyKey.key): string {
+    return seal(key, name, this.random, sealContext.label(this.client.familyId, deviceId));
+  }
+
+  /** Opens a change as pulled from the relay. */
+  openChange(sealed: string): string {
+    return open(this.familyKey.key, sealed, this.changeContext());
+  }
+
+  /** A code to compare with the other phones: equal when they trust the same phones. */
+  async safetyCode(): Promise<string> {
+    return safetyCode(this.client.familyId, [...(await this.trustedIds())]);
   }
 
   /**
@@ -184,26 +268,32 @@ export class SyncEngine {
       familyKey: this.familyKey.key,
       keyEpoch: this.familyKey.epoch,
       inviteSecret,
+      inviterId: this.client.deviceId,
     });
     return { code, expiresAt };
   }
 
   /** The family's phones, with the names that could be read. */
   async devices(): Promise<FamilyDevice[]> {
-    const { devices } = await this.client.devices();
-    return devices.map((d) => ({
-      id: d.id,
-      name: this.readLabel(d),
-      createdAt: d.createdAt,
-      lastSeenAt: d.lastSeenAt ?? null,
-      thisPhone: d.id === this.client.deviceId,
-    }));
+    const [{ devices }, trusted] = await Promise.all([this.client.devices(), this.trustedIds()]);
+    return devices.map((d) => {
+      const isTrusted = trusted.has(d.id);
+      return {
+        id: d.id,
+        name: isTrusted ? this.readLabel(d) : null,
+        createdAt: d.createdAt,
+        lastSeenAt: d.lastSeenAt ?? null,
+        thisPhone: d.id === this.client.deviceId,
+        trusted: isTrusted,
+      };
+    });
   }
 
   private readLabel(d: RelayDevice): string | null {
     if (!d.label) return null;
     try {
-      return this.open(d.label);
+      const context = sealContext.label(this.client.familyId, d.id);
+      return open(this.familyKey.key, d.label, context, { legacy: true });
     } catch {
       return null;
     }
@@ -221,21 +311,29 @@ export class SyncEngine {
       await this.sync();
       const state = await this.repo.getSyncState();
       if (!state) throw new Error('Sync is not set up.');
-      const { devices } = await this.client.devices();
-      const remaining = devices.filter((d) => d.id !== deviceId);
+      const [{ devices }, trusted] = await Promise.all([
+        this.client.devices(),
+        this.trustedIds(),
+      ]);
+      // The new key only goes to phones this phone trusts (#41); phones only the relay
+      // lists are removed along with `deviceId`.
+      const others = devices.filter((d) => d.id !== deviceId);
+      const remaining = others.filter((d) => trusted.has(d.id));
+      const untrusted = others.filter((d) => !trusted.has(d.id)).map((d) => d.id);
       const next: FamilyKey = { key: this.random(32), epoch: this.familyKey.epoch + 1 };
       const wraps: Record<string, string> = {};
       const labels: Record<string, string> = {};
       for (const d of remaining) {
-        wraps[d.id] = wrapKey(this.deviceSecret, d.id, next.key, this.random);
+        const context = sealContext.wrap(this.client.familyId, next.epoch, d.id);
+        wraps[d.id] = wrapKey(this.deviceSecret, d.id, next.key, this.random, context);
         const name = this.readLabel(d);
-        if (name !== null) labels[d.id] = seal(next.key, name, this.random);
+        if (name !== null) labels[d.id] = this.sealLabel(name, d.id, next.key);
       }
       try {
         await this.client.rotate({
           epoch: next.epoch,
           basis: state.lastSeq,
-          remove: [deviceId],
+          remove: [deviceId, ...untrusted],
           wraps,
           labels,
         });
@@ -249,6 +347,9 @@ export class SyncEngine {
       }
       await saveFamilyKey(this.store, next);
       this.familyKey = next;
+      // Before the snapshot, so it carries the removal under the new key.
+      await this.repo.removeMember(deviceId);
+      for (const id of untrusted) await this.repo.removeMember(id);
       await this.repo.enqueueSnapshot();
       await this.sync();
       return;

@@ -17,10 +17,12 @@ export function PartnerSyncCard() {
   const [relayUrl, setRelayUrl] = useState(DEFAULT_RELAY_URL);
   const [busy, setBusy] = useState(false);
   const [devices, setDevices] = useState<FamilyDevice[] | null>(null);
+  const [safetyCode, setSafetyCode] = useState<string | null>(null);
 
   useEffect(() => {
     if (!status.enabled || !status.lastSyncAt) return;
     sync.devices().then(setDevices, () => {});
+    sync.safetyCode().then(setSafetyCode, () => {});
     // Refresh the phone count after each successful sync only.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status.enabled, status.lastSyncAt]);
@@ -49,7 +51,7 @@ export function PartnerSyncCard() {
 
   const remove = (device: FamilyDevice) =>
     Alert.alert(
-      `Remove ${device.name ?? 'this phone'}?`,
+      `Remove ${device.trusted ? (device.name ?? 'this phone') : 'the unknown phone'}?`,
       'It stops receiving updates. The other phones switch to a new encryption key, so it cannot read anything logged from now on. What it already has stays on it.',
       [
         { text: 'Cancel', style: 'cancel' },
@@ -60,6 +62,7 @@ export function PartnerSyncCard() {
             try {
               await sync.removeDevice(device.id);
               setDevices(await sync.devices());
+              setSafetyCode(await sync.safetyCode());
             } catch (e) {
               Alert.alert('Could not remove', e instanceof Error ? e.message : String(e));
             }
@@ -131,6 +134,8 @@ export function PartnerSyncCard() {
         ? `Synced at ${formatClock(status.lastSyncAt)}`
         : 'Not synced yet';
 
+  const unknown = devices?.filter((d) => !d.trusted) ?? [];
+
   return (
     <Card>
       <ThemedText type="smallBold" themeColor="textSecondary">
@@ -149,8 +154,12 @@ export function PartnerSyncCard() {
         devices.map((d) => (
           <View key={d.id} style={styles.device} testID="family-device">
             <View style={styles.grow}>
-              <ThemedText>
-                {d.thisPhone ? `${d.name ?? 'Phone'} (this phone)` : (d.name ?? 'Phone')}
+              <ThemedText style={d.trusted ? undefined : { color: theme.danger }}>
+                {!d.trusted
+                  ? 'Unknown phone'
+                  : d.thisPhone
+                    ? `${d.name ?? 'Phone'} (this phone)`
+                    : (d.name ?? 'Phone')}
               </ThemedText>
               <ThemedText type="small" themeColor="textSecondary">
                 {d.lastSeenAt
@@ -161,6 +170,19 @@ export function PartnerSyncCard() {
             {!d.thisPhone && <Button label="Remove" variant="danger" onPress={() => remove(d)} />}
           </View>
         ))}
+      {unknown.length > 0 && (
+        <ThemedText type="small" style={{ color: theme.danger }} testID="unknown-phone-warning">
+          The sync server lists a phone that none of your phones added. It gets no encryption key
+          from this phone and cannot read your log. Remove it; if it keeps coming back, stop
+          syncing and start a new family.
+        </ThemedText>
+      )}
+      {safetyCode && devices !== null && devices.length > 1 && (
+        <ThemedText type="small" themeColor="textSecondary" testID="safety-code">
+          Safety code: {safetyCode}. It is the same on each of your phones when they trust the
+          same phones; compare it with your partner.
+        </ThemedText>
+      )}
       <ThemedText type="small" themeColor="textSecondary" testID="reminder-delivery">
         {status.push
           ? 'Reminders arrive by push from the sync server, so they follow your partner’s logging even while this app is closed.'

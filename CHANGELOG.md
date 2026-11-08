@@ -3,13 +3,32 @@
 All notable changes to Baby Tracker. Versions follow [Semantic Versioning](https://semver.org/);
 before 1.0.0 a minor version marks a phase of the plan.
 
-## Unreleased
+## [0.7.0] — 2026-11-08 — Live timers and security fixes
 
 - Live timers (#15): a running sleep or breastfeeding timer counts up outside the app without
   the app updating it. Android: ongoing notification with a chronometer, requested as a Live
   Update on Android 16+ (status bar chip, lock screen), from a small native module
   (`mobile/modules/timer-notification`). iPhone: a Live Activity on the lock screen and in the
   Dynamic Island (`expo-widgets`), falling back to a plain notification when switched off.
+- Security (#40): release APKs are signed with our own keys instead of the public debug key
+  of the Expo template, which let anyone build an APK that installs over the app. The
+  production key is only available to release builds from `main` (GitHub environment
+  `production`); CI refuses to release a production APK signed with the debug key. Phones
+  with 0.6.0 or earlier must reinstall once and rejoin the family (README, "Signing keys").
+- Security (#41): end-to-end encryption now holds against a compromised relay. Phones keep
+  a member list in the encrypted log and only accept a new family key wrapped by a member;
+  removing a phone wraps the new key for members only. Phones the relay lists but no member
+  added show as "Unknown phone" with a warning. Sealed data is bound to its family, purpose
+  and key epoch (XChaCha20-Poly1305 associated data, `v2.` format), so old wrapped keys
+  cannot be replayed. Partner sync shows a safety code to compare between the phones.
+  Invite codes carry the inviting phone's id. Phones on 0.6 cannot read changes from 0.7:
+  update both phones (they reinstall for #40 anyway).
+- Security (#42): checked that other apps cannot trigger the widget's buttons. The
+  widget library declares its click receiver `android:exported="false"`, so a broadcast
+  from another app never reaches it; CI now reads each APK's manifest and fails if that
+  receiver becomes exported (`.github/scripts/verify-apk-manifest.sh`).
+- CI: Maestro 2.12.1 is installed from its GitHub release (checksum checked, cached)
+  instead of the get.maestro.mobile.dev installer, whose outage failed every E2E run.
 - Screen readers: the Stop button of a running timer on the Today screen is now reachable
   on iOS (it sat inside the tappable card, which hid it from VoiceOver); timeline rows read
   out their notes and tags.

@@ -52,6 +52,8 @@ interface SyncContextValue {
   leaveFamily(): Promise<void>;
   createInvite(): Promise<{ code: string; expiresAt: number }>;
   devices(): Promise<FamilyDevice[]>;
+  /** Equal on every phone that trusts the same phones; for the parents to compare. */
+  safetyCode(): Promise<string | null>;
   /** Removes another phone and gives the others a new family key. */
   removeDevice(deviceId: string): Promise<void>;
   /** Deletes the family from the sync server; every phone keeps its own log. */
@@ -162,7 +164,7 @@ export function SyncProvider({ children }: { children: ReactNode }) {
         const { push } = await current.client.updateDevice(
           token,
           remindersHere,
-          current.seal(deviceName()),
+          current.sealLabel(deviceName()),
         );
         const active = Boolean(token) && push;
         await repo.setPushActive(active);
@@ -217,6 +219,7 @@ export function SyncProvider({ children }: { children: ReactNode }) {
         return engine.current.createInvite();
       },
       devices: async () => (engine.current ? engine.current.devices() : []),
+      safetyCode: async () => (engine.current ? engine.current.safetyCode() : null),
       removeDevice: async (deviceId) => {
         if (!engine.current) throw new Error('Sync is not set up.');
         await engine.current.removeDevice(deviceId);
