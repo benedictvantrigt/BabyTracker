@@ -8,7 +8,7 @@ name: iOS build
 on:
   push:
     branches-ignore: [e2e-results, e2e-results-ios]
-    paths: ['mobile/**', 'relay/**', '.github/scripts/install-maestro.sh', '.github/workflows/ios-build.yml']
+    paths: ['mobile/**', 'relay/**', '.github/scripts/**', '.github/workflows/ios-build.yml']
   workflow_dispatch:
 
 concurrency:

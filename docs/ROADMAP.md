@@ -106,4 +106,4 @@ Other extras:
 - #26 Final package name and store submission
 - #40 Sign release APKs with our own key, not the template debug keystore (done; keys set up per README)
 - #41 Don't trust the relay's device list for key wrapping
-- #42 Other apps can trigger widget actions via the exported widget receiver
+- #42 Other apps can trigger widget actions via the exported widget receiver (not exploitable: the receiver is not exported; CI guards it)

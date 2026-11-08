@@ -15,6 +15,12 @@ before 1.0.0 a minor version marks a phase of the plan.
   production key is only available to release builds from `main` (GitHub environment
   `production`); CI refuses to release a production APK signed with the debug key. Phones
   with 0.6.0 or earlier must reinstall once and rejoin the family (README, "Signing keys").
+- Security (#42): checked that other apps cannot trigger the widget's buttons. The
+  widget library declares its click receiver `android:exported="false"`, so a broadcast
+  from another app never reaches it; CI now reads each APK's manifest and fails if that
+  receiver becomes exported (`.github/scripts/verify-apk-manifest.sh`).
+- CI: Maestro 2.12.1 is installed from its GitHub release (checksum checked, cached)
+  instead of the get.maestro.mobile.dev installer, whose outage failed every E2E run.
 - Screen readers: the Stop button of a running timer on the Today screen is now reachable
   on iOS (it sat inside the tappable card, which hid it from VoiceOver); timeline rows read
   out their notes and tags.
