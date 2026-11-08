@@ -14,6 +14,11 @@ mkdir -p "$OUT/screenshots"
 timeout 5m adb install -r "$APK"
 # Exact alarms are denied by default on Android 14+; a user grants them in Settings.
 adb shell appops set "$PKG" SCHEDULE_EXACT_ALARM allow
+# The CI emulator sometimes shows "Pixel Launcher isn't responding" over the app, at any
+# point in a flow; hide such system dialogs. (A crash of the app itself still fails the
+# flow, as its screen is gone.)
+adb shell settings put global hide_error_dialogs 1
+adb shell settings put global anr_show_background 0
 
 # Relay on this machine; the app reaches it as http://localhost:8787 through adb reverse.
 RELAY_PORT=8787
