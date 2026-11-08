@@ -11,9 +11,10 @@ DEBUG_CERT_SHA256=fac61745dc0903786fb9ede62a962b399f7348f0bb6f899b8332667591033b
 
 apksigner=$(ls -d "$ANDROID_HOME"/build-tools/*/apksigner | sort -V | tail -1)
 "$apksigner" verify --verbose "$apk" > /dev/null
-# The signer label differs between build-tools versions ("Signer #1", "Signer (minSdkVersion=...)").
+# The signer label differs between build-tools versions ("Signer #1", "V2 Signer:",
+# "Signer (minSdkVersion=...)").
 certs=$("$apksigner" verify --print-certs "$apk" 2>&1)
-digest=$(printf '%s\n' "$certs" | sed -n 's/^Signer.* certificate SHA-256 digest: //p' | head -1 | tr 'A-F' 'a-f')
+digest=$(printf '%s\n' "$certs" | sed -n 's/^.*Signer.* certificate SHA-256 digest: //p' | head -1 | tr 'A-F' 'a-f')
 if [ -z "$digest" ]; then
   echo "::error::Could not read the signing certificate of $apk with $apksigner"
   printf '%s\n' "$certs"
