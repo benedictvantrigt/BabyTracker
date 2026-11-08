@@ -194,6 +194,7 @@ const SLOT_STATUS_LABEL: Record<SlotState['status'], string> = {
 function DayPlan({ schedule, now }: { schedule: ScheduleStatus; now: number }) {
   const [open, setOpen] = useState(false);
   const { daySleep, nightSleepHours } = schedule.stage.stage;
+  const nightTarget: [number, number] = [nightSleepHours * 60, nightSleepHours * 60];
   return (
     <View style={styles.plan}>
       <Pressable
@@ -210,6 +211,9 @@ function DayPlan({ schedule, now }: { schedule: ScheduleStatus; now: number }) {
             {`${schedule.slots.map((n) => formatClock(n.startAt)).join(' · ')} · bed ${formatClock(schedule.plan.bedtimeAt)}`}
           </ThemedText>
         )}
+        <ThemedText type="small" themeColor="textSecondary" testID="schedule-guide-sleep">
+          {`Sleep for this age: ${formatTarget(daySleep)} by day · ${formatTarget(nightTarget)} at night`}
+        </ThemedText>
       </Pressable>
       {open &&
         schedule.slots.map((slot) => (
@@ -235,7 +239,7 @@ function DayPlan({ schedule, now }: { schedule: ScheduleStatus; now: number }) {
             </ThemedText>
           </View>
           <ThemedText type="small" themeColor="textSecondary">
-            {`Night ${formatDuration(schedule.nightSleptMs)} of ${formatTarget([nightSleepHours * 60, nightSleepHours * 60])}`}
+            {`Night ${formatDuration(schedule.nightSleptMs)} of ${formatTarget(nightTarget)}`}
           </ThemedText>
           <ThemedText type="small" themeColor="textSecondary">
             {`Day sleep ${formatDuration(schedule.daySleptMs)} of ${formatTarget(daySleep)}`}

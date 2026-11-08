@@ -8,6 +8,11 @@ before 1.0.0 a minor version marks a phase of the plan.
 - Switches no longer flicker when tapped (Customize Today, Settings): they showed the old
   position again until the setting was saved and reloaded, then flipped. They now keep the
   new position, and only go back when saving fails.
+- Sleep schedule: nap times no longer include the guide's optional extra sleep. Where the
+  guide gives two times ("15.30/15.45 - 17.00"), the shorter nap is used: later start,
+  earlier end. Changes for 3–6 weeks to 12–16 weeks, 5 and 6 months, and 2–3 years.
+- Sleep card: "Today's plan" shows the guide's day and night sleep for the baby's age
+  under the times.
 
 ## [0.7.0] — 2026-11-08 — Live timers and security fixes
 

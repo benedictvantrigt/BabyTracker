@@ -3,7 +3,9 @@ import type { Entry, EntryOf, Settings } from './types';
 
 // Age-based day schedules. Times are minutes after midnight for a day that starts at 07:00;
 // a different `dayStartMinute` shifts the whole day. Nap times are in-bed times: the baby
-// goes into bed at `start` and is taken out at `end`, also after a shorter sleep.
+// goes into bed at `start` and is taken out at `end`, also after a shorter sleep. Where the
+// guide gives two times ("15.30/15.45 - 17.00"), the later start and the earlier end are used:
+// the other one is optional extra sleep.
 
 /** Reference wake-up time the schedule times are written for. */
 const BASE_DAY_START = 7 * 60;
@@ -48,7 +50,7 @@ const STAGES: (ScheduleStage & { from: Age })[] = [
     id: 'w3',
     label: '3–6 weeks',
     from: { weeks: 3 },
-    naps: [nap(t(8, 30), t(10)), nap(t(11, 30), t(14)), nap(t(15, 30), t(17))],
+    naps: [nap(t(8, 30), t(10)), nap(t(11, 30), t(14)), nap(t(15, 45), t(17))],
     bedtime: t(18),
     wakeWindow: [75, 90],
     awakeBeforeBed: null,
@@ -59,7 +61,7 @@ const STAGES: (ScheduleStage & { from: Age })[] = [
     id: 'w6',
     label: '6–9 weeks',
     from: { weeks: 6 },
-    naps: [nap(t(8, 30), t(10)), nap(t(11, 30), t(14)), nap(t(15, 45), t(17))],
+    naps: [nap(t(8, 30), t(10)), nap(t(11, 30), t(14)), nap(t(16), t(17))],
     bedtime: t(18, 15),
     wakeWindow: [90, 90],
     awakeBeforeBed: null,
@@ -70,7 +72,7 @@ const STAGES: (ScheduleStage & { from: Age })[] = [
     id: 'w9',
     label: '9–12 weeks',
     from: { weeks: 9 },
-    naps: [nap(t(8, 45), t(10)), nap(t(11, 30), t(14)), nap(t(15, 45), t(17))],
+    naps: [nap(t(9), t(10)), nap(t(11, 30), t(14)), nap(t(16), t(17))],
     bedtime: t(18, 15),
     wakeWindow: [90, 105],
     awakeBeforeBed: null,
@@ -81,7 +83,7 @@ const STAGES: (ScheduleStage & { from: Age })[] = [
     id: 'w12',
     label: '12–16 weeks',
     from: { weeks: 12 },
-    naps: [nap(t(8, 45), t(10)), nap(t(11, 30), t(14)), nap(t(16), t(17))],
+    naps: [nap(t(9), t(10)), nap(t(11, 45), t(14)), nap(t(16), t(17))],
     bedtime: t(18, 30),
     wakeWindow: [90, 120],
     awakeBeforeBed: null,
@@ -103,7 +105,7 @@ const STAGES: (ScheduleStage & { from: Age })[] = [
     id: 'm5',
     label: '5 months',
     from: { months: 5 },
-    naps: [nap(t(9, 15), t(10)), nap(t(12), t(14, 15)), nap(t(16, 30), t(17))],
+    naps: [nap(t(9, 15), t(10)), nap(t(12, 15), t(14, 15)), nap(t(16, 30), t(17))],
     bedtime: t(19),
     wakeWindow: [135, 135],
     awakeBeforeBed: null,
@@ -114,7 +116,7 @@ const STAGES: (ScheduleStage & { from: Age })[] = [
     id: 'm6',
     label: '6 months',
     from: { months: 6 },
-    naps: [nap(t(9, 15), t(10)), nap(t(12, 15), t(14, 15)), nap(t(16, 45), t(17))],
+    naps: [nap(t(9, 15), t(10)), nap(t(12, 30), t(14, 15)), nap(t(16, 45), t(17))],
     bedtime: t(19),
     wakeWindow: [150, 150],
     awakeBeforeBed: null,
@@ -169,7 +171,7 @@ const STAGES: (ScheduleStage & { from: Age })[] = [
     id: 'y2',
     label: '2–3 years',
     from: { months: 25 },
-    naps: [nap(t(12, 30), t(14, 30))],
+    naps: [nap(t(13), t(14, 30))],
     bedtime: t(19),
     wakeWindow: null,
     awakeBeforeBed: [270, 270],
