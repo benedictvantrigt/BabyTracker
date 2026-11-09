@@ -5,6 +5,10 @@ before 1.0.0 a minor version marks a phase of the plan.
 
 ## Unreleased
 
+- Android: a running sleep or feeding timer now has an icon in the status bar. Its
+  notification moved to a new "Running timers" channel at normal importance, still without
+  sound or vibration; the old low-importance channel filed it under "Silent", which has no
+  status bar icon before Android 16.
 - Switches no longer flicker when tapped (Customize Today, Settings): they showed the old
   position again until the setting was saved and reloaded, then flipped. They now keep the
   new position, and only go back when saving fails.
