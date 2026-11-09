@@ -147,7 +147,8 @@ back from that phone.
   new APK installs over the old one. `CHANGELOG.md` lists what each version changed.
 - To release: raise both numbers, add the CHANGELOG entry and merge to `main`. When all tests
   pass on `main` and that version has no release yet, the workflow deploys the production
-  relay, builds the production APK and creates tag and GitHub release `v0.4.0` with it.
+  relay, builds the production APK and the Play Store bundle (`.aab`, #47), and creates tag
+  and GitHub release `v0.4.0` with both. Google Play steps: `docs/play-store.md`.
 - `android-latest` stays a pre-release with the newest passing acceptance build of any
   branch, for testing.
 

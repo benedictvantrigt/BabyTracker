@@ -3,6 +3,26 @@
 All notable changes to Baby Tracker. Versions follow [Semantic Versioning](https://semver.org/);
 before 1.0.0 a minor version marks a phase of the plan.
 
+## [0.8.0] — 2026-11-09 — Feedback fixes and Google Play preparation
+
+- Feeding (#53): log a feed without a length. The feeding form has a "Length" switch;
+  off logs the feed at one moment. Settings → Feeding → "Time feeds" (per phone): when
+  off, Left and Right on the Today card log the feed now instead of starting a timer.
+  Feeds without a length show no duration in the timeline.
+- Sleep card (#54): the day plan shows slept against planned per nap ("30m of 2h 00m ·
+  too short"), with a note that "too short" means less than half of the planned nap.
+  The catch-up advice now says the midday nap was missed or too short.
+- Sleep card (#55): "Sleep today … of …" is the last line of the card.
+- Live Update (#51): a timer notification the user swipes away stays away until that
+  timer stops (delete intent, unexported receiver).
+- Privacy statement (#25) in `docs/privacy.md`; Settings → About links to it, shows
+  the version and a health note: the sleep schedule is general guidance, not medical
+  advice (#43, #44). The note also shows in the expanded sleep plan.
+- Google Play (#47): releases from `main` also build an Android App Bundle with every
+  ABI, signed with the production key as Play upload key; CI checks the upload key and
+  that the app targets API 36 or higher, and attaches the `.aab` to the GitHub release.
+  The Play Console steps and form answers are in `docs/play-store.md`.
+
 ## [0.7.0] — 2026-11-08 — Live timers and security fixes
 
 - Live timers (#15): a running sleep or breastfeeding timer counts up outside the app without
@@ -132,6 +152,7 @@ before 1.0.0 a minor version marks a phase of the plan.
 - On-phone reminders: nap, daytime feed, night feed alarm, ongoing timer notification.
 - Android end-to-end tests on a GitHub Actions emulator; passing APK as `android-latest`.
 
+[0.8.0]: https://github.com/benedictvantrigt/BabyTracker/releases/tag/v0.8.0
 [0.5.0]: https://github.com/benedictvantrigt/BabyTracker/releases/tag/v0.5.0
 [0.4.0]: https://github.com/benedictvantrigt/BabyTracker/releases/tag/v0.4.0
 [0.3.0]: https://github.com/benedictvantrigt/BabyTracker/releases/tag/v0.3.0

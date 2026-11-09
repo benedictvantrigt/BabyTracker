@@ -1,5 +1,15 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Alert, AppState, Platform, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import Constants from 'expo-constants';
+import {
+  Alert,
+  AppState,
+  Linking,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  TextInput,
+  View,
+} from 'react-native';
 
 import { TabScreen } from '@/components/tab-screen';
 import { ThemedText } from '@/components/themed-text';
@@ -13,6 +23,7 @@ import {
   TimeOfDayField,
   ToggleRow,
 } from '@/components/ui';
+import { HEALTH_DISCLAIMER, PRIVACY_URL } from '@/constants/links';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useAction, useAppData } from '@/data/app-data';
 import { isCardOn } from '@/domain/dashboard';
@@ -146,6 +157,22 @@ export default function SettingsScreen() {
             </View>
           </Card>
         )}
+
+        <Card testID="settings-about">
+          <ThemedText type="smallBold" themeColor="textSecondary">
+            ABOUT
+          </ThemedText>
+          <ThemedText type="small" themeColor="textSecondary">
+            {HEALTH_DISCLAIMER}
+          </ThemedText>
+          <ThemedText type="small" themeColor="textSecondary">
+            Your entries stay on your phones; partner sync is end-to-end encrypted.
+          </ThemedText>
+          <Button label="Privacy statement" onPress={() => Linking.openURL(PRIVACY_URL)} />
+          <ThemedText type="small" themeColor="textSecondary">
+            {`Version ${Constants.expoConfig?.version ?? '?'}`}
+          </ThemedText>
+        </Card>
       </ScrollView>
     </TabScreen>
   );

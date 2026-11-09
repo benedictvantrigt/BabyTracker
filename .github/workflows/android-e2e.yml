@@ -227,7 +227,7 @@ jobs:
   release:
     needs: [release-check, relay-production]
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 90
     # The production signing key lives in this environment's secrets, which only runs from
     # main can read (deployment branch rule), not the repository secrets every branch sees.
     environment: production
@@ -250,7 +250,7 @@ jobs:
           java-version: 17
       - uses: gradle/actions/setup-gradle@v4
 
-      - name: Build production APK
+      - name: Build production APK and Play Store bundle (AAB)
         working-directory: mobile
         env:
           # The production relay (repository variable RELAY_URL_PROD).
@@ -276,8 +276,17 @@ jobs:
           npx expo prebuild --platform android --no-install
           cd android
           ./gradlew assembleRelease -PreactNativeArchitectures=x86_64,arm64-v8a
-          rm -f "$ANDROID_KEYSTORE_PATH"
           cp app/build/outputs/apk/release/app-release.apk ../babytracker.apk
+          # Google Play takes an App Bundle, with every ABI; Play App Signing re-signs it
+          # with Google's app signing key, ours is the upload key (#47).
+          ./gradlew bundleRelease
+          cp app/build/outputs/bundle/release/app-release.aab ../babytracker.aab
+          rm -f "$ANDROID_KEYSTORE_PATH"
+
+      - name: Check the Play Store bundle (upload key, target SDK 36)
+        env:
+          EXPECTED_CERT_SHA256: ${{ vars.ANDROID_CERT_SHA256_PROD }}
+        run: bash .github/scripts/verify-aab.sh mobile/babytracker.aab mobile/babytracker.apk 36
 
       - name: Check the production APK's signing key
         env:
@@ -293,6 +302,7 @@ jobs:
           TAG: ${{ needs.release-check.outputs.tag }}
         run: |
           cp mobile/babytracker.apk "babytracker-$TAG.apk"
-          gh release create "$TAG" "babytracker-$TAG.apk" \
+          cp mobile/babytracker.aab "babytracker-$TAG.aab"
+          gh release create "$TAG" "babytracker-$TAG.apk" "babytracker-$TAG.aab" \
             --target "$GITHUB_SHA" --title "Baby Tracker $TAG" \
-            --notes "See CHANGELOG.md for what changed. All E2E checks passed on the acceptance build. Install on the phone: download the APK and open it."
+            --notes "See CHANGELOG.md for what changed. All E2E checks passed on the acceptance build. Install on the phone: download the APK and open it. The .aab is for Google Play (docs/play-store.md)."

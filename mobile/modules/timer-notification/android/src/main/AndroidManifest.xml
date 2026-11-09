@@ -1,4 +1,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
   <!-- Lets Android 16+ show a running timer as a Live Update (status bar chip, lock screen). -->
   <uses-permission android:name="android.permission.POST_PROMOTED_NOTIFICATIONS" />
+  <application>
+    <!-- Records that the user swiped a timer away (#51); only our own PendingIntent reaches it. -->
+    <receiver
+      android:name="expo.modules.timernotification.TimerDismissedReceiver"
+      android:exported="false" />
+  </application>
 </manifest>

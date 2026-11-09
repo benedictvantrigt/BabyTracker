@@ -11,6 +11,7 @@ export async function syncLiveTimers(timers: LiveTimer[], channelId: string): Pr
   for (const id of TimerNotification.activeIds()) {
     if (!running.has(id)) TimerNotification.dismiss(id);
   }
+  TimerNotification.forgetDismissed([...running]);
   for (const t of timers) {
     TimerNotification.show({
       id: t.id,

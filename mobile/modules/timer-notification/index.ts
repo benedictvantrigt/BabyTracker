@@ -12,7 +12,10 @@ export interface TimerNotificationInput {
 }
 
 interface TimerNotificationModule {
+  /** Does nothing for a timer whose notification the user dismissed. */
   show(timer: TimerNotificationInput): void;
+  /** Forgets dismissals of timers that are no longer running. */
+  forgetDismissed(runningIds: string[]): void;
   dismiss(id: string): void;
   activeIds(): string[];
 }

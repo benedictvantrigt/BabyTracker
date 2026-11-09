@@ -4,6 +4,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { Button, Card, Icon, KIND_ICON } from '@/components/ui';
+import { HEALTH_DISCLAIMER } from '@/constants/links';
 import { Spacing } from '@/constants/theme';
 import type { Repo } from '@/db/repo';
 import type { DashboardCardId } from '@/domain/dashboard';
@@ -233,6 +234,9 @@ function DayPlan({ schedule, now }: { schedule: ScheduleStatus; now: number }) {
           </ThemedText>
           <ThemedText type="small" themeColor="textSecondary">
             {`Day sleep ${formatDuration(schedule.daySleptMs)} of ${formatTarget(daySleep)}`}
+          </ThemedText>
+          <ThemedText type="small" themeColor="textSecondary" testID="schedule-disclaimer">
+            {HEALTH_DISCLAIMER}
           </ThemedText>
         </>
       )}
