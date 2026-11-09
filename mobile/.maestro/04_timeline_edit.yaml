@@ -40,6 +40,10 @@ name: Timeline lists entries; edit and delete
 # Delete the feed (Android alert: second button is the positive one).
 - tapOn: '(Edit )?Feeding · Left( at .*)?'
 - assertVisible: 'Edit feeding'
+# The form is taller than the screen (the Length switch, #53).
+- scrollUntilVisible:
+    element: 'Delete'
+    centerElement: true
 - tapOn: 'Delete'
 - assertVisible: 'Delete entry\?'
 - runFlow:
