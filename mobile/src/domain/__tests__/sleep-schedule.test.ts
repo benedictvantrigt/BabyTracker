@@ -5,6 +5,7 @@ import {
   isNewStage,
   planDay,
   scheduleStatus,
+  slotLabel,
   stageFor,
   totalSleepTarget,
 } from '../sleep-schedule';
@@ -152,8 +153,11 @@ describe('scheduleStatus', () => {
     expect(short.slots[1].status).toBe('short');
     expect(short.advice).toEqual({ kind: 'catch-up', from: at(16), to: at(17) });
 
+    expect(slotLabel(short.slots[1])).toBe('30m of 2h 00m · too short');
+
     const missed = scheduleStatus([night, nap(9, 15, 10)], tenMonths, settings, at(14, 45))!;
     expect(missed.slots[1].status).toBe('missed');
+    expect(slotLabel(missed.slots[1])).toBe('missed');
     expect(missed.advice).toEqual({ kind: 'catch-up', from: at(16), to: at(17) });
 
     expect(scheduleStatus([night], tenMonths, settings, at(17, 30))!.advice).toBeNull();

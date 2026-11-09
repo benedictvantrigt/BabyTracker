@@ -21,10 +21,10 @@ import { nextFeedAt, nextNapAt } from '@/domain/reminders';
 import {
   isNewStage,
   scheduleStatus,
+  slotLabel,
   totalSleepTarget,
   type ScheduleStatus,
   type SleepAdvice,
-  type SlotState,
 } from '@/domain/sleep-schedule';
 import { MINUTE, formatAgo, formatClock, formatDuration, formatStopwatch } from '@/domain/time';
 import type { Child, DiaperData, Entry, FeedingMethod, Settings } from '@/domain/types';
@@ -111,15 +111,15 @@ function SleepCard({ child, settings, entries, now, repo, run, logged }: Dashboa
           </ThemedText>
         )
       )}
+      {!sleeping && (
+        <Button label="Start sleep" variant="primary" color={theme.sleep} onPress={startSleep} />
+      )}
+      {schedule && <DayPlan schedule={schedule} now={now} />}
       {schedule && (
         <ThemedText type="small" themeColor="textSecondary" testID="sleep-total">
           {`Sleep today ${formatDuration(schedule.totalSleptMs)} of ${formatTarget(totalSleepTarget(schedule.stage.stage))}`}
         </ThemedText>
       )}
-      {!sleeping && (
-        <Button label="Start sleep" variant="primary" color={theme.sleep} onPress={startSleep} />
-      )}
-      {schedule && <DayPlan schedule={schedule} now={now} />}
     </KindCard>
   );
 }
@@ -175,20 +175,11 @@ function adviceText(advice: SleepAdvice): string {
     case 'resettle':
       return `Woke early: try to settle again; the nap runs until ${formatClock(advice.until)}.`;
     case 'catch-up':
-      return `Short day sleep: one long or two short naps between ${formatClock(advice.from)} and ${formatClock(advice.to)}.`;
+      return `Midday nap missed or too short: catch up with one long or two short naps between ${formatClock(advice.from)} and ${formatClock(advice.to)}.`;
     case 'wake-overdue':
       return `Time to wake up: the nap was planned until ${formatClock(advice.since)}.`;
   }
 }
-
-const SLOT_STATUS_LABEL: Record<SlotState['status'], string> = {
-  done: 'slept',
-  short: 'short',
-  missed: 'missed',
-  now: 'now',
-  sleeping: 'sleeping',
-  upcoming: '',
-};
 
 /** Today's planned naps and bedtime with what was slept, and day sleep against the target. */
 function DayPlan({ schedule, now }: { schedule: ScheduleStatus; now: number }) {
@@ -218,12 +209,15 @@ function DayPlan({ schedule, now }: { schedule: ScheduleStatus; now: number }) {
               {`Nap ${slot.index}  ${formatClock(slot.startAt)}–${formatClock(slot.endAt)}`}
             </ThemedText>
             <ThemedText type="small" themeColor="textSecondary">
-              {slot.sleptMs > 0
-                ? `${formatDuration(slot.sleptMs)} ${SLOT_STATUS_LABEL[slot.status]}`
-                : SLOT_STATUS_LABEL[slot.status]}
+              {slotLabel(slot)}
             </ThemedText>
           </View>
         ))}
+      {open && schedule.slots.some((slot) => slot.status === 'short') && (
+        <ThemedText type="small" themeColor="textSecondary" testID="schedule-short-note">
+          Too short: slept less than half of the planned nap.
+        </ThemedText>
+      )}
       {open && (
         <>
           <View style={styles.planRow}>
@@ -257,8 +251,15 @@ function FeedingCard({ child, settings, entries, now, repo, run, logged }: Dashb
   const feedAt = nextFeedAt(entries, settings);
   const startFeed = (method: FeedingMethod) =>
     run(async () => {
-      const e = await repo.startTimer(child.id, 'feeding', { type: 'breast_milk', method });
-      logged(e, `Feeding (${method}) started`);
+      const data = { type: 'breast_milk', method } as const;
+      if (settings.feedTimer) {
+        const e = await repo.startTimer(child.id, 'feeding', data);
+        logged(e, `Feeding (${method}) started`);
+      } else {
+        const t = Date.now();
+        const e = await repo.addEntry(child.id, { kind: 'feeding', start: t, end: t, data });
+        logged(e, `Feeding logged: ${method}`);
+      }
     });
 
   return (

@@ -104,6 +104,11 @@ export interface Settings {
   dashboardLayout: DashboardLayout;
   /** Whether this phone shows nap and feed reminders (per phone, not synced). */
   remindersOnThisPhone: boolean;
+  /**
+   * Left and Right on the Feeding card start a timer; when off they log the feed at one
+   * moment, without a length (per phone, not synced).
+   */
+  feedTimer: boolean;
 }
 
 /** Reminder rules shared by the phones of a family; the rest of Settings is per phone. */
@@ -136,4 +141,5 @@ export const DEFAULT_SETTINGS: Settings = {
   feedAlarmNight: true,
   dashboardLayout: DEFAULT_DASHBOARD,
   remindersOnThisPhone: true,
+  feedTimer: true,
 };

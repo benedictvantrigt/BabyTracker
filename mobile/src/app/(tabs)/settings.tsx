@@ -95,6 +95,17 @@ export default function SettingsScreen() {
               onChange={(v) => update({ feedIntervalMinutes: v })}
             />
             <ToggleRow
+              label="Time feeds"
+              description={
+                settings.feedTimer
+                  ? 'Left and Right start a timer (this phone)'
+                  : 'Left and Right log the feed now, without a length (this phone)'
+              }
+              value={settings.feedTimer}
+              testID="toggle-feed-timer"
+              onChange={(v) => update({ feedTimer: v })}
+            />
+            <ToggleRow
               label="Daytime reminder"
               description="Notification when a feed is due during the day"
               value={settings.feedRemindersDay}

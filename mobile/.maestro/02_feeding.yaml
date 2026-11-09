@@ -37,3 +37,20 @@ name: Breast feeding timers switch sides, bottle feed with amount
 - assertVisible: '(Edit )?Feeding · Right( at .*)?'
 - assertVisible: '(Edit )?Feeding · Left( at .*)?'
 - takeScreenshot: 02-feeding-timeline
+# With "Time feeds" off, Left logs the feed now without a length (#53).
+- tapOn: 'Settings'
+- scrollUntilVisible:
+    element:
+      id: 'toggle-feed-timer'
+    centerElement: true
+- tapOn:
+    id: 'toggle-feed-timer'
+- tapOn: 'Today'
+- scrollUntilVisible:
+    element: 'Left'
+    centerElement: true
+- tapOn: 'Left'
+- assertVisible: 'Feeding logged: left'
+- assertNotVisible: 'Stop'
+- assertVisible: 'Last: Left, .* ago'
+- takeScreenshot: 02-feeding-without-length

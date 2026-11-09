@@ -1,5 +1,12 @@
 /// <reference types="jest" />
-import { entryTitle, groupByDay, isNapStart, summarizeDay, validateEntry } from '../entries';
+import {
+  entryDurationLabel,
+  entryTitle,
+  groupByDay, isNapStart,
+  isUntimedFeed,
+  summarizeDay,
+  validateEntry,
+} from '../entries';
 import { HOUR, MINUTE, formatAge, formatDuration, formatStopwatch } from '../time';
 
 import { at, entry, settings } from './fixtures';
@@ -79,6 +86,17 @@ describe('labels and grouping', () => {
       'Diaper · Wet + solid',
     );
     expect(entryTitle(entry('sleep', 0, 0, { nap: false }))).toBe('Night sleep');
+  });
+
+  it('shows no length for a feed logged at one moment', () => {
+    const data = { type: 'breast_milk', method: 'left' } as const;
+    const instant = entry('feeding', at(9), at(9), data);
+    expect(isUntimedFeed(instant)).toBe(true);
+    expect(entryDurationLabel(instant, at(10))).toBeNull();
+    const timed = entry('feeding', at(9), at(9, 20), data);
+    expect(isUntimedFeed(timed)).toBe(false);
+    expect(entryDurationLabel(timed, at(10))).toBe('20m');
+    expect(entryDurationLabel(entry('feeding', at(9), null, data), at(9, 5))).toBe('5m');
   });
 
   it('groups by local day, newest first', () => {

@@ -1,4 +1,4 @@
-import { DAY, HOUR, MINUTE, startOfLocalDay } from './time';
+import { DAY, HOUR, MINUTE, formatDuration, startOfLocalDay } from './time';
 import type { Entry, EntryOf, Settings } from './types';
 
 // Age-based day schedules. Times are minutes after midnight for a day that starts at 07:00;
@@ -323,6 +323,29 @@ export interface SlotState extends PlanSlot {
   status: SlotStatus;
   /** Sleep that counted toward this slot, in ms. */
   sleptMs: number;
+}
+
+/**
+ * What the day plan shows next to a nap: slept against planned, and its status.
+ * A nap is "too short" when its time is over and the baby slept less than half of it.
+ */
+export function slotLabel(slot: SlotState): string {
+  const planned = formatDuration(slot.endAt - slot.startAt);
+  const slept = formatDuration(slot.sleptMs);
+  switch (slot.status) {
+    case 'done':
+      return `${slept} of ${planned}`;
+    case 'short':
+      return `${slept} of ${planned} · too short`;
+    case 'sleeping':
+      return `${slept} of ${planned} · sleeping`;
+    case 'missed':
+      return 'missed';
+    case 'now':
+      return 'now';
+    case 'upcoming':
+      return '';
+  }
 }
 
 export type SleepAdvice =

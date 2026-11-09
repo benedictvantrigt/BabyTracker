@@ -69,8 +69,13 @@ export function entryTitle(entry: Entry): string {
   }
 }
 
+/** A feed logged at one moment, without a length (#53). */
+export function isUntimedFeed(entry: Entry): boolean {
+  return entry.kind === 'feeding' && entry.end === entry.start;
+}
+
 export function entryDurationLabel(entry: Entry, now: number): string | null {
-  if (!isTimedKind(entry.kind)) return null;
+  if (!isTimedKind(entry.kind) || isUntimedFeed(entry)) return null;
   return formatDuration((entry.end ?? now) - entry.start);
 }
 

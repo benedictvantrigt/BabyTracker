@@ -46,6 +46,8 @@ const COLOR_OPTIONS: { value: DiaperColor | 'none'; label: string }[] = [
 interface FormState {
   start: number;
   end: number | null;
+  /** Feeding only: false logs the feed at one moment, without a length (`end === start`). */
+  timed: boolean;
   feedingType: FeedingType;
   feedingMethod: FeedingMethod;
   amount: string;
@@ -63,12 +65,16 @@ function initialState(
   kind: EntryKind,
   method: FeedingMethod | undefined,
   napNow: boolean,
+  feedTimed: boolean,
 ): FormState {
   const now = Date.now();
-  const defaultLength = kind === 'sleep' ? 60 * MINUTE : kind === 'feeding' ? 15 * MINUTE : 0;
+  const timed = kind !== 'feeding' || feedTimed;
+  const defaultLength =
+    kind === 'sleep' ? 60 * MINUTE : kind === 'feeding' && timed ? 15 * MINUTE : 0;
   return {
     start: now - defaultLength,
     end: now,
+    timed,
     feedingType: method === 'bottle' ? 'formula' : 'breast_milk',
     feedingMethod: method ?? 'left',
     amount: '',
@@ -84,9 +90,10 @@ function initialState(
 
 function stateFromEntry(entry: Entry): FormState {
   const base = {
-    ...initialState(entry.kind, undefined, false),
+    ...initialState(entry.kind, undefined, false, true),
     start: entry.start,
     end: entry.end,
+    timed: !(entry.kind === 'feeding' && entry.end === entry.start),
     notes: entry.notes,
     tags: entry.tags,
   };
@@ -119,7 +126,7 @@ function toInput(kind: EntryKind, s: FormState): EntryInput {
       return {
         kind,
         start: s.start,
-        end: s.end,
+        end: s.timed ? s.end : s.start,
         notes,
         tags,
         data: {
@@ -155,6 +162,7 @@ export default function EntryScreen() {
           kind,
           params.method as FeedingMethod | undefined,
           isNapStart(Date.now(), settings),
+          settings.feedTimer,
         )
       : null,
   );
@@ -283,11 +291,27 @@ export default function EntryScreen() {
           </>
         )}
 
-        <Field label={kind === 'diaper' ? 'Time' : 'Start'}>
+        {kind === 'feeding' && (
+          <ToggleRow
+            label="Length"
+            description="Off: log the feed at one moment, without start and end"
+            value={form.timed}
+            onChange={(on) => {
+              if (!on) return set({ timed: false });
+              if (form.end !== form.start) return set({ timed: true });
+              // Give an entry without a length the default 15 minutes, ending by now.
+              const end = Math.min(form.start + 15 * MINUTE, Date.now());
+              set({ timed: true, start: Math.min(form.start, end - 15 * MINUTE), end });
+            }}
+            testID="toggle-feed-length"
+          />
+        )}
+
+        <Field label={form.timed && kind !== 'diaper' ? 'Start' : 'Time'}>
           <DateTimeField value={form.start} onChange={(start) => set({ start })} />
         </Field>
 
-        {kind !== 'diaper' && (
+        {kind !== 'diaper' && form.timed && (
           <>
             {editing && (
               <ToggleRow
