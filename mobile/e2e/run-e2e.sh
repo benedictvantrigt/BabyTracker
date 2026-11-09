@@ -42,9 +42,11 @@ echo "== maestro $(maestro --version 2>&1 | tail -1) =="
 maestro_status=0
 
 # Emulator faults rather than test failures: no report (Maestro hung before the flow
-# ran) or the on-device driver died. A flow that hit one is run once more.
+# ran), the on-device driver died, or "Unknown error" (seen when adb lost the emulator:
+# "device offline"; a failed check names the check). A flow that hit one is run once more.
 infra_failure() { # report file
-  [ ! -s "$1" ] || grep -qE 'DeviceServerDied|StatusRuntimeException: UNAVAILABLE' "$1"
+  [ ! -s "$1" ] ||
+    grep -qE 'DeviceServerDied|StatusRuntimeException: UNAVAILABLE|<failure>Unknown error</failure>' "$1"
 }
 
 run_maestro() { # name, flow file, extra maestro args...
@@ -68,6 +70,9 @@ run_flow() { # flow file, extra maestro args...
   if infra_failure "$OUT/report-$name.xml"; then
     echo "== $name: emulator fault, running it once more ==" | tee -a "$OUT/maestro.txt"
     mv "$OUT/report-$name.xml" "$OUT/report-$name-attempt1.xml.txt" 2>/dev/null
+    # Back online, with the relay port mapping that an adb restart drops.
+    timeout 120 adb wait-for-device || true
+    adb reverse tcp:$RELAY_PORT tcp:$RELAY_PORT || true
     run_maestro "$name" "$flow" "$@" && return 0
   fi
   maestro_status=1
