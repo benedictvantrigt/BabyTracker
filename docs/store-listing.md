@@ -8,13 +8,14 @@ Android build does. Items marked **CHECK** need a decision before they go into P
 | Field | Value |
 |---|---|
 | App name (max 30) | Napchime |
-| Default language | English (United States) — **CHECK**: or English (UK) / Dutch |
+| Default language | English (United States) |
 | App or game | App |
 | Free or paid | Free |
 | Category | Parenting |
 | Tags | Baby tracker, Sleep tracker, Parenting |
-| Contact email | {{EMAIL}} — **CHECK** (shown on the listing) |
-| Website | https://github.com/benedictvantrigt/BabyTracker — **CHECK**: or your own site |
+| Contact email | info@iter-it.nl (shown on the listing) |
+| Developer | ITER IT, Bestevaerstraat 128, Amsterdam, the Netherlands |
+| Website | https://github.com/benedictvantrigt/BabyTracker — **CHECK**: or https://iter-it.nl |
 | Privacy policy | https://benedictvantrigt.github.io/BabyTracker/privacy/ |
 
 ## Short description (max 80)
@@ -104,6 +105,7 @@ Google's guidance exempts end-to-end encrypted data; the answer above relies on 
 
 ## Account-level (Play Console, not per app)
 
-- **EU trader status (DSA)**: as an organisation that publishes the app, you are most
-  likely a trader; your address, phone and email are then shown on the listing. **CHECK**
+- **EU trader status (DSA)**: ITER IT publishes the app as a business, so declare it as a
+  trader; Play then shows the address, phone number and email on the listing. **CHECK** the
+  phone number you want shown.
 - **D-U-N-S / organisation verification**: done when creating the account.
