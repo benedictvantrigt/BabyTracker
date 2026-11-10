@@ -15,7 +15,7 @@ Android build does. Items marked **CHECK** need a decision before they go into P
 | Tags | Baby tracker, Sleep tracker, Parenting |
 | Contact email | info@iter-it.nl (shown on the listing) |
 | Developer | ITER IT, Bestevaerstraat 128, Amsterdam, the Netherlands |
-| Website | https://github.com/benedictvantrigt/BabyTracker — **CHECK**: or https://iter-it.nl |
+| Website | https://github.com/benedictvantrigt/BabyTracker |
 | Privacy policy | https://benedictvantrigt.github.io/BabyTracker/privacy/ |
 
 ## Short description (max 80)
@@ -100,12 +100,12 @@ Google does not count data that is end-to-end encrypted so that we can't read it
 | Data types collected | **Device or other IDs**: the device's public key and push token, for app functionality (sync and reminders). Optional: only when partner sync is used |
 | Not collected | Personal info, health and fitness, location, photos, contacts, app activity, crash logs: the baby's records are end-to-end encrypted, and the app has no analytics |
 
-**CHECK**: whether Play's reviewers treat the encrypted baby records as "Health info".
-Google's guidance exempts end-to-end encrypted data; the answer above relies on that.
+Decided: the encrypted baby records are not declared as "Health info", relying on Google's
+exemption for end-to-end encrypted data. Revisit if a reviewer asks.
 
 ## Account-level (Play Console, not per app)
 
 - **EU trader status (DSA)**: ITER IT publishes the app as a business, so declare it as a
-  trader; Play then shows the address, phone number and email on the listing. **CHECK** the
-  phone number you want shown.
+  trader; Play then shows the address, phone number and email on the listing. The phone
+  number is entered in Play Console only (not kept in this public repository).
 - **D-U-N-S / organisation verification**: done when creating the account.
