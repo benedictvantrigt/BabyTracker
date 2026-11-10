@@ -152,6 +152,13 @@ back from that phone.
 - `android-latest` stays a pre-release with the newest passing acceptance build of any
   branch, for testing.
 
+## About the sleep schedule
+
+The age-based sleep schedule (`mobile/src/domain/sleep-schedule.ts`) is an example day
+rhythm per age, put together by the developer from parenting guides. Every baby is
+different. This is general guidance, not medical advice; ask your doctor or nurse if you
+have concerns.
+
 ## Layout
 
 ```
