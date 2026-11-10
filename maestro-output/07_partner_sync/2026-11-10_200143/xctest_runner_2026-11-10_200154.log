@@ -1,0 +1,1195 @@
+2026-11-10 20:02:01.019 xcodebuild[41605:364042] [MT] IDERunDestination: Supported platforms for the buildables in the current scheme is empty.
+2026-11-10 20:02:01.050 xcodebuild[41605:364042] [MT] IDERunDestination: Supported platforms for the buildables in the current scheme is empty.
+--- xcodebuild: WARNING: Using the first of multiple matching destinations:
+{ platform:iOS Simulator, arch:arm64, id:FCC5F673-7BEC-4A7D-8F2A-4DC35E2668EC, OS:262026-11-10 20:02:33.751522+0000 maestro-driver-iosUITests-Runner[42900:367542] [Default] Running tests...
+2026-11-10 20:02:34.081491+0000 maestro-driver-iosUITests-Runner[42900:367542] snapshotKeyHonorModalViews configured to value: (null)
+    t =      nans Interface orientation** BUILD INTERRUPTED **
+t Suite 'Selected tests' started at 2026-11-10 20:02:42.072.
+Test Suite 'maestro-driver-iosUITests.xctest' started at 2026-11-10 20:02:42.077.
+Test Suite 'SwipeRouteHandlerV2ClassificationTests' started at 2026-11-10 20:02:42.077.
+Test Case '-[maestro_driver_iosUITests.SwipeRouteHandlerV2ClassificationTests testClassifiedTimeoutPreservesTheRealMessage]' started.
+    t =     0.00s Start Test at 2026-11-10 20:02:42.079
+    t =     0.01s Set Up
+    t =     0.01s Tear Down
+Test Case '-[maestro_driver_iosUITests.SwipeRouteHandlerV2ClassificationTests testClassifiedTimeoutPreservesTheRealMessage]' passed (0.011 seconds).
+Test Case '-[maestro_driver_iosUITests.SwipeRouteHandlerV2ClassificationTests testMainThreadBusyIsClassifiedAsTimeout]' started.
+    t =     0.00s Start Test at 2026-11-10 20:02:42.090
+    t =     0.00s Set Up
+    t =     0.00s Tear Down
+Test Case '-[maestro_driver_iosUITests.SwipeRouteHandlerV2ClassificationTests testMainThreadBusyIsClassifiedAsTimeout]' passed (0.003 seconds).
+Test Case '-[maestro_driver_iosUITests.SwipeRouteHandlerV2ClassificationTests testTimeoutMessageWithWrongDomainStaysInternal]' started.
+    t =     0.00s Start Test at 2026-11-10 20:02:42.130
+    t =     0.00s Set Up
+    t =     0.00s Tear Down
+Test Case '-[maestro_driver_iosUITests.SwipeRouteHandlerV2ClassificationTests testTimeoutMessageWithWrongDomainStaysInternal]' passed (0.003 seconds).
+Test Case '-[maestro_driver_iosUITests.SwipeRouteHandlerV2ClassificationTests testUIQueryTimeoutIsClassifiedAsTimeout]' started.
+    t =     0.00s Start Test at 2026-11-10 20:02:42.134
+    t =     0.00s Set Up
+    t =     0.01s Tear Down
+Test Case '-[maestro_driver_iosUITests.SwipeRouteHandlerV2ClassificationTests testUIQueryTimeoutIsClassifiedAsTimeout]' passed (0.008 seconds).
+Test Case '-[maestro_driver_iosUITests.SwipeRouteHandlerV2ClassificationTests testUnrelatedXCTFutureErrorStaysInternal]' started.
+    t =     0.00s Start Test at 2026-11-10 20:02:42.142
+    t =     0.00s Set Up
+    t =     0.01s Tear Down
+Test Case '-[maestro_driver_iosUITests.SwipeRouteHandlerV2ClassificationTests testUnrelatedXCTFutureErrorStaysInternal]' passed (0.008 seconds).
+Test Case '-[maestro_driver_iosUITests.SwipeRouteHandlerV2ClassificationTests testXCTFutureCode1000WithUnrelatedMessageStaysInternal]' started.
+    t =     0.00s Start Test at 2026-11-10 20:02:42.150
+    t =     0.00s Set Up
+    t =     0.00s Tear Down
+Test Case '-[maestro_driver_iosUITests.SwipeRouteHandlerV2ClassificationTests testXCTFutureCode1000WithUnrelatedMessageStaysInternal]' passed (0.002 seconds).
+Test Suite 'SwipeRouteHandlerV2ClassificationTests' passed at 2026-11-10 20:02:42.180.
+	 Executed 6 tests, with 0 failures (0 unexpected) in 0.034 (0.103) seconds
+Test Suite 'maestro_driver_iosUITests' started at 2026-11-10 20:02:42.180.
+    t =      nans Suite Set Up
+Test Case '-[maestro_driver_iosUITests.maestro_driver_iosUITests testHttpServer]' started.
+    t =     0.00s Start Test at 2026-11-10 20:02:42.182
+    t =     0.00s Set Up
+2026-11-10 20:02:42.185286+0000 maestro-driver-iosUITests-Runner[42900:368371] [maestro_driver_iosUITests] Will start HTTP server
+2026-11-10 20:02:42.351551+0000 maestro-driver-iosUITests-Runner[42900:368374] [FlyingFox] starting server 127.0.0.1:51017
+2026-11-10 20:02:42.361124+0000 maestro-driver-iosUITests-Runner[42900:368369] [FlyingFox] <127.0.0.1> open connection
+2026-11-10 20:02:42.370471+0000 maestro-driver-iosUITests-Runner[42900:368369] [FlyingFox] <127.0.0.1> request: GET /status
+2026-11-10 20:02:42.646917+0000 maestro-driver-iosUITests-Runner[42900:368369] [FlyingFox] <127.0.0.1> open connection
+2026-11-10 20:02:42.649144+0000 maestro-driver-iosUITests-Runner[42900:368372] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =     0.47s Getting device orientation
+2026-11-10 20:02:44.055189+0000 maestro-driver-iosUITests-Runner[42900:367542] Using singleton test manager
+2026-11-10 20:02:44.077029+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+    t =     1.90s Getting device orientation
+    t =     1.90s Find the Application 'com.napchime.app.acc'
+2026-11-10 20:02:44.333543+0000 maestro-driver-iosUITests-Runner[42900:367542] Device orientation is 1
+objc[42900]: Class UIAccessibilityLoaderWebShared is implemented in both /Library/Developer/CoreSimulator/Volumes/iOS_23F77/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 26.5.simruntime/Contents/Resources/RuntimeRoot/System/Library/AccessibilityBundles/WebCore.axbundle/WebCore (0x109fd0310) and /Library/Developer/CoreSimulator/Volumes/iOS_23F77/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 26.5.simruntime/Contents/Resources/RuntimeRoot/System/Library/AccessibilityBundles/WebKit.axbundle/WebKit (0x10a4c8398). This may cause spurious casting failures and mysterious crashes. One of the duplicates must be removed or renamed.
+2026-11-10 20:03:00.952964+0000 maestro-driver-iosUITests-Runner[42900:368374] [FlyingFox] <127.0.0.1> request: POST /setPermissions
+2026-11-10 20:03:01.204931+0000 maestro-driver-iosUITests-Runner[42900:368369] [FlyingFox] <127.0.0.1> request: POST /terminateApp
+2026-11-10 20:03:01.212579+0000 maestro-driver-iosUITests-Runner[42900:367542] [Start] Terminating app com.napchime.app.acc
+    t =    19.04s Terminate com.napchime.app.acc:0
+2026-11-10 20:03:01.448275+0000 maestro-driver-iosUITests-Runner[42900:367542] [End] Terminating app com.napchime.app.acc
+2026-11-10 20:03:04.955361+0000 maestro-driver-iosUITests-Runner[42900:368369] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    22.78s Getting device orientation
+2026-11-10 20:03:05.013981+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+    t =    22.83s Getting device orientation
+2026-11-10 20:03:05.017811+0000 maestro-driver-iosUITests-Runner[42900:367542] Returning cached screen size
+2026-11-10 20:03:05.018019+0000 maestro-driver-iosUITests-Runner[42900:367542] Device orientation is 1
+2026-11-10 20:03:08.250219+0000 maestro-driver-iosUITests-Runner[42900:368370] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-10 20:03:08.266578+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+2026-11-10 20:03:08.267586+0000 maestro-driver-iosUITests-Runner[42900:367542] [Start] View hierarchy snapshot for Application 'com.napchime.app.acc'
+2026-11-10 20:03:08.267784+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =    26.09s Find the Application 'com.napchime.app.acc'
+2026-11-10 20:03:08.629783+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-10 20:03:08.630163+0000 maestro-driver-iosUITests-Runner[42900:367542] Foreground app is not springboard skipping auto tapping on permissions
+2026-11-10 20:03:08.630273+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =    26.45s Checking existence of `StatusBar (First Match)`
+    t =    26.47s Get all elements bound by index for: Descendants matching type StatusBar
+    t =    26.52s Find the StatusBar (Element at index 0)
+    t =    26.55s Find the StatusBar (Element at index 1)
+2026-11-10 20:03:08.770307+0000 maestro-driver-iosUITests-Runner[42900:367542] Fetch status bar hierarchy - duration 0.13996803760528564
+2026-11-10 20:03:08.770392+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-10 20:03:08.775103+0000 maestro-driver-iosUITests-Runner[42900:367542] Fetch Safari WebView hierarchy - duration 0.004648923873901367
+    t =    26.59s Find the Application 'com.apple.springboard'
+2026-11-10 20:03:08.805995+0000 maestro-driver-iosUITests-Runner[42900:367542] [Done] View hierarchy snapshot for Application 'com.napchime.app.acc' 
+2026-11-10 20:03:08.958868+0000 maestro-driver-iosUITests-Runner[42900:368369] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    26.78s Getting device orientation
+2026-11-10 20:03:08.963459+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+    t =    26.78s Getting device orientation
+2026-11-10 20:03:08.965082+0000 maestro-driver-iosUITests-Runner[42900:367542] Returning cached screen size
+2026-11-10 20:03:08.965215+0000 maestro-driver-iosUITests-Runner[42900:367542] Device orientation is 1
+2026-11-10 20:03:08.968608+0000 maestro-driver-iosUITests-Runner[42900:368371] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-10 20:03:08.972002+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+2026-11-10 20:03:08.973109+0000 maestro-driver-iosUITests-Runner[42900:367542] [Start] View hierarchy snapshot for Application 'com.napchime.app.acc'
+2026-11-10 20:03:08.973240+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =    26.79s Find the Application 'com.napchime.app.acc'
+2026-11-10 20:03:09.076697+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-10 20:03:09.076933+0000 maestro-driver-iosUITests-Runner[42900:367542] Foreground app is not springboard skipping auto tapping on permissions
+2026-11-10 20:03:09.076993+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =    26.90s Checking existence of `StatusBar (First Match)`
+    t =    26.91s Get all elements bound by index for: Descendants matching type StatusBar
+    t =    26.94s Find the StatusBar (Element at index 0)
+    t =    26.99s Find the StatusBar (Element at index 1)
+2026-11-10 20:03:09.214789+0000 maestro-driver-iosUITests-Runner[42900:367542] Fetch status bar hierarchy - duration 0.13770198822021484
+2026-11-10 20:03:09.214899+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-10 20:03:09.215565+0000 maestro-driver-iosUITests-Runner[42900:367542] Fetch Safari WebView hierarchy - duration 0.0006380081176757812
+    t =    27.03s Find the Application 'com.apple.springboard'
+2026-11-10 20:03:09.251989+0000 maestro-driver-iosUITests-Runner[42900:367542] [Done] View hierarchy snapshot for Application 'com.napchime.app.acc' 
+2026-11-10 20:03:09.356194+0000 maestro-driver-iosUITests-Runner[42900:368371] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    27.18s Getting device orientation
+2026-11-10 20:03:09.361339+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+    t =    27.18s Getting device orientation
+2026-11-10 20:03:09.363281+0000 maestro-driver-iosUITests-Runner[42900:367542] Returning cached screen size
+2026-11-10 20:03:09.363726+0000 maestro-driver-iosUITests-Runner[42900:367542] Device orientation is 1
+2026-11-10 20:03:09.387838+0000 maestro-driver-iosUITests-Runner[42900:368371] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-10 20:03:09.390779+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+2026-11-10 20:03:09.391378+0000 maestro-driver-iosUITests-Runner[42900:367542] [Start] View hierarchy snapshot for Application 'com.napchime.app.acc'
+2026-11-10 20:03:09.391441+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =    27.21s Find the Application 'com.napchime.app.acc'
+2026-11-10 20:03:09.469311+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-10 20:03:09.469895+0000 maestro-driver-iosUITests-Runner[42900:367542] Foreground app is not springboard skipping auto tapping on permissions
+2026-11-10 20:03:09.470126+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =    27.29s Checking existence of `StatusBar (First Match)`
+    t =    27.30s Get all elements bound by index for: Descendants matching type StatusBar
+    t =    27.33s Find the StatusBar (Element at index 0)
+    t =    27.37s Find the StatusBar (Element at index 1)
+2026-11-10 20:03:09.602514+0000 maestro-driver-iosUITests-Runner[42900:367542] Fetch status bar hierarchy - duration 0.13230204582214355
+2026-11-10 20:03:09.602791+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-10 20:03:09.603545+0000 maestro-driver-iosUITests-Runner[42900:367542] Fetch Safari WebView hierarchy - duration 0.0007169246673583984
+    t =    27.42s Find the Application 'com.apple.springboard'
+2026-11-10 20:03:09.633115+0000 maestro-driver-iosUITests-Runner[42900:367542] [Done] View hierarchy snapshot for Application 'com.napchime.app.acc' 
+2026-11-10 20:03:09.653759+0000 maestro-driver-iosUITests-Runner[42900:368374] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    27.47s Getting device orientation
+2026-11-10 20:03:09.660267+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+    t =    27.48s Getting device orientation
+2026-11-10 20:03:09.662287+0000 maestro-driver-iosUITests-Runner[42900:367542] Returning cached screen size
+2026-11-10 20:03:09.662401+0000 maestro-driver-iosUITests-Runner[42900:367542] Device orientation is 1
+2026-11-10 20:03:09.665096+0000 maestro-driver-iosUITests-Runner[42900:368370] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-10 20:03:09.668666+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+2026-11-10 20:03:09.669358+0000 maestro-driver-iosUITests-Runner[42900:367542] [Start] View hierarchy snapshot for Application 'com.napchime.app.acc'
+2026-11-10 20:03:09.669440+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =    27.49s Find the Application 'com.napchime.app.acc'
+2026-11-10 20:03:09.752098+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-10 20:03:09.752375+0000 maestro-driver-iosUITests-Runner[42900:367542] Foreground app is not springboard skipping auto tapping on permissions
+2026-11-10 20:03:09.752443+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =    27.57s Checking existence of `StatusBar (First Match)`
+    t =    27.58s Get all elements bound by index for: Descendants matching type StatusBar
+    t =    27.61s Find the StatusBar (Element at index 0)
+    t =    27.64s Find the StatusBar (Element at index 1)
+2026-11-10 20:03:09.859019+0000 maestro-driver-iosUITests-Runner[42900:367542] Fetch status bar hierarchy - duration 0.10647702217102051
+2026-11-10 20:03:09.859119+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-10 20:03:09.859863+0000 maestro-driver-iosUITests-Runner[42900:367542] Fetch Safari WebView hierarchy - duration 0.0007100105285644531
+    t =    27.68s Find the Application 'com.apple.springboard'
+2026-11-10 20:03:09.894748+0000 maestro-driver-iosUITests-Runner[42900:367542] [Done] View hierarchy snapshot for Application 'com.napchime.app.acc' 
+2026-11-10 20:03:09.935838+0000 maestro-driver-iosUITests-Runner[42900:368374] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    27.75s Getting device orientation
+2026-11-10 20:03:09.941683+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+    t =    27.76s Getting device orientation
+2026-11-10 20:03:09.944141+0000 maestro-driver-iosUITests-Runner[42900:367542] Returning cached screen size
+2026-11-10 20:03:09.944276+0000 maestro-driver-iosUITests-Runner[42900:367542] Device orientation is 1
+2026-11-10 20:03:09.947085+0000 maestro-driver-iosUITests-Runner[42900:369345] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-10 20:03:09.950121+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+2026-11-10 20:03:09.950750+0000 maestro-driver-iosUITests-Runner[42900:367542] [Start] View hierarchy snapshot for Application 'com.napchime.app.acc'
+2026-11-10 20:03:09.950841+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =    27.77s Find the Application 'com.napchime.app.acc'
+2026-11-10 20:03:10.029405+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-10 20:03:10.029685+0000 maestro-driver-iosUITests-Runner[42900:367542] Foreground app is not springboard skipping auto tapping on permissions
+2026-11-10 20:03:10.029748+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =    27.85s Checking existence of `StatusBar (First Match)`
+    t =    27.86s Get all elements bound by index for: Descendants matching type StatusBar
+    t =    27.89s Find the StatusBar (Element at index 0)
+    t =    27.92s Find the StatusBar (Element at index 1)
+2026-11-10 20:03:10.135277+0000 maestro-driver-iosUITests-Runner[42900:367542] Fetch status bar hierarchy - duration 0.1054450273513794
+2026-11-10 20:03:10.135371+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-10 20:03:10.135975+0000 maestro-driver-iosUITests-Runner[42900:367542] Fetch Safari WebView hierarchy - duration 0.0005699396133422852
+    t =    27.95s Find the Application 'com.apple.springboard'
+2026-11-10 20:03:10.166440+0000 maestro-driver-iosUITests-Runner[42900:367542] [Done] View hierarchy snapshot for Application 'com.napchime.app.acc' 
+2026-11-10 20:03:10.196407+0000 maestro-driver-iosUITests-Runner[42900:368369] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    28.02s Getting device orientation
+2026-11-10 20:03:10.200796+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+    t =    28.02s Getting device orientation
+2026-11-10 20:03:10.202451+0000 maestro-driver-iosUITests-Runner[42900:367542] Returning cached screen size
+2026-11-10 20:03:10.202562+0000 maestro-driver-iosUITests-Runner[42900:367542] Device orientation is 1
+2026-11-10 20:03:10.205686+0000 maestro-driver-iosUITests-Runner[42900:368371] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-10 20:03:10.209026+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+2026-11-10 20:03:10.209743+0000 maestro-driver-iosUITests-Runner[42900:367542] [Start] View hierarchy snapshot for Application 'com.napchime.app.acc'
+2026-11-10 20:03:10.210156+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =    28.03s Find the Application 'com.napchime.app.acc'
+2026-11-10 20:03:10.308647+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-10 20:03:10.308928+0000 maestro-driver-iosUITests-Runner[42900:367542] Foreground app is not springboard skipping auto tapping on permissions
+2026-11-10 20:03:10.309018+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =    28.13s Checking existence of `StatusBar (First Match)`
+    t =    28.14s Get all elements bound by index for: Descendants matching type StatusBar
+    t =    28.17s Find the StatusBar (Element at index 0)
+    t =    28.20s Find the StatusBar (Element at index 1)
+2026-11-10 20:03:10.416322+0000 maestro-driver-iosUITests-Runner[42900:367542] Fetch status bar hierarchy - duration 0.10724103450775146
+2026-11-10 20:03:10.416531+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-10 20:03:10.417471+0000 maestro-driver-iosUITests-Runner[42900:367542] Fetch Safari WebView hierarchy - duration 0.0009119510650634766
+    t =    28.24s Find the Application 'com.apple.springboard'
+2026-11-10 20:03:10.442148+0000 maestro-driver-iosUITests-Runner[42900:367542] [Done] View hierarchy snapshot for Application 'com.napchime.app.acc' 
+2026-11-10 20:03:10.451402+0000 maestro-driver-iosUITests-Runner[42900:368369] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    28.27s Getting device orientation
+2026-11-10 20:03:10.458617+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+    t =    28.28s Getting device orientation
+2026-11-10 20:03:10.461460+0000 maestro-driver-iosUITests-Runner[42900:367542] Returning cached screen size
+2026-11-10 20:03:10.461935+0000 maestro-driver-iosUITests-Runner[42900:367542] Device orientation is 1
+2026-11-10 20:03:10.496863+0000 maestro-driver-iosUITests-Runner[42900:368374] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-10 20:03:10.500292+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+2026-11-10 20:03:10.501148+0000 maestro-driver-iosUITests-Runner[42900:367542] [Start] View hierarchy snapshot for Application 'com.napchime.app.acc'
+2026-11-10 20:03:10.501238+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =    28.32s Find the Application 'com.napchime.app.acc'
+2026-11-10 20:03:10.583810+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-10 20:03:10.584350+0000 maestro-driver-iosUITests-Runner[42900:367542] Foreground app is not springboard skipping auto tapping on permissions
+2026-11-10 20:03:10.584463+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =    28.40s Checking existence of `StatusBar (First Match)`
+    t =    28.42s Get all elements bound by index for: Descendants matching type StatusBar
+    t =    28.45s Find the StatusBar (Element at index 0)
+    t =    28.47s Find the StatusBar (Element at index 1)
+2026-11-10 20:03:10.699149+0000 maestro-driver-iosUITests-Runner[42900:367542] Fetch status bar hierarchy - duration 0.11454296112060547
+2026-11-10 20:03:10.699337+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-10 20:03:10.700106+0000 maestro-driver-iosUITests-Runner[42900:367542] Fetch Safari WebView hierarchy - duration 0.000720977783203125
+    t =    28.52s Find the Application 'com.apple.springboard'
+2026-11-10 20:03:10.731536+0000 maestro-driver-iosUITests-Runner[42900:367542] [Done] View hierarchy snapshot for Application 'com.napchime.app.acc' 
+2026-11-10 20:03:10.782705+0000 maestro-driver-iosUITests-Runner[42900:368369] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    28.60s Getting device orientation
+2026-11-10 20:03:10.788043+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+    t =    28.61s Getting device orientation
+2026-11-10 20:03:10.790214+0000 maestro-driver-iosUITests-Runner[42900:367542] Returning cached screen size
+2026-11-10 20:03:10.790323+0000 maestro-driver-iosUITests-Runner[42900:367542] Device orientation is 1
+2026-11-10 20:03:10.792804+0000 maestro-driver-iosUITests-Runner[42900:368370] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-10 20:03:10.796283+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+2026-11-10 20:03:10.796938+0000 maestro-driver-iosUITests-Runner[42900:367542] [Start] View hierarchy snapshot for Application 'com.napchime.app.acc'
+2026-11-10 20:03:10.797012+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =    28.62s Find the Application 'com.napchime.app.acc'
+2026-11-10 20:03:10.877028+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-10 20:03:10.877258+0000 maestro-driver-iosUITests-Runner[42900:367542] Foreground app is not springboard skipping auto tapping on permissions
+2026-11-10 20:03:10.877331+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =    28.70s Checking existence of `StatusBar (First Match)`
+    t =    28.71s Get all elements bound by index for: Descendants matching type StatusBar
+    t =    28.74s Find the StatusBar (Element at index 0)
+    t =    28.77s Find the StatusBar (Element at index 1)
+2026-11-10 20:03:10.984938+0000 maestro-driver-iosUITests-Runner[42900:367542] Fetch status bar hierarchy - duration 0.10753393173217773
+2026-11-10 20:03:10.985037+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-10 20:03:10.985630+0000 maestro-driver-iosUITests-Runner[42900:367542] Fetch Safari WebView hierarchy - duration 0.0005649328231811523
+    t =    28.80s Find the Application 'com.apple.springboard'
+2026-11-10 20:03:11.012946+0000 maestro-driver-iosUITests-Runner[42900:367542] [Done] View hierarchy snapshot for Application 'com.napchime.app.acc' 
+2026-11-10 20:03:11.043479+0000 maestro-driver-iosUITests-Runner[42900:368374] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    28.86s Getting device orientation
+2026-11-10 20:03:11.048249+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+    t =    28.87s Getting device orientation
+2026-11-10 20:03:11.049991+0000 maestro-driver-iosUITests-Runner[42900:367542] Returning cached screen size
+2026-11-10 20:03:11.050096+0000 maestro-driver-iosUITests-Runner[42900:367542] Device orientation is 1
+2026-11-10 20:03:11.052430+0000 maestro-driver-iosUITests-Runner[42900:368369] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-10 20:03:11.055999+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+2026-11-10 20:03:11.056597+0000 maestro-driver-iosUITests-Runner[42900:367542] [Start] View hierarchy snapshot for Application 'com.napchime.app.acc'
+2026-11-10 20:03:11.056687+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =    28.88s Find the Application 'com.napchime.app.acc'
+2026-11-10 20:03:11.139604+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-10 20:03:11.140069+0000 maestro-driver-iosUITests-Runner[42900:367542] Foreground app is not springboard skipping auto tapping on permissions
+2026-11-10 20:03:11.140208+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =    28.96s Checking existence of `StatusBar (First Match)`
+    t =    28.97s Get all elements bound by index for: Descendants matching type StatusBar
+    t =    29.00s Find the StatusBar (Element at index 0)
+    t =    29.03s Find the StatusBar (Element at index 1)
+2026-11-10 20:03:11.250782+0000 maestro-driver-iosUITests-Runner[42900:367542] Fetch status bar hierarchy - duration 0.11052894592285156
+2026-11-10 20:03:11.250896+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-10 20:03:11.251525+0000 maestro-driver-iosUITests-Runner[42900:367542] Fetch Safari WebView hierarchy - duration 0.000599980354309082
+    t =    29.07s Find the Application 'com.apple.springboard'
+2026-11-10 20:03:11.278694+0000 maestro-driver-iosUITests-Runner[42900:367542] [Done] View hierarchy snapshot for Application 'com.napchime.app.acc' 
+2026-11-10 20:03:11.292394+0000 maestro-driver-iosUITests-Runner[42900:368374] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    29.11s Getting device orientation
+2026-11-10 20:03:11.296640+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+    t =    29.12s Getting device orientation
+2026-11-10 20:03:11.298385+0000 maestro-driver-iosUITests-Runner[42900:367542] Returning cached screen size
+2026-11-10 20:03:11.298527+0000 maestro-driver-iosUITests-Runner[42900:367542] Device orientation is 1
+2026-11-10 20:03:11.302245+0000 maestro-driver-iosUITests-Runner[42900:368370] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-10 20:03:11.306682+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+2026-11-10 20:03:11.307334+0000 maestro-driver-iosUITests-Runner[42900:367542] [Start] View hierarchy snapshot for Application 'com.napchime.app.acc'
+2026-11-10 20:03:11.307412+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =    29.13s Find the Application 'com.napchime.app.acc'
+2026-11-10 20:03:11.386904+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-10 20:03:11.387205+0000 maestro-driver-iosUITests-Runner[42900:367542] Foreground app is not springboard skipping auto tapping on permissions
+2026-11-10 20:03:11.387282+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =    29.21s Checking existence of `StatusBar (First Match)`
+    t =    29.22s Get all elements bound by index for: Descendants matching type StatusBar
+    t =    29.25s Find the StatusBar (Element at index 0)
+    t =    29.27s Find the StatusBar (Element at index 1)
+2026-11-10 20:03:11.490406+0000 maestro-driver-iosUITests-Runner[42900:367542] Fetch status bar hierarchy - duration 0.10304701328277588
+2026-11-10 20:03:11.490499+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-10 20:03:11.491071+0000 maestro-driver-iosUITests-Runner[42900:367542] Fetch Safari WebView hierarchy - duration 0.0005429983139038086
+    t =    29.31s Find the Application 'com.apple.springboard'
+2026-11-10 20:03:11.517640+0000 maestro-driver-iosUITests-Runner[42900:367542] [Done] View hierarchy snapshot for Application 'com.napchime.app.acc' 
+2026-11-10 20:03:11.527426+0000 maestro-driver-iosUITests-Runner[42900:369345] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    29.35s Getting device orientation
+2026-11-10 20:03:11.533918+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+    t =    29.35s Getting device orientation
+2026-11-10 20:03:11.535909+0000 maestro-driver-iosUITests-Runner[42900:367542] Returning cached screen size
+2026-11-10 20:03:11.536156+0000 maestro-driver-iosUITests-Runner[42900:367542] Device orientation is 1
+2026-11-10 20:03:11.548592+0000 maestro-driver-iosUITests-Runner[42900:368369] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-10 20:03:11.551434+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+2026-11-10 20:03:11.551989+0000 maestro-driver-iosUITests-Runner[42900:367542] [Start] View hierarchy snapshot for Application 'com.napchime.app.acc'
+2026-11-10 20:03:11.552081+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =    29.37s Find the Application 'com.napchime.app.acc'
+2026-11-10 20:03:11.628744+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-10 20:03:11.629207+0000 maestro-driver-iosUITests-Runner[42900:367542] Foreground app is not springboard skipping auto tapping on permissions
+2026-11-10 20:03:11.629425+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =    29.45s Checking existence of `StatusBar (First Match)`
+    t =    29.46s Get all elements bound by index for: Descendants matching type StatusBar
+    t =    29.49s Find the StatusBar (Element at index 0)
+    t =    29.53s Find the StatusBar (Element at index 1)
+2026-11-10 20:03:11.746480+0000 maestro-driver-iosUITests-Runner[42900:367542] Fetch status bar hierarchy - duration 0.11696493625640869
+2026-11-10 20:03:11.746597+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-10 20:03:11.747271+0000 maestro-driver-iosUITests-Runner[42900:367542] Fetch Safari WebView hierarchy - duration 0.0006200075149536133
+    t =    29.57s Find the Application 'com.apple.springboard'
+2026-11-10 20:03:11.772484+0000 maestro-driver-iosUITests-Runner[42900:367542] [Done] View hierarchy snapshot for Application 'com.napchime.app.acc' 
+2026-11-10 20:03:11.791741+0000 maestro-driver-iosUITests-Runner[42900:368369] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    29.61s Getting device orientation
+2026-11-10 20:03:11.796158+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+    t =    29.62s Getting device orientation
+2026-11-10 20:03:11.797612+0000 maestro-driver-iosUITests-Runner[42900:367542] Returning cached screen size
+2026-11-10 20:03:11.797706+0000 maestro-driver-iosUITests-Runner[42900:367542] Device orientation is 1
+2026-11-10 20:03:11.800901+0000 maestro-driver-iosUITests-Runner[42900:368370] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-10 20:03:11.804634+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+2026-11-10 20:03:11.805463+0000 maestro-driver-iosUITests-Runner[42900:367542] [Start] View hierarchy snapshot for Application 'com.napchime.app.acc'
+2026-11-10 20:03:11.805544+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =    29.62s Find the Application 'com.napchime.app.acc'
+2026-11-10 20:03:11.882983+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-10 20:03:11.883284+0000 maestro-driver-iosUITests-Runner[42900:367542] Foreground app is not springboard skipping auto tapping on permissions
+2026-11-10 20:03:11.883623+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =    29.70s Checking existence of `StatusBar (First Match)`
+    t =    29.72s Get all elements bound by index for: Descendants matching type StatusBar
+    t =    29.76s Find the StatusBar (Element at index 0)
+    t =    29.79s Find the StatusBar (Element at index 1)
+2026-11-10 20:03:12.007621+0000 maestro-driver-iosUITests-Runner[42900:367542] Fetch status bar hierarchy - duration 0.12392604351043701
+2026-11-10 20:03:12.007706+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-10 20:03:12.009175+0000 maestro-driver-iosUITests-Runner[42900:367542] Fetch Safari WebView hierarchy - duration 0.0013860464096069336
+    t =    29.83s Find the Application 'com.apple.springboard'
+2026-11-10 20:03:12.034459+0000 maestro-driver-iosUITests-Runner[42900:367542] [Done] View hierarchy snapshot for Application 'com.napchime.app.acc' 
+2026-11-10 20:03:12.052811+0000 maestro-driver-iosUITests-Runner[42900:368371] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    29.87s Getting device orientation
+2026-11-10 20:03:12.056706+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+    t =    29.88s Getting device orientation
+2026-11-10 20:03:12.058219+0000 maestro-driver-iosUITests-Runner[42900:367542] Returning cached screen size
+2026-11-10 20:03:12.058328+0000 maestro-driver-iosUITests-Runner[42900:367542] Device orientation is 1
+2026-11-10 20:03:12.060495+0000 maestro-driver-iosUITests-Runner[42900:368374] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-10 20:03:12.063058+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+2026-11-10 20:03:12.063553+0000 maestro-driver-iosUITests-Runner[42900:367542] [Start] View hierarchy snapshot for Application 'com.napchime.app.acc'
+2026-11-10 20:03:12.063607+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =    29.88s Find the Application 'com.napchime.app.acc'
+2026-11-10 20:03:12.158193+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-10 20:03:12.158437+0000 maestro-driver-iosUITests-Runner[42900:367542] Foreground app is not springboard skipping auto tapping on permissions
+2026-11-10 20:03:12.158495+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =    29.98s Checking existence of `StatusBar (First Match)`
+    t =    29.99s Get all elements bound by index for: Descendants matching type StatusBar
+    t =    30.02s Find the StatusBar (Element at index 0)
+    t =    30.07s Find the StatusBar (Element at index 1)
+2026-11-10 20:03:12.286858+0000 maestro-driver-iosUITests-Runner[42900:367542] Fetch status bar hierarchy - duration 0.12827908992767334
+2026-11-10 20:03:12.286945+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-10 20:03:12.287525+0000 maestro-driver-iosUITests-Runner[42900:367542] Fetch Safari WebView hierarchy - duration 0.0005570650100708008
+    t =    30.11s Find the Application 'com.apple.springboard'
+2026-11-10 20:03:12.312607+0000 maestro-driver-iosUITests-Runner[42900:367542] [Done] View hierarchy snapshot for Application 'com.napchime.app.acc' 
+2026-11-10 20:03:12.335056+0000 maestro-driver-iosUITests-Runner[42900:368374] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    30.15s Getting device orientation
+2026-11-10 20:03:12.339162+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+    t =    30.16s Getting device orientation
+2026-11-10 20:03:12.340897+0000 maestro-driver-iosUITests-Runner[42900:367542] Returning cached screen size
+2026-11-10 20:03:12.341017+0000 maestro-driver-iosUITests-Runner[42900:367542] Device orientation is 1
+2026-11-10 20:03:12.344477+0000 maestro-driver-iosUITests-Runner[42900:368370] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-10 20:03:12.347458+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+2026-11-10 20:03:12.348083+0000 maestro-driver-iosUITests-Runner[42900:367542] [Start] View hierarchy snapshot for Application 'com.napchime.app.acc'
+2026-11-10 20:03:12.348150+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =    30.17s Find the Application 'com.napchime.app.acc'
+2026-11-10 20:03:12.419335+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-10 20:03:12.419585+0000 maestro-driver-iosUITests-Runner[42900:367542] Foreground app is not springboard skipping auto tapping on permissions
+2026-11-10 20:03:12.419665+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =    30.24s Checking existence of `StatusBar (First Match)`
+    t =    30.25s Get all elements bound by index for: Descendants matching type StatusBar
+    t =    30.28s Find the StatusBar (Element at index 0)
+    t =    30.30s Find the StatusBar (Element at index 1)
+2026-11-10 20:03:12.517993+0000 maestro-driver-iosUITests-Runner[42900:367542] Fetch status bar hierarchy - duration 0.09825599193572998
+2026-11-10 20:03:12.518078+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-10 20:03:12.518702+0000 maestro-driver-iosUITests-Runner[42900:367542] Fetch Safari WebView hierarchy - duration 0.000594019889831543
+    t =    30.34s Find the Application 'com.apple.springboard'
+2026-11-10 20:03:12.544908+0000 maestro-driver-iosUITests-Runner[42900:367542] [Done] View hierarchy snapshot for Application 'com.napchime.app.acc' 
+2026-11-10 20:03:12.561874+0000 maestro-driver-iosUITests-Runner[42900:368371] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 20:03:12.953530+0000 maestro-driver-iosUITests-Runner[42900:368371] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 20:03:13.265185+0000 maestro-driver-iosUITests-Runner[42900:369345] [FlyingFox] <127.0.0.1> request: GET /screenshot
+2026-11-10 20:03:13.859925+0000 maestro-driver-iosUITests-Runner[42900:368369] [FlyingFox] <127.0.0.1> request: POST /touch
+2026-11-10 20:03:13.869279+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+    t =    31.69s Getting device orientation
+2026-11-10 20:03:13.872975+0000 maestro-driver-iosUITests-Runner[42900:367542] Returning cached screen size
+    t =    31.69s Getting device orientation
+2026-11-10 20:03:13.874594+0000 maestro-driver-iosUITests-Runner[42900:367542] Tapping 201.0, 100.0
+    t =    31.69s Getting device orientation
+2026-11-10 20:03:15.384387+0000 maestro-driver-iosUITests-Runner[42900:367542] Tapping took 1.5027880668640137
+2026-11-10 20:03:16.008258+0000 maestro-driver-iosUITests-Runner[42900:369345] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 20:03:16.429729+0000 maestro-driver-iosUITests-Runner[42900:368370] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    34.25s Getting device orientation
+2026-11-10 20:03:16.442869+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+    t =    34.26s Getting device orientation
+2026-11-10 20:03:16.447088+0000 maestro-driver-iosUITests-Runner[42900:367542] Returning cached screen size
+2026-11-10 20:03:16.447428+0000 maestro-driver-iosUITests-Runner[42900:367542] Device orientation is 1
+2026-11-10 20:03:16.451473+0000 maestro-driver-iosUITests-Runner[42900:369345] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-10 20:03:16.456603+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+2026-11-10 20:03:16.457255+0000 maestro-driver-iosUITests-Runner[42900:367542] [Start] View hierarchy snapshot for Application 'com.napchime.app.acc'
+2026-11-10 20:03:16.457478+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =    34.28s Find the Application 'com.napchime.app.acc'
+2026-11-10 20:03:16.548592+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-10 20:03:16.548858+0000 maestro-driver-iosUITests-Runner[42900:367542] Foreground app is not springboard skipping auto tapping on permissions
+2026-11-10 20:03:16.548957+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =    34.37s Checking existence of `StatusBar (First Match)`
+    t =    34.39s Get all elements bound by index for: Descendants matching type StatusBar
+    t =    34.45s Find the StatusBar (Element at index 0)
+    t =    34.49s Find the StatusBar (Element at index 1)
+2026-11-10 20:03:16.747654+0000 maestro-driver-iosUITests-Runner[42900:367542] Fetch status bar hierarchy - duration 0.1986229419708252
+2026-11-10 20:03:16.747737+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-10 20:03:16.748955+0000 maestro-driver-iosUITests-Runner[42900:367542] Fetch Safari WebView hierarchy - duration 0.00115203857421875
+    t =    34.57s Find the Application 'com.apple.springboard'
+2026-11-10 20:03:16.803260+0000 maestro-driver-iosUITests-Runner[42900:367542] [Done] View hierarchy snapshot for Application 'com.napchime.app.acc' 
+2026-11-10 20:03:16.833730+0000 maestro-driver-iosUITests-Runner[42900:368370] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 20:03:17.223889+0000 maestro-driver-iosUITests-Runner[42900:368369] [FlyingFox] <127.0.0.1> request: GET /screenshot
+2026-11-10 20:03:17.536886+0000 maestro-driver-iosUITests-Runner[42900:368369] [FlyingFox] <127.0.0.1> request: POST /touch
+2026-11-10 20:03:17.542063+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+    t =    35.36s Getting device orientation
+2026-11-10 20:03:17.544064+0000 maestro-driver-iosUITests-Runner[42900:367542] Returning cached screen size
+    t =    35.36s Getting device orientation
+2026-11-10 20:03:17.545551+0000 maestro-driver-iosUITests-Runner[42900:367542] Tapping 201.0, 550.0
+    t =    35.36s Getting device orientation
+2026-11-10 20:03:17.888640+0000 maestro-driver-iosUITests-Runner[42900:367542] Tapping took 0.34053897857666016
+2026-11-10 20:03:18.116412+0000 maestro-driver-iosUITests-Runner[42900:368370] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 20:03:18.733937+0000 maestro-driver-iosUITests-Runner[42900:368371] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 20:03:19.137060+0000 maestro-driver-iosUITests-Runner[42900:368371] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    36.96s Getting device orientation
+2026-11-10 20:03:19.143666+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+    t =    36.96s Getting device orientation
+2026-11-10 20:03:19.145209+0000 maestro-driver-iosUITests-Runner[42900:367542] Returning cached screen size
+2026-11-10 20:03:19.145329+0000 maestro-driver-iosUITests-Runner[42900:367542] Device orientation is 1
+2026-11-10 20:03:19.150810+0000 maestro-driver-iosUITests-Runner[42900:369345] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-10 20:03:19.154873+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+2026-11-10 20:03:19.155454+0000 maestro-driver-iosUITests-Runner[42900:367542] [Start] View hierarchy snapshot for Application 'com.napchime.app.acc'
+2026-11-10 20:03:19.155580+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =    36.97s Find the Application 'com.napchime.app.acc'
+2026-11-10 20:03:19.225580+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-10 20:03:19.225754+0000 maestro-driver-iosUITests-Runner[42900:367542] Foreground app is not springboard skipping auto tapping on permissions
+2026-11-10 20:03:19.225852+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =    37.04s Checking existence of `StatusBar (First Match)`
+    t =    37.06s Get all elements bound by index for: Descendants matching type StatusBar
+    t =    37.10s Find the StatusBar (Element at index 0)
+    t =    37.15s Find the StatusBar (Element at index 1)
+2026-11-10 20:03:19.374335+0000 maestro-driver-iosUITests-Runner[42900:367542] Fetch status bar hierarchy - duration 0.14840900897979736
+2026-11-10 20:03:19.374418+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-10 20:03:19.374914+0000 maestro-driver-iosUITests-Runner[42900:367542] Fetch Safari WebView hierarchy - duration 0.0004750490188598633
+    t =    37.19s Find the Application 'com.apple.springboard'
+2026-11-10 20:03:19.406666+0000 maestro-driver-iosUITests-Runner[42900:367542] [Done] View hierarchy snapshot for Application 'com.napchime.app.acc' 
+2026-11-10 20:03:19.426652+0000 maestro-driver-iosUITests-Runner[42900:368369] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    37.25s Getting device orientation
+2026-11-10 20:03:19.435026+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+    t =    37.25s Getting device orientation
+2026-11-10 20:03:19.436760+0000 maestro-driver-iosUITests-Runner[42900:367542] Returning cached screen size
+2026-11-10 20:03:19.436971+0000 maestro-driver-iosUITests-Runner[42900:367542] Device orientation is 1
+2026-11-10 20:03:19.477974+0000 maestro-driver-iosUITests-Runner[42900:368371] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-10 20:03:19.481487+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+2026-11-10 20:03:19.482044+0000 maestro-driver-iosUITests-Runner[42900:367542] [Start] View hierarchy snapshot for Application 'com.napchime.app.acc'
+2026-11-10 20:03:19.482104+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =    37.30s Find the Application 'com.napchime.app.acc'
+2026-11-10 20:03:19.570450+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-10 20:03:19.580042+0000 maestro-driver-iosUITests-Runner[42900:367542] Foreground app is not springboard skipping auto tapping on permissions
+2026-11-10 20:03:19.586442+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =    37.41s Checking existence of `StatusBar (First Match)`
+    t =    37.46s Get all elements bound by index for: Descendants matching type StatusBar
+    t =    37.63s Find the StatusBar (Element at index 0)
+    t =    37.67s Find the StatusBar (Element at index 1)
+2026-11-10 20:03:19.892791+0000 maestro-driver-iosUITests-Runner[42900:367542] Fetch status bar hierarchy - duration 0.3062840700149536
+2026-11-10 20:03:19.892887+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-10 20:03:19.893427+0000 maestro-driver-iosUITests-Runner[42900:367542] Fetch Safari WebView hierarchy - duration 0.0005179643630981445
+    t =    37.71s Find the Application 'com.apple.springboard'
+2026-11-10 20:03:19.936424+0000 maestro-driver-iosUITests-Runner[42900:367542] [Done] View hierarchy snapshot for Application 'com.napchime.app.acc' 
+2026-11-10 20:03:20.050851+0000 maestro-driver-iosUITests-Runner[42900:368374] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 20:03:20.358250+0000 maestro-driver-iosUITests-Runner[42900:368369] [FlyingFox] <127.0.0.1> request: GET /screenshot
+2026-11-10 20:03:20.603294+0000 maestro-driver-iosUITests-Runner[42900:368374] [FlyingFox] <127.0.0.1> request: POST /touch
+2026-11-10 20:03:20.608687+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+    t =    38.43s Getting device orientation
+2026-11-10 20:03:20.610858+0000 maestro-driver-iosUITests-Runner[42900:367542] Returning cached screen size
+    t =    38.43s Getting device orientation
+2026-11-10 20:03:20.613918+0000 maestro-driver-iosUITests-Runner[42900:367542] Tapping 201.0, 330.0
+    t =    38.43s Getting device orientation
+2026-11-10 20:03:21.001263+0000 maestro-driver-iosUITests-Runner[42900:367542] Tapping took 0.38451600074768066
+2026-11-10 20:03:21.317090+0000 maestro-driver-iosUITests-Runner[42900:368371] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 20:03:21.695673+0000 maestro-driver-iosUITests-Runner[42900:369345] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 20:03:22.068679+0000 maestro-driver-iosUITests-Runner[42900:368374] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 20:03:24.179071+0000 maestro-driver-iosUITests-Runner[42900:368370] [FlyingFox] <127.0.0.1> request: POST /inputText
+2026-11-10 20:03:24.206788+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+    t =    42.03s Checking existence of `Keyboard (First Match)`
+2026-11-10 20:03:24.236127+0000 maestro-driver-iosUITests-Runner[42900:367542] [TextInputHelper] first character: B
+    t =    42.05s Getting device orientation
+2026-11-10 20:03:24.977942+0000 maestro-driver-iosUITests-Runner[42900:367542] [TextInputHelper] remaining text: T1.eyJ1IjoiaHR0cDovL2xvY2FsaG9zdDo4Nzg3IiwiZiI6IlJCalA4d21WcGw5Y1QySVJLdndaTkEiLCJrIjoiQnJjbFVIV2J2RzBRdTJIb1hETTZSVVZ1d2RjRFAxTjNNU1JIdkswY211ayIsImUiOjAsImkiOiJUS2Z2dnVqVlFqam51cVA2MkVxekpBIiwiZCI6IlROcGNkSDk0cFVUVklVZW1Gd3lDUUo4Zk5hWWlWcE1hMHAtTnFGOUx6a0EifQ
+    t =    42.80s Getting device orientation
+2026-11-10 20:03:33.861462+0000 maestro-driver-iosUITests-Runner[42900:367542] [InputTextRouteHandler] Text input duration took 9.664458
+2026-11-10 20:03:33.895749+0000 maestro-driver-iosUITests-Runner[42900:368370] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 20:03:34.557744+0000 maestro-driver-iosUITests-Runner[42900:368374] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    52.38s Getting device orientation
+2026-11-10 20:03:34.578135+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+    t =    52.40s Getting device orientation
+2026-11-10 20:03:34.583448+0000 maestro-driver-iosUITests-Runner[42900:367542] Returning cached screen size
+2026-11-10 20:03:34.583651+0000 maestro-driver-iosUITests-Runner[42900:367542] Device orientation is 1
+2026-11-10 20:03:34.589407+0000 maestro-driver-iosUITests-Runner[42900:368371] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-10 20:03:34.595110+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+2026-11-10 20:03:34.597555+0000 maestro-driver-iosUITests-Runner[42900:367542] [Start] View hierarchy snapshot for Application 'com.napchime.app.acc'
+2026-11-10 20:03:34.598305+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =    52.42s Find the Application 'com.napchime.app.acc'
+2026-11-10 20:03:34.786689+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-10 20:03:34.786997+0000 maestro-driver-iosUITests-Runner[42900:367542] Foreground app is not springboard skipping auto tapping on permissions
+2026-11-10 20:03:34.787070+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =    52.61s Checking existence of `StatusBar (First Match)`
+    t =    52.63s Get all elements bound by index for: Descendants matching type StatusBar
+    t =    52.72s Find the StatusBar (Element at index 0)
+    t =    52.77s Find the StatusBar (Element at index 1)
+2026-11-10 20:03:35.017880+0000 maestro-driver-iosUITests-Runner[42900:367542] Fetch status bar hierarchy - duration 0.23072409629821777
+2026-11-10 20:03:35.018164+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-10 20:03:35.019175+0000 maestro-driver-iosUITests-Runner[42900:367542] Fetch Safari WebView hierarchy - duration 0.0009609460830688477
+    t =    52.84s Find the Application 'com.apple.springboard'
+2026-11-10 20:03:35.063920+0000 maestro-driver-iosUITests-Runner[42900:367542] [Done] View hierarchy snapshot for Application 'com.napchime.app.acc' 
+2026-11-10 20:03:35.086505+0000 maestro-driver-iosUITests-Runner[42900:369345] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 20:03:35.706607+0000 maestro-driver-iosUITests-Runner[42900:368371] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 20:03:36.206179+0000 maestro-driver-iosUITests-Runner[42900:368374] [FlyingFox] <127.0.0.1> request: GET /screenshot
+2026-11-10 20:03:36.770731+0000 maestro-driver-iosUITests-Runner[42900:368371] [FlyingFox] <127.0.0.1> request: POST /touch
+2026-11-10 20:03:36.775284+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+    t =    54.59s Getting device orientation
+2026-11-10 20:03:36.777261+0000 maestro-driver-iosUITests-Runner[42900:367542] Returning cached screen size
+    t =    54.60s Getting device orientation
+2026-11-10 20:03:36.778580+0000 maestro-driver-iosUITests-Runner[42900:367542] Tapping 201.0, 256.0
+    t =    54.60s Getting device orientation
+2026-11-10 20:03:37.118616+0000 maestro-driver-iosUITests-Runner[42900:367542] Tapping took 0.3383380174636841
+2026-11-10 20:03:37.132732+0000 maestro-driver-iosUITests-Runner[42900:368371] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 20:03:37.523486+0000 maestro-driver-iosUITests-Runner[42900:368374] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 20:03:37.849030+0000 maestro-driver-iosUITests-Runner[42900:368370] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    55.67s Getting device orientation
+2026-11-10 20:03:37.855073+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+    t =    55.67s Getting device orientation
+2026-11-10 20:03:37.857278+0000 maestro-driver-iosUITests-Runner[42900:367542] Returning cached screen size
+2026-11-10 20:03:37.857513+0000 maestro-driver-iosUITests-Runner[42900:367542] Device orientation is 1
+2026-11-10 20:03:37.870480+0000 maestro-driver-iosUITests-Runner[42900:369345] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-10 20:03:37.873622+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+2026-11-10 20:03:37.874227+0000 maestro-driver-iosUITests-Runner[42900:367542] [Start] View hierarchy snapshot for Application 'com.napchime.app.acc'
+2026-11-10 20:03:37.874313+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =    55.69s Find the Application 'com.napchime.app.acc'
+2026-11-10 20:03:37.936231+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-10 20:03:37.936518+0000 maestro-driver-iosUITests-Runner[42900:367542] Foreground app is not springboard skipping auto tapping on permissions
+2026-11-10 20:03:37.936591+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =    55.76s Checking existence of `StatusBar (First Match)`
+    t =    55.77s Get all elements bound by index for: Descendants matching type StatusBar
+    t =    55.81s Find the StatusBar (Element at index 0)
+    t =    55.86s Find the StatusBar (Element at index 1)
+2026-11-10 20:03:38.097685+0000 maestro-driver-iosUITests-Runner[42900:367542] Fetch status bar hierarchy - duration 0.1610100269317627
+2026-11-10 20:03:38.097834+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-10 20:03:38.098751+0000 maestro-driver-iosUITests-Runner[42900:367542] Fetch Safari WebView hierarchy - duration 0.0008840560913085938
+    t =    55.92s Find the Application 'com.apple.springboard'
+2026-11-10 20:03:38.137148+0000 maestro-driver-iosUITests-Runner[42900:367542] [Done] View hierarchy snapshot for Application 'com.napchime.app.acc' 
+2026-11-10 20:03:38.143773+0000 maestro-driver-iosUITests-Runner[42900:369345] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 20:03:38.435608+0000 maestro-driver-iosUITests-Runner[42900:368370] [FlyingFox] <127.0.0.1> request: GET /screenshot
+2026-11-10 20:03:38.689477+0000 maestro-driver-iosUITests-Runner[42900:368369] [FlyingFox] <127.0.0.1> request: POST /touch
+2026-11-10 20:03:38.695755+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+    t =    56.52s Getting device orientation
+2026-11-10 20:03:38.698148+0000 maestro-driver-iosUITests-Runner[42900:367542] Returning cached screen size
+    t =    56.52s Getting device orientation
+2026-11-10 20:03:38.699409+0000 maestro-driver-iosUITests-Runner[42900:367542] Tapping 201.0, 473.0
+    t =    56.52s Getting device orientation
+2026-11-10 20:03:39.039709+0000 maestro-driver-iosUITests-Runner[42900:367542] Tapping took 0.33830392360687256
+2026-11-10 20:03:39.085654+0000 maestro-driver-iosUITests-Runner[42900:369345] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 20:03:39.515839+0000 maestro-driver-iosUITests-Runner[42900:368374] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 20:03:40.002270+0000 maestro-driver-iosUITests-Runner[42900:368369] [FlyingFox] <127.0.0.1> request: GET /screenshot
+2026-11-10 20:03:40.277641+0000 maestro-driver-iosUITests-Runner[42900:369345] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    58.10s Getting device orientation
+2026-11-10 20:03:40.293881+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+    t =    58.12s Getting device orientation
+2026-11-10 20:03:40.300139+0000 maestro-driver-iosUITests-Runner[42900:367542] Returning cached screen size
+2026-11-10 20:03:40.301128+0000 maestro-driver-iosUITests-Runner[42900:367542] Device orientation is 1
+2026-11-10 20:03:40.333618+0000 maestro-driver-iosUITests-Runner[42900:368370] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-10 20:03:40.338429+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+2026-11-10 20:03:40.339400+0000 maestro-driver-iosUITests-Runner[42900:367542] [Start] View hierarchy snapshot for Application 'com.napchime.app.acc'
+2026-11-10 20:03:40.339472+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =    58.16s Find the Application 'com.napchime.app.acc'
+2026-11-10 20:03:40.437476+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-10 20:03:40.437797+0000 maestro-driver-iosUITests-Runner[42900:367542] Foreground app is not springboard skipping auto tapping on permissions
+2026-11-10 20:03:40.438149+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =    58.26s Checking existence of `StatusBar (First Match)`
+    t =    58.28s Get all elements bound by index for: Descendants matching type StatusBar
+    t =    58.33s Find the StatusBar (Element at index 0)
+    t =    58.38s Find the StatusBar (Element at index 1)
+2026-11-10 20:03:40.680643+0000 maestro-driver-iosUITests-Runner[42900:367542] Fetch status bar hierarchy - duration 0.24244201183319092
+2026-11-10 20:03:40.682185+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-10 20:03:40.683150+0000 maestro-driver-iosUITests-Runner[42900:367542] Fetch Safari WebView hierarchy - duration 0.000903010368347168
+    t =    58.50s Find the Application 'com.apple.springboard'
+2026-11-10 20:03:40.747697+0000 maestro-driver-iosUITests-Runner[42900:367542] [Done] View hierarchy snapshot for Application 'com.napchime.app.acc' 
+2026-11-10 20:03:40.831255+0000 maestro-driver-iosUITests-Runner[42900:368374] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    58.65s Getting device orientation
+2026-11-10 20:03:40.837088+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+    t =    58.66s Getting device orientation
+2026-11-10 20:03:40.839291+0000 maestro-driver-iosUITests-Runner[42900:367542] Returning cached screen size
+2026-11-10 20:03:40.839464+0000 maestro-driver-iosUITests-Runner[42900:367542] Device orientation is 1
+2026-11-10 20:03:40.843551+0000 maestro-driver-iosUITests-Runner[42900:368370] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-10 20:03:40.848208+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+2026-11-10 20:03:40.848952+0000 maestro-driver-iosUITests-Runner[42900:367542] [Start] View hierarchy snapshot for Application 'com.napchime.app.acc'
+2026-11-10 20:03:40.849254+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =    58.67s Find the Application 'com.napchime.app.acc'
+2026-11-10 20:03:40.986351+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-10 20:03:40.986591+0000 maestro-driver-iosUITests-Runner[42900:367542] Foreground app is not springboard skipping auto tapping on permissions
+2026-11-10 20:03:40.986692+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =    58.81s Checking existence of `StatusBar (First Match)`
+    t =    58.83s Get all elements bound by index for: Descendants matching type StatusBar
+    t =    58.89s Find the StatusBar (Element at index 0)
+    t =    58.98s Find the StatusBar (Element at index 1)
+2026-11-10 20:03:41.245350+0000 maestro-driver-iosUITests-Runner[42900:367542] Fetch status bar hierarchy - duration 0.258558988571167
+2026-11-10 20:03:41.245799+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-10 20:03:41.248394+0000 maestro-driver-iosUITests-Runner[42900:367542] Fetch Safari WebView hierarchy - duration 0.002508997917175293
+    t =    59.07s Find the Application 'com.apple.springboard'
+2026-11-10 20:03:41.308010+0000 maestro-driver-iosUITests-Runner[42900:367542] [Done] View hierarchy snapshot for Application 'com.napchime.app.acc' 
+2026-11-10 20:03:41.342461+0000 maestro-driver-iosUITests-Runner[42900:368374] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    59.16s Getting device orientation
+2026-11-10 20:03:41.351170+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+    t =    59.17s Getting device orientation
+2026-11-10 20:03:41.355971+0000 maestro-driver-iosUITests-Runner[42900:367542] Returning cached screen size
+2026-11-10 20:03:41.356177+0000 maestro-driver-iosUITests-Runner[42900:367542] Device orientation is 1
+2026-11-10 20:03:41.360952+0000 maestro-driver-iosUITests-Runner[42900:374809] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-10 20:03:41.368669+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+2026-11-10 20:03:41.370624+0000 maestro-driver-iosUITests-Runner[42900:367542] [Start] View hierarchy snapshot for Application 'com.napchime.app.acc'
+2026-11-10 20:03:41.370750+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =    59.19s Find the Application 'com.napchime.app.acc'
+2026-11-10 20:03:41.526538+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-10 20:03:41.526804+0000 maestro-driver-iosUITests-Runner[42900:367542] Foreground app is not springboard skipping auto tapping on permissions
+2026-11-10 20:03:41.526893+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =    59.35s Checking existence of `StatusBar (First Match)`
+    t =    59.37s Get all elements bound by index for: Descendants matching type StatusBar
+    t =    59.41s Find the StatusBar (Element at index 0)
+    t =    59.49s Find the StatusBar (Element at index 1)
+2026-11-10 20:03:41.707867+0000 maestro-driver-iosUITests-Runner[42900:367542] Fetch status bar hierarchy - duration 0.1808990240097046
+2026-11-10 20:03:41.707982+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-10 20:03:41.708522+0000 maestro-driver-iosUITests-Runner[42900:367542] Fetch Safari WebView hierarchy - duration 0.0005079507827758789
+    t =    59.56s Find the Application 'com.apple.springboard'
+2026-11-10 20:03:41.767015+0000 maestro-driver-iosUITests-Runner[42900:367542] [Done] View hierarchy snapshot for Application 'com.napchime.app.acc' 
+2026-11-10 20:03:41.812646+0000 maestro-driver-iosUITests-Runner[42900:368369] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    59.63s Getting device orientation
+2026-11-10 20:03:41.817459+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+    t =    59.64s Getting device orientation
+2026-11-10 20:03:41.819060+0000 maestro-driver-iosUITests-Runner[42900:367542] Returning cached screen size
+2026-11-10 20:03:41.819209+0000 maestro-driver-iosUITests-Runner[42900:367542] Device orientation is 1
+2026-11-10 20:03:41.852725+0000 maestro-driver-iosUITests-Runner[42900:374809] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-10 20:03:41.856092+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+2026-11-10 20:03:41.856605+0000 maestro-driver-iosUITests-Runner[42900:367542] [Start] View hierarchy snapshot for Application 'com.napchime.app.acc'
+2026-11-10 20:03:41.856825+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =    59.68s Find the Application 'com.napchime.app.acc'
+2026-11-10 20:03:41.983190+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-10 20:03:41.983524+0000 maestro-driver-iosUITests-Runner[42900:367542] Foreground app is not springboard skipping auto tapping on permissions
+2026-11-10 20:03:41.983582+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =    59.80s Checking existence of `StatusBar (First Match)`
+    t =    59.81s Get all elements bound by index for: Descendants matching type StatusBar
+    t =    59.85s Find the StatusBar (Element at index 0)
+    t =    59.89s Find the StatusBar (Element at index 1)
+2026-11-10 20:03:42.105453+0000 maestro-driver-iosUITests-Runner[42900:367542] Fetch status bar hierarchy - duration 0.12173402309417725
+2026-11-10 20:03:42.105569+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-10 20:03:42.106080+0000 maestro-driver-iosUITests-Runner[42900:367542] Fetch Safari WebView hierarchy - duration 0.00048100948333740234
+    t =    59.92s Find the Application 'com.apple.springboard'
+2026-11-10 20:03:42.131845+0000 maestro-driver-iosUITests-Runner[42900:367542] [Done] View hierarchy snapshot for Application 'com.napchime.app.acc' 
+2026-11-10 20:03:42.218511+0000 maestro-driver-iosUITests-Runner[42900:368370] [FlyingFox] <127.0.0.1> request: GET /screenshot
+2026-11-10 20:03:42.428461+0000 maestro-driver-iosUITests-Runner[42900:368374] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    60.25s Getting device orientation
+2026-11-10 20:03:42.432954+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+    t =    60.25s Getting device orientation
+2026-11-10 20:03:42.434488+0000 maestro-driver-iosUITests-Runner[42900:367542] Returning cached screen size
+2026-11-10 20:03:42.434631+0000 maestro-driver-iosUITests-Runner[42900:367542] Device orientation is 1
+2026-11-10 20:03:42.443388+0000 maestro-driver-iosUITests-Runner[42900:368371] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    60.26s Getting device orientation
+2026-11-10 20:03:42.448206+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+    t =    60.27s Getting device orientation
+2026-11-10 20:03:42.450421+0000 maestro-driver-iosUITests-Runner[42900:367542] Returning cached screen size
+2026-11-10 20:03:42.450627+0000 maestro-driver-iosUITests-Runner[42900:367542] Device orientation is 1
+2026-11-10 20:03:42.456556+0000 maestro-driver-iosUITests-Runner[42900:368369] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-10 20:03:42.459787+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+2026-11-10 20:03:42.460371+0000 maestro-driver-iosUITests-Runner[42900:367542] [Start] View hierarchy snapshot for Application 'com.napchime.app.acc'
+2026-11-10 20:03:42.460449+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =    60.28s Find the Application 'com.napchime.app.acc'
+2026-11-10 20:03:42.571442+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-10 20:03:42.571765+0000 maestro-driver-iosUITests-Runner[42900:367542] Foreground app is not springboard skipping auto tapping on permissions
+2026-11-10 20:03:42.571838+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =    60.39s Checking existence of `StatusBar (First Match)`
+    t =    60.41s Get all elements bound by index for: Descendants matching type StatusBar
+    t =    60.43s Find the StatusBar (Element at index 0)
+    t =    60.47s Find the StatusBar (Element at index 1)
+2026-11-10 20:03:42.691255+0000 maestro-driver-iosUITests-Runner[42900:367542] Fetch status bar hierarchy - duration 0.11933708190917969
+2026-11-10 20:03:42.691603+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-10 20:03:42.692864+0000 maestro-driver-iosUITests-Runner[42900:367542] Fetch Safari WebView hierarchy - duration 0.0011960268020629883
+    t =    60.53s Find the Application 'com.apple.springboard'
+2026-11-10 20:03:42.736692+0000 maestro-driver-iosUITests-Runner[42900:367542] [Done] View hierarchy snapshot for Application 'com.napchime.app.acc' 
+2026-11-10 20:03:42.853590+0000 maestro-driver-iosUITests-Runner[42900:368371] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    60.67s Getting device orientation
+2026-11-10 20:03:42.857772+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+    t =    60.68s Getting device orientation
+2026-11-10 20:03:42.859486+0000 maestro-driver-iosUITests-Runner[42900:367542] Returning cached screen size
+2026-11-10 20:03:42.859600+0000 maestro-driver-iosUITests-Runner[42900:367542] Device orientation is 1
+2026-11-10 20:03:42.868974+0000 maestro-driver-iosUITests-Runner[42900:368370] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    60.69s Getting device orientation
+2026-11-10 20:03:42.873921+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+    t =    60.69s Getting device orientation
+2026-11-10 20:03:42.875444+0000 maestro-driver-iosUITests-Runner[42900:367542] Returning cached screen size
+2026-11-10 20:03:42.875656+0000 maestro-driver-iosUITests-Runner[42900:367542] Device orientation is 1
+2026-11-10 20:03:42.881212+0000 maestro-driver-iosUITests-Runner[42900:368371] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    60.70s Getting device orientation
+2026-11-10 20:03:42.885114+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+    t =    60.70s Getting device orientation
+2026-11-10 20:03:42.886642+0000 maestro-driver-iosUITests-Runner[42900:367542] Returning cached screen size
+2026-11-10 20:03:42.886763+0000 maestro-driver-iosUITests-Runner[42900:367542] Device orientation is 1
+2026-11-10 20:03:42.897834+0000 maestro-driver-iosUITests-Runner[42900:368369] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 20:03:43.246624+0000 maestro-driver-iosUITests-Runner[42900:368370] [FlyingFox] <127.0.0.1> request: POST /swipeV2
+2026-11-10 20:03:43.258207+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+    t =    61.08s Getting device orientation
+2026-11-10 20:03:43.260860+0000 maestro-driver-iosUITests-Runner[42900:367542] Returning cached screen size
+    t =    61.08s Getting device orientation
+    t =    61.08s Getting device orientation
+2026-11-10 20:03:43.269367+0000 maestro-driver-iosUITests-Runner[42900:367542] [SwipeRouteHandlerV2] Swipe (v2) from (201.0, 437.0) to (201.0, 87.0) with 0.601 duration
+2026-11-10 20:03:43.275034+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+    t =    61.10s Swipe (v2) from (201.0, 437.0) to (201.0, 87.0) with 0.601 duration
+2026-11-10 20:03:43.282637+0000 maestro-driver-iosUITests-Runner[42900:367542] Quiescence checks are disabled for com.napchime.app.acc application. Making it to believe it is idling
+    t =    61.10s     Find the Any (First Match)
+    t =    61.11s Application is configured to skip UI interruption handling
+    t =    61.12s     Synthesize event
+    t =    61.12s         Getting device orientation
+2026-11-10 20:03:44.240960+0000 maestro-driver-iosUITests-Runner[42900:367542] Quiescence checks are disabled for com.napchime.app.acc application. Making it to believe it is idling
+2026-11-10 20:03:44.253732+0000 maestro-driver-iosUITests-Runner[42900:368370] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 20:03:44.628567+0000 maestro-driver-iosUITests-Runner[42900:374809] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 20:03:44.982355+0000 maestro-driver-iosUITests-Runner[42900:368370] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 20:03:45.294497+0000 maestro-driver-iosUITests-Runner[42900:368370] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 20:03:45.610899+0000 maestro-driver-iosUITests-Runner[42900:368369] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    63.43s Getting device orientation
+2026-11-10 20:03:45.619547+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+    t =    63.44s Getting device orientation
+2026-11-10 20:03:45.621484+0000 maestro-driver-iosUITests-Runner[42900:367542] Returning cached screen size
+2026-11-10 20:03:45.621633+0000 maestro-driver-iosUITests-Runner[42900:367542] Device orientation is 1
+2026-11-10 20:03:45.627433+0000 maestro-driver-iosUITests-Runner[42900:368369] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-10 20:03:45.631844+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+2026-11-10 20:03:45.632508+0000 maestro-driver-iosUITests-Runner[42900:367542] [Start] View hierarchy snapshot for Application 'com.napchime.app.acc'
+2026-11-10 20:03:45.632582+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =    63.45s Find the Application 'com.napchime.app.acc'
+2026-11-10 20:03:45.735218+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-10 20:03:45.735495+0000 maestro-driver-iosUITests-Runner[42900:367542] Foreground app is not springboard skipping auto tapping on permissions
+2026-11-10 20:03:45.735573+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =    63.55s Checking existence of `StatusBar (First Match)`
+    t =    63.57s Get all elements bound by index for: Descendants matching type StatusBar
+    t =    63.60s Find the StatusBar (Element at index 0)
+    t =    63.64s Find the StatusBar (Element at index 1)
+2026-11-10 20:03:45.861400+0000 maestro-driver-iosUITests-Runner[42900:367542] Fetch status bar hierarchy - duration 0.12572896480560303
+2026-11-10 20:03:45.861515+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-10 20:03:45.862133+0000 maestro-driver-iosUITests-Runner[42900:367542] Fetch Safari WebView hierarchy - duration 0.0005819797515869141
+    t =    63.68s Find the Application 'com.apple.springboard'
+2026-11-10 20:03:45.888769+0000 maestro-driver-iosUITests-Runner[42900:367542] [Done] View hierarchy snapshot for Application 'com.napchime.app.acc' 
+2026-11-10 20:03:45.922428+0000 maestro-driver-iosUITests-Runner[42900:374809] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    63.74s Getting device orientation
+2026-11-10 20:03:45.926340+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+    t =    63.75s Getting device orientation
+2026-11-10 20:03:45.927649+0000 maestro-driver-iosUITests-Runner[42900:367542] Returning cached screen size
+2026-11-10 20:03:45.927743+0000 maestro-driver-iosUITests-Runner[42900:367542] Device orientation is 1
+2026-11-10 20:03:45.932718+0000 maestro-driver-iosUITests-Runner[42900:368369] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-10 20:03:45.935443+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+2026-11-10 20:03:45.936051+0000 maestro-driver-iosUITests-Runner[42900:367542] [Start] View hierarchy snapshot for Application 'com.napchime.app.acc'
+2026-11-10 20:03:45.936134+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =    63.75s Find the Application 'com.napchime.app.acc'
+2026-11-10 20:03:46.026066+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-10 20:03:46.026311+0000 maestro-driver-iosUITests-Runner[42900:367542] Foreground app is not springboard skipping auto tapping on permissions
+2026-11-10 20:03:46.026381+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =    63.85s Checking existence of `StatusBar (First Match)`
+    t =    63.86s Get all elements bound by index for: Descendants matching type StatusBar
+    t =    63.90s Find the StatusBar (Element at index 0)
+    t =    63.94s Find the StatusBar (Element at index 1)
+2026-11-10 20:03:46.162629+0000 maestro-driver-iosUITests-Runner[42900:367542] Fetch status bar hierarchy - duration 0.13609600067138672
+2026-11-10 20:03:46.162903+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-10 20:03:46.164260+0000 maestro-driver-iosUITests-Runner[42900:367542] Fetch Safari WebView hierarchy - duration 0.001241922378540039
+    t =    63.98s Find the Application 'com.apple.springboard'
+2026-11-10 20:03:46.194366+0000 maestro-driver-iosUITests-Runner[42900:367542] [Done] View hierarchy snapshot for Application 'com.napchime.app.acc' 
+2026-11-10 20:03:46.219510+0000 maestro-driver-iosUITests-Runner[42900:368370] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 20:03:46.606162+0000 maestro-driver-iosUITests-Runner[42900:368374] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 20:03:46.853447+0000 maestro-driver-iosUITests-Runner[42900:368374] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    64.67s Getting device orientation
+2026-11-10 20:03:46.857647+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+    t =    64.68s Getting device orientation
+2026-11-10 20:03:46.859493+0000 maestro-driver-iosUITests-Runner[42900:367542] Returning cached screen size
+2026-11-10 20:03:46.859590+0000 maestro-driver-iosUITests-Runner[42900:367542] Device orientation is 1
+2026-11-10 20:03:46.862063+0000 maestro-driver-iosUITests-Runner[42900:374809] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-10 20:03:46.865020+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+2026-11-10 20:03:46.865600+0000 maestro-driver-iosUITests-Runner[42900:367542] [Start] View hierarchy snapshot for Application 'com.napchime.app.acc'
+2026-11-10 20:03:46.865671+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =    64.68s Find the Application 'com.napchime.app.acc'
+2026-11-10 20:03:46.954473+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-10 20:03:46.954680+0000 maestro-driver-iosUITests-Runner[42900:367542] Foreground app is not springboard skipping auto tapping on permissions
+2026-11-10 20:03:46.954776+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =    64.77s Checking existence of `StatusBar (First Match)`
+    t =    64.78s Get all elements bound by index for: Descendants matching type StatusBar
+    t =    64.81s Find the StatusBar (Element at index 0)
+    t =    64.84s Find the StatusBar (Element at index 1)
+2026-11-10 20:03:47.052139+0000 maestro-driver-iosUITests-Runner[42900:367542] Fetch status bar hierarchy - duration 0.0972890853881836
+2026-11-10 20:03:47.052235+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-10 20:03:47.052746+0000 maestro-driver-iosUITests-Runner[42900:367542] Fetch Safari WebView hierarchy - duration 0.0004830360412597656
+    t =    64.87s Find the Application 'com.apple.springboard'
+2026-11-10 20:03:47.076966+0000 maestro-driver-iosUITests-Runner[42900:367542] [Done] View hierarchy snapshot for Application 'com.napchime.app.acc' 
+2026-11-10 20:03:47.339307+0000 maestro-driver-iosUITests-Runner[42900:368374] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    65.16s Getting device orientation
+2026-11-10 20:03:47.344547+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+    t =    65.16s Getting device orientation
+2026-11-10 20:03:47.346204+0000 maestro-driver-iosUITests-Runner[42900:367542] Returning cached screen size
+2026-11-10 20:03:47.346322+0000 maestro-driver-iosUITests-Runner[42900:367542] Device orientation is 1
+2026-11-10 20:03:47.348433+0000 maestro-driver-iosUITests-Runner[42900:368370] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-10 20:03:47.351565+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+2026-11-10 20:03:47.352084+0000 maestro-driver-iosUITests-Runner[42900:367542] [Start] View hierarchy snapshot for Application 'com.napchime.app.acc'
+2026-11-10 20:03:47.352149+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =    65.17s Find the Application 'com.napchime.app.acc'
+2026-11-10 20:03:47.442275+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-10 20:03:47.442635+0000 maestro-driver-iosUITests-Runner[42900:367542] Foreground app is not springboard skipping auto tapping on permissions
+2026-11-10 20:03:47.442713+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =    65.26s Checking existence of `StatusBar (First Match)`
+    t =    65.27s Get all elements bound by index for: Descendants matching type StatusBar
+    t =    65.30s Find the StatusBar (Element at index 0)
+    t =    65.33s Find the StatusBar (Element at index 1)
+2026-11-10 20:03:47.545931+0000 maestro-driver-iosUITests-Runner[42900:367542] Fetch status bar hierarchy - duration 0.1031351089477539
+2026-11-10 20:03:47.546017+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-10 20:03:47.546667+0000 maestro-driver-iosUITests-Runner[42900:367542] Fetch Safari WebView hierarchy - duration 0.0006159543991088867
+    t =    65.37s Find the Application 'com.apple.springboard'
+2026-11-10 20:03:47.569675+0000 maestro-driver-iosUITests-Runner[42900:367542] [Done] View hierarchy snapshot for Application 'com.napchime.app.acc' 
+2026-11-10 20:03:47.581704+0000 maestro-driver-iosUITests-Runner[42900:374809] [FlyingFox] <127.0.0.1> request: GET /screenshot
+2026-11-10 20:03:47.802102+0000 maestro-driver-iosUITests-Runner[42900:369345] [FlyingFox] <127.0.0.1> request: POST /touch
+2026-11-10 20:03:47.805092+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+    t =    65.62s Getting device orientation
+2026-11-10 20:03:47.806427+0000 maestro-driver-iosUITests-Runner[42900:367542] Returning cached screen size
+    t =    65.62s Getting device orientation
+2026-11-10 20:03:47.807525+0000 maestro-driver-iosUITests-Runner[42900:367542] Tapping 85.0, 340.0
+    t =    65.63s Getting device orientation
+2026-11-10 20:03:48.140675+0000 maestro-driver-iosUITests-Runner[42900:367542] Tapping took 0.33204805850982666
+2026-11-10 20:03:48.143514+0000 maestro-driver-iosUITests-Runner[42900:368374] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 20:03:48.411737+0000 maestro-driver-iosUITests-Runner[42900:374809] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    66.23s Getting device orientation
+2026-11-10 20:03:48.417229+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+    t =    66.24s Getting device orientation
+2026-11-10 20:03:48.418766+0000 maestro-driver-iosUITests-Runner[42900:367542] Returning cached screen size
+2026-11-10 20:03:48.418935+0000 maestro-driver-iosUITests-Runner[42900:367542] Device orientation is 1
+2026-11-10 20:03:48.432488+0000 maestro-driver-iosUITests-Runner[42900:368374] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-10 20:03:48.435554+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+2026-11-10 20:03:48.436102+0000 maestro-driver-iosUITests-Runner[42900:367542] [Start] View hierarchy snapshot for Application 'com.napchime.app.acc'
+2026-11-10 20:03:48.436180+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =    66.26s Find the Application 'com.napchime.app.acc'
+2026-11-10 20:03:48.540606+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-10 20:03:48.540906+0000 maestro-driver-iosUITests-Runner[42900:367542] Foreground app is not springboard skipping auto tapping on permissions
+2026-11-10 20:03:48.541071+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =    66.36s Checking existence of `StatusBar (First Match)`
+    t =    66.38s Get all elements bound by index for: Descendants matching type StatusBar
+    t =    66.41s Find the StatusBar (Element at index 0)
+    t =    66.45s Find the StatusBar (Element at index 1)
+2026-11-10 20:03:48.660603+0000 maestro-driver-iosUITests-Runner[42900:367542] Fetch status bar hierarchy - duration 0.11944997310638428
+2026-11-10 20:03:48.660708+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-10 20:03:48.661348+0000 maestro-driver-iosUITests-Runner[42900:367542] Fetch Safari WebView hierarchy - duration 0.0006099939346313477
+    t =    66.48s Find the Application 'com.apple.springboard'
+2026-11-10 20:03:48.683985+0000 maestro-driver-iosUITests-Runner[42900:367542] [Done] View hierarchy snapshot for Application 'com.napchime.app.acc' 
+2026-11-10 20:03:48.710919+0000 maestro-driver-iosUITests-Runner[42900:369345] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    66.53s Getting device orientation
+2026-11-10 20:03:48.714957+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+    t =    66.53s Getting device orientation
+2026-11-10 20:03:48.716568+0000 maestro-driver-iosUITests-Runner[42900:367542] Returning cached screen size
+2026-11-10 20:03:48.716691+0000 maestro-driver-iosUITests-Runner[42900:367542] Device orientation is 1
+2026-11-10 20:03:48.720510+0000 maestro-driver-iosUITests-Runner[42900:368370] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-10 20:03:48.723733+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+2026-11-10 20:03:48.724327+0000 maestro-driver-iosUITests-Runner[42900:367542] [Start] View hierarchy snapshot for Application 'com.napchime.app.acc'
+2026-11-10 20:03:48.724401+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =    66.54s Find the Application 'com.napchime.app.acc'
+2026-11-10 20:03:48.813323+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-10 20:03:48.813563+0000 maestro-driver-iosUITests-Runner[42900:367542] Foreground app is not springboard skipping auto tapping on permissions
+2026-11-10 20:03:48.813625+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =    66.63s Checking existence of `StatusBar (First Match)`
+    t =    66.64s Get all elements bound by index for: Descendants matching type StatusBar
+    t =    66.67s Find the StatusBar (Element at index 0)
+    t =    66.70s Find the StatusBar (Element at index 1)
+2026-11-10 20:03:48.930898+0000 maestro-driver-iosUITests-Runner[42900:367542] Fetch status bar hierarchy - duration 0.11720097064971924
+2026-11-10 20:03:48.931091+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-10 20:03:48.931657+0000 maestro-driver-iosUITests-Runner[42900:367542] Fetch Safari WebView hierarchy - duration 0.0005570650100708008
+    t =    66.75s Find the Application 'com.apple.springboard'
+2026-11-10 20:03:48.959658+0000 maestro-driver-iosUITests-Runner[42900:367542] [Done] View hierarchy snapshot for Application 'com.napchime.app.acc' 
+2026-11-10 20:03:48.970376+0000 maestro-driver-iosUITests-Runner[42900:368369] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 20:03:49.236504+0000 maestro-driver-iosUITests-Runner[42900:368369] [FlyingFox] <127.0.0.1> request: GET /screenshot
+2026-11-10 20:03:49.458411+0000 maestro-driver-iosUITests-Runner[42900:368370] [FlyingFox] <127.0.0.1> request: POST /touch
+2026-11-10 20:03:49.462910+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+    t =    67.28s Getting device orientation
+2026-11-10 20:03:49.464562+0000 maestro-driver-iosUITests-Runner[42900:367542] Returning cached screen size
+    t =    67.28s Getting device orientation
+2026-11-10 20:03:49.466320+0000 maestro-driver-iosUITests-Runner[42900:367542] Tapping 287.0, 822.0
+    t =    67.28s Getting device orientation
+2026-11-10 20:03:49.804144+0000 maestro-driver-iosUITests-Runner[42900:367542] Tapping took 0.33645498752593994
+2026-11-10 20:03:49.872378+0000 maestro-driver-iosUITests-Runner[42900:369345] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 20:03:50.569643+0000 maestro-driver-iosUITests-Runner[42900:369345] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 20:03:51.185839+0000 maestro-driver-iosUITests-Runner[42900:368374] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 20:03:51.569920+0000 maestro-driver-iosUITests-Runner[42900:368369] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    69.39s Getting device orientation
+2026-11-10 20:03:51.576581+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+    t =    69.40s Getting device orientation
+2026-11-10 20:03:51.578910+0000 maestro-driver-iosUITests-Runner[42900:367542] Returning cached screen size
+2026-11-10 20:03:51.579057+0000 maestro-driver-iosUITests-Runner[42900:367542] Device orientation is 1
+2026-11-10 20:03:51.582377+0000 maestro-driver-iosUITests-Runner[42900:368369] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    69.40s Getting device orientation
+2026-11-10 20:03:51.586503+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+    t =    69.41s Getting device orientation
+2026-11-10 20:03:51.588241+0000 maestro-driver-iosUITests-Runner[42900:367542] Returning cached screen size
+2026-11-10 20:03:51.588352+0000 maestro-driver-iosUITests-Runner[42900:367542] Device orientation is 1
+2026-11-10 20:03:51.590522+0000 maestro-driver-iosUITests-Runner[42900:374809] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-10 20:03:51.593699+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+2026-11-10 20:03:51.594287+0000 maestro-driver-iosUITests-Runner[42900:367542] [Start] View hierarchy snapshot for Application 'com.napchime.app.acc'
+2026-11-10 20:03:51.594366+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =    69.41s Find the Application 'com.napchime.app.acc'
+2026-11-10 20:03:51.775185+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-10 20:03:51.775557+0000 maestro-driver-iosUITests-Runner[42900:367542] Foreground app is not springboard skipping auto tapping on permissions
+2026-11-10 20:03:51.775634+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =    69.59s Checking existence of `StatusBar (First Match)`
+    t =    69.61s Get all elements bound by index for: Descendants matching type StatusBar
+    t =    69.64s Find the StatusBar (Element at index 0)
+    t =    69.68s Find the StatusBar (Element at index 1)
+2026-11-10 20:03:51.913707+0000 maestro-driver-iosUITests-Runner[42900:367542] Fetch status bar hierarchy - duration 0.1379920244216919
+2026-11-10 20:03:51.913807+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-10 20:03:51.914383+0000 maestro-driver-iosUITests-Runner[42900:367542] Fetch Safari WebView hierarchy - duration 0.0005470514297485352
+    t =    69.73s Find the Application 'com.apple.springboard'
+2026-11-10 20:03:51.943418+0000 maestro-driver-iosUITests-Runner[42900:367542] [Done] View hierarchy snapshot for Application 'com.napchime.app.acc' 
+2026-11-10 20:03:51.999887+0000 maestro-driver-iosUITests-Runner[42900:369345] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    69.82s Getting device orientation
+2026-11-10 20:03:52.006975+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+    t =    69.83s Getting device orientation
+2026-11-10 20:03:52.011795+0000 maestro-driver-iosUITests-Runner[42900:367542] Returning cached screen size
+2026-11-10 20:03:52.012153+0000 maestro-driver-iosUITests-Runner[42900:367542] Device orientation is 1
+2026-11-10 20:03:52.019460+0000 maestro-driver-iosUITests-Runner[42900:368369] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    69.84s Getting device orientation
+2026-11-10 20:03:52.026019+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+    t =    69.84s Getting device orientation
+2026-11-10 20:03:52.027596+0000 maestro-driver-iosUITests-Runner[42900:367542] Returning cached screen size
+2026-11-10 20:03:52.027706+0000 maestro-driver-iosUITests-Runner[42900:367542] Device orientation is 1
+2026-11-10 20:03:52.031287+0000 maestro-driver-iosUITests-Runner[42900:368370] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-10 20:03:52.035052+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+2026-11-10 20:03:52.036857+0000 maestro-driver-iosUITests-Runner[42900:367542] [Start] View hierarchy snapshot for Application 'com.napchime.app.acc'
+2026-11-10 20:03:52.036972+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =    69.86s Find the Application 'com.napchime.app.acc'
+2026-11-10 20:03:52.193643+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-10 20:03:52.194057+0000 maestro-driver-iosUITests-Runner[42900:367542] Foreground app is not springboard skipping auto tapping on permissions
+2026-11-10 20:03:52.194229+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =    70.01s Checking existence of `StatusBar (First Match)`
+    t =    70.03s Get all elements bound by index for: Descendants matching type StatusBar
+    t =    70.06s Find the StatusBar (Element at index 0)
+    t =    70.08s Find the StatusBar (Element at index 1)
+2026-11-10 20:03:52.296880+0000 maestro-driver-iosUITests-Runner[42900:367542] Fetch status bar hierarchy - duration 0.10257101058959961
+2026-11-10 20:03:52.297029+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-10 20:03:52.297817+0000 maestro-driver-iosUITests-Runner[42900:367542] Fetch Safari WebView hierarchy - duration 0.0007469654083251953
+    t =    70.12s Find the Application 'com.apple.springboard'
+2026-11-10 20:03:52.321588+0000 maestro-driver-iosUITests-Runner[42900:367542] [Done] View hierarchy snapshot for Application 'com.napchime.app.acc' 
+2026-11-10 20:03:52.338418+0000 maestro-driver-iosUITests-Runner[42900:368371] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    70.16s Getting device orientation
+2026-11-10 20:03:52.342191+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+    t =    70.16s Getting device orientation
+2026-11-10 20:03:52.344001+0000 maestro-driver-iosUITests-Runner[42900:367542] Returning cached screen size
+2026-11-10 20:03:52.344119+0000 maestro-driver-iosUITests-Runner[42900:367542] Device orientation is 1
+2026-11-10 20:03:52.346433+0000 maestro-driver-iosUITests-Runner[42900:368374] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-10 20:03:52.349489+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+2026-11-10 20:03:52.350136+0000 maestro-driver-iosUITests-Runner[42900:367542] [Start] View hierarchy snapshot for Application 'com.napchime.app.acc'
+2026-11-10 20:03:52.350208+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =    70.17s Find the Application 'com.napchime.app.acc'
+2026-11-10 20:03:52.471975+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-10 20:03:52.472290+0000 maestro-driver-iosUITests-Runner[42900:367542] Foreground app is not springboard skipping auto tapping on permissions
+2026-11-10 20:03:52.472362+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =    70.29s Checking existence of `StatusBar (First Match)`
+    t =    70.30s Get all elements bound by index for: Descendants matching type StatusBar
+    t =    70.33s Find the StatusBar (Element at index 0)
+    t =    70.36s Find the StatusBar (Element at index 1)
+2026-11-10 20:03:52.573478+0000 maestro-driver-iosUITests-Runner[42900:367542] Fetch status bar hierarchy - duration 0.10104000568389893
+2026-11-10 20:03:52.573564+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-10 20:03:52.574137+0000 maestro-driver-iosUITests-Runner[42900:367542] Fetch Safari WebView hierarchy - duration 0.0005500316619873047
+    t =    70.39s Find the Application 'com.apple.springboard'
+2026-11-10 20:03:52.596344+0000 maestro-driver-iosUITests-Runner[42900:367542] [Done] View hierarchy snapshot for Application 'com.napchime.app.acc' 
+2026-11-10 20:03:52.603766+0000 maestro-driver-iosUITests-Runner[42900:368371] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    70.42s Getting device orientation
+2026-11-10 20:03:52.607690+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+    t =    70.43s Getting device orientation
+2026-11-10 20:03:52.608948+0000 maestro-driver-iosUITests-Runner[42900:367542] Returning cached screen size
+2026-11-10 20:03:52.609035+0000 maestro-driver-iosUITests-Runner[42900:367542] Device orientation is 1
+2026-11-10 20:03:52.612488+0000 maestro-driver-iosUITests-Runner[42900:374809] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-10 20:03:52.615321+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+2026-11-10 20:03:52.615914+0000 maestro-driver-iosUITests-Runner[42900:367542] [Start] View hierarchy snapshot for Application 'com.napchime.app.acc'
+2026-11-10 20:03:52.615978+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =    70.43s Find the Application 'com.napchime.app.acc'
+2026-11-10 20:03:52.744622+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-10 20:03:52.744973+0000 maestro-driver-iosUITests-Runner[42900:367542] Foreground app is not springboard skipping auto tapping on permissions
+2026-11-10 20:03:52.745039+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =    70.56s Checking existence of `StatusBar (First Match)`
+    t =    70.58s Get all elements bound by index for: Descendants matching type StatusBar
+    t =    70.60s Find the StatusBar (Element at index 0)
+    t =    70.63s Find the StatusBar (Element at index 1)
+2026-11-10 20:03:52.845263+0000 maestro-driver-iosUITests-Runner[42900:367542] Fetch status bar hierarchy - duration 0.10015296936035156
+2026-11-10 20:03:52.845357+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-10 20:03:52.845957+0000 maestro-driver-iosUITests-Runner[42900:367542] Fetch Safari WebView hierarchy - duration 0.0005789995193481445
+    t =    70.66s Find the Application 'com.apple.springboard'
+2026-11-10 20:03:52.867803+0000 maestro-driver-iosUITests-Runner[42900:367542] [Done] View hierarchy snapshot for Application 'com.napchime.app.acc' 
+2026-11-10 20:03:52.873979+0000 maestro-driver-iosUITests-Runner[42900:368370] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    70.69s Getting device orientation
+2026-11-10 20:03:52.878558+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+    t =    70.70s Getting device orientation
+2026-11-10 20:03:52.880046+0000 maestro-driver-iosUITests-Runner[42900:367542] Returning cached screen size
+2026-11-10 20:03:52.880151+0000 maestro-driver-iosUITests-Runner[42900:367542] Device orientation is 1
+2026-11-10 20:03:52.884371+0000 maestro-driver-iosUITests-Runner[42900:368374] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    70.70s Getting device orientation
+2026-11-10 20:03:52.889275+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+    t =    70.71s Getting device orientation
+2026-11-10 20:03:52.891024+0000 maestro-driver-iosUITests-Runner[42900:367542] Returning cached screen size
+2026-11-10 20:03:52.891441+0000 maestro-driver-iosUITests-Runner[42900:367542] Device orientation is 1
+2026-11-10 20:03:52.922873+0000 maestro-driver-iosUITests-Runner[42900:374809] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    70.74s Getting device orientation
+2026-11-10 20:03:52.926987+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+    t =    70.75s Getting device orientation
+2026-11-10 20:03:52.928406+0000 maestro-driver-iosUITests-Runner[42900:367542] Returning cached screen size
+2026-11-10 20:03:52.928549+0000 maestro-driver-iosUITests-Runner[42900:367542] Device orientation is 1
+2026-11-10 20:03:52.931622+0000 maestro-driver-iosUITests-Runner[42900:368374] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 20:03:53.357168+0000 maestro-driver-iosUITests-Runner[42900:368369] [FlyingFox] <127.0.0.1> request: POST /swipeV2
+2026-11-10 20:03:53.448002+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+    t =    71.27s Getting device orientation
+2026-11-10 20:03:53.471630+0000 maestro-driver-iosUITests-Runner[42900:367542] Returning cached screen size
+    t =    71.30s Getting device orientation
+    t =    71.30s Getting device orientation
+2026-11-10 20:03:53.500595+0000 maestro-driver-iosUITests-Runner[42900:367542] [SwipeRouteHandlerV2] Swipe (v2) from (201.0, 437.0) to (201.0, 87.0) with 0.601 duration
+2026-11-10 20:03:53.507194+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+    t =    71.33s Swipe (v2) from (201.0, 437.0) to (201.0, 87.0) with 0.601 duration
+2026-11-10 20:03:53.508222+0000 maestro-driver-iosUITests-Runner[42900:367542] Quiescence checks are disabled for com.napchime.app.acc application. Making it to believe it is idling
+    t =    71.33s     Find the Any (First Match)
+    t =    71.33s Application is configured to skip UI interruption handling
+    t =    71.33s     Synthesize event
+    t =    71.33s         Getting device orientation
+2026-11-10 20:03:54.443776+0000 maestro-driver-iosUITests-Runner[42900:367542] Quiescence checks are disabled for com.napchime.app.acc application. Making it to believe it is idling
+2026-11-10 20:03:54.656443+0000 maestro-driver-iosUITests-Runner[42900:368370] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 20:03:55.359852+0000 maestro-driver-iosUITests-Runner[42900:368371] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 20:03:55.846859+0000 maestro-driver-iosUITests-Runner[42900:374809] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 20:03:56.214809+0000 maestro-driver-iosUITests-Runner[42900:368370] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 20:03:56.638481+0000 maestro-driver-iosUITests-Runner[42900:368374] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    74.46s Getting device orientation
+2026-11-10 20:03:56.644365+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+    t =    74.46s Getting device orientation
+2026-11-10 20:03:56.645996+0000 maestro-driver-iosUITests-Runner[42900:367542] Returning cached screen size
+2026-11-10 20:03:56.646116+0000 maestro-driver-iosUITests-Runner[42900:367542] Device orientation is 1
+2026-11-10 20:03:56.649691+0000 maestro-driver-iosUITests-Runner[42900:368371] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-10 20:03:56.653076+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+2026-11-10 20:03:56.653779+0000 maestro-driver-iosUITests-Runner[42900:367542] [Start] View hierarchy snapshot for Application 'com.napchime.app.acc'
+2026-11-10 20:03:56.653864+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =    74.47s Find the Application 'com.napchime.app.acc'
+2026-11-10 20:03:56.808958+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-10 20:03:56.809368+0000 maestro-driver-iosUITests-Runner[42900:367542] Foreground app is not springboard skipping auto tapping on permissions
+2026-11-10 20:03:56.809638+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =    74.63s Checking existence of `StatusBar (First Match)`
+    t =    74.65s Get all elements bound by index for: Descendants matching type StatusBar
+    t =    74.68s Find the StatusBar (Element at index 0)
+    t =    74.72s Find the StatusBar (Element at index 1)
+2026-11-10 20:03:56.943872+0000 maestro-driver-iosUITests-Runner[42900:367542] Fetch status bar hierarchy - duration 0.13384592533111572
+2026-11-10 20:03:56.944033+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-10 20:03:56.944692+0000 maestro-driver-iosUITests-Runner[42900:367542] Fetch Safari WebView hierarchy - duration 0.0006420612335205078
+    t =    74.76s Find the Application 'com.apple.springboard'
+2026-11-10 20:03:56.980798+0000 maestro-driver-iosUITests-Runner[42900:367542] [Done] View hierarchy snapshot for Application 'com.napchime.app.acc' 
+2026-11-10 20:03:57.091561+0000 maestro-driver-iosUITests-Runner[42900:368371] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    74.91s Getting device orientation
+2026-11-10 20:03:57.098898+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+    t =    74.92s Getting device orientation
+2026-11-10 20:03:57.100689+0000 maestro-driver-iosUITests-Runner[42900:367542] Returning cached screen size
+2026-11-10 20:03:57.100844+0000 maestro-driver-iosUITests-Runner[42900:367542] Device orientation is 1
+2026-11-10 20:03:57.104460+0000 maestro-driver-iosUITests-Runner[42900:368369] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-10 20:03:57.109957+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+2026-11-10 20:03:57.110567+0000 maestro-driver-iosUITests-Runner[42900:367542] [Start] View hierarchy snapshot for Application 'com.napchime.app.acc'
+2026-11-10 20:03:57.110644+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =    74.93s Find the Application 'com.napchime.app.acc'
+2026-11-10 20:03:57.302280+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-10 20:03:57.302675+0000 maestro-driver-iosUITests-Runner[42900:367542] Foreground app is not springboard skipping auto tapping on permissions
+2026-11-10 20:03:57.302780+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =    75.12s Checking existence of `StatusBar (First Match)`
+    t =    75.14s Get all elements bound by index for: Descendants matching type StatusBar
+    t =    75.17s Find the StatusBar (Element at index 0)
+    t =    75.20s Find the StatusBar (Element at index 1)
+2026-11-10 20:03:57.421675+0000 maestro-driver-iosUITests-Runner[42900:367542] Fetch status bar hierarchy - duration 0.11883008480072021
+2026-11-10 20:03:57.421935+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-10 20:03:57.422657+0000 maestro-driver-iosUITests-Runner[42900:367542] Fetch Safari WebView hierarchy - duration 0.0006899833679199219
+    t =    75.24s Find the Application 'com.apple.springboard'
+2026-11-10 20:03:57.446241+0000 maestro-driver-iosUITests-Runner[42900:367542] [Done] View hierarchy snapshot for Application 'com.napchime.app.acc' 
+2026-11-10 20:03:57.474989+0000 maestro-driver-iosUITests-Runner[42900:368371] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 20:03:57.755346+0000 maestro-driver-iosUITests-Runner[42900:374809] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    75.57s Getting device orientation
+2026-11-10 20:03:57.759674+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+    t =    75.58s Getting device orientation
+2026-11-10 20:03:57.761065+0000 maestro-driver-iosUITests-Runner[42900:367542] Returning cached screen size
+2026-11-10 20:03:57.761187+0000 maestro-driver-iosUITests-Runner[42900:367542] Device orientation is 1
+2026-11-10 20:03:57.763458+0000 maestro-driver-iosUITests-Runner[42900:368374] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-10 20:03:57.766470+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+2026-11-10 20:03:57.766957+0000 maestro-driver-iosUITests-Runner[42900:367542] [Start] View hierarchy snapshot for Application 'com.napchime.app.acc'
+2026-11-10 20:03:57.767026+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =    75.59s Find the Application 'com.napchime.app.acc'
+2026-11-10 20:03:57.907974+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-10 20:03:57.908626+0000 maestro-driver-iosUITests-Runner[42900:367542] Foreground app is not springboard skipping auto tapping on permissions
+2026-11-10 20:03:57.908783+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =    75.73s Checking existence of `StatusBar (First Match)`
+    t =    75.75s Get all elements bound by index for: Descendants matching type StatusBar
+    t =    75.78s Find the StatusBar (Element at index 0)
+    t =    75.81s Find the StatusBar (Element at index 1)
+2026-11-10 20:03:58.023061+0000 maestro-driver-iosUITests-Runner[42900:367542] Fetch status bar hierarchy - duration 0.11418294906616211
+2026-11-10 20:03:58.023186+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-10 20:03:58.023782+0000 maestro-driver-iosUITests-Runner[42900:367542] Fetch Safari WebView hierarchy - duration 0.0005649328231811523
+    t =    75.84s Find the Application 'com.apple.springboard'
+2026-11-10 20:03:58.053274+0000 maestro-driver-iosUITests-Runner[42900:367542] [Done] View hierarchy snapshot for Application 'com.napchime.app.acc' 
+2026-11-10 20:03:58.194641+0000 maestro-driver-iosUITests-Runner[42900:368369] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    76.01s Getting device orientation
+2026-11-10 20:03:58.202971+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+    t =    76.02s Getting device orientation
+2026-11-10 20:03:58.204909+0000 maestro-driver-iosUITests-Runner[42900:367542] Returning cached screen size
+2026-11-10 20:03:58.205045+0000 maestro-driver-iosUITests-Runner[42900:367542] Device orientation is 1
+2026-11-10 20:03:58.207659+0000 maestro-driver-iosUITests-Runner[42900:374809] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-10 20:03:58.210700+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+2026-11-10 20:03:58.211167+0000 maestro-driver-iosUITests-Runner[42900:367542] [Start] View hierarchy snapshot for Application 'com.napchime.app.acc'
+2026-11-10 20:03:58.211214+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =    76.03s Find the Application 'com.napchime.app.acc'
+2026-11-10 20:03:58.338107+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-10 20:03:58.338442+0000 maestro-driver-iosUITests-Runner[42900:367542] Foreground app is not springboard skipping auto tapping on permissions
+2026-11-10 20:03:58.338510+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =    76.16s Checking existence of `StatusBar (First Match)`
+    t =    76.18s Get all elements bound by index for: Descendants matching type StatusBar
+    t =    76.21s Find the StatusBar (Element at index 0)
+    t =    76.24s Find the StatusBar (Element at index 1)
+2026-11-10 20:03:58.456812+0000 maestro-driver-iosUITests-Runner[42900:367542] Fetch status bar hierarchy - duration 0.11820805072784424
+2026-11-10 20:03:58.456962+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-10 20:03:58.457605+0000 maestro-driver-iosUITests-Runner[42900:367542] Fetch Safari WebView hierarchy - duration 0.0006339550018310547
+    t =    76.28s Find the Application 'com.apple.springboard'
+2026-11-10 20:03:58.480442+0000 maestro-driver-iosUITests-Runner[42900:367542] [Done] View hierarchy snapshot for Application 'com.napchime.app.acc' 
+2026-11-10 20:03:58.509763+0000 maestro-driver-iosUITests-Runner[42900:368370] [FlyingFox] <127.0.0.1> request: GET /screenshot
+2026-11-10 20:03:58.740619+0000 maestro-driver-iosUITests-Runner[42900:368370] [FlyingFox] <127.0.0.1> request: POST /touch
+2026-11-10 20:03:58.748364+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+    t =    76.57s Getting device orientation
+2026-11-10 20:03:58.752486+0000 maestro-driver-iosUITests-Runner[42900:367542] Returning cached screen size
+    t =    76.57s Getting device orientation
+2026-11-10 20:03:58.753866+0000 maestro-driver-iosUITests-Runner[42900:367542] Tapping 201.0, 411.0
+    t =    76.57s Getting device orientation
+2026-11-10 20:03:59.096819+0000 maestro-driver-iosUITests-Runner[42900:367542] Tapping took 0.34161198139190674
+2026-11-10 20:03:59.127199+0000 maestro-driver-iosUITests-Runner[42900:368369] [FlyingFox] <127.0.0.1> request: GET /isScreenStatic
+2026-11-10 20:03:59.606613+0000 maestro-driver-iosUITests-Runner[42900:368371] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    77.43s Getting device orientation
+2026-11-10 20:03:59.611042+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+    t =    77.43s Getting device orientation
+2026-11-10 20:03:59.612551+0000 maestro-driver-iosUITests-Runner[42900:367542] Returning cached screen size
+2026-11-10 20:03:59.612673+0000 maestro-driver-iosUITests-Runner[42900:367542] Device orientation is 1
+2026-11-10 20:03:59.617116+0000 maestro-driver-iosUITests-Runner[42900:368371] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    77.44s Getting device orientation
+2026-11-10 20:03:59.621392+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+    t =    77.44s Getting device orientation
+2026-11-10 20:03:59.622796+0000 maestro-driver-iosUITests-Runner[42900:367542] Returning cached screen size
+2026-11-10 20:03:59.622908+0000 maestro-driver-iosUITests-Runner[42900:367542] Device orientation is 1
+2026-11-10 20:03:59.625368+0000 maestro-driver-iosUITests-Runner[42900:368369] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-10 20:03:59.628047+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+2026-11-10 20:03:59.628561+0000 maestro-driver-iosUITests-Runner[42900:367542] [Start] View hierarchy snapshot for Application 'com.napchime.app.acc'
+2026-11-10 20:03:59.628640+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =    77.45s Find the Application 'com.napchime.app.acc'
+2026-11-10 20:03:59.756727+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-10 20:03:59.757063+0000 maestro-driver-iosUITests-Runner[42900:367542] Foreground app is not springboard skipping auto tapping on permissions
+2026-11-10 20:03:59.757133+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =    77.58s Checking existence of `StatusBar (First Match)`
+    t =    77.59s Get all elements bound by index for: Descendants matching type StatusBar
+    t =    77.61s Find the StatusBar (Element at index 0)
+    t =    77.64s Find the StatusBar (Element at index 1)
+2026-11-10 20:03:59.854188+0000 maestro-driver-iosUITests-Runner[42900:367542] Fetch status bar hierarchy - duration 0.09698796272277832
+2026-11-10 20:03:59.854271+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-10 20:03:59.854810+0000 maestro-driver-iosUITests-Runner[42900:367542] Fetch Safari WebView hierarchy - duration 0.0005210638046264648
+    t =    77.67s Find the Application 'com.apple.springboard'
+2026-11-10 20:03:59.878306+0000 maestro-driver-iosUITests-Runner[42900:367542] [Done] View hierarchy snapshot for Application 'com.napchime.app.acc' 
+2026-11-10 20:03:59.894919+0000 maestro-driver-iosUITests-Runner[42900:368370] [FlyingFox] <127.0.0.1> request: POST /deviceInfo
+    t =    77.71s Getting device orientation
+2026-11-10 20:03:59.900103+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+    t =    77.72s Getting device orientation
+2026-11-10 20:03:59.901675+0000 maestro-driver-iosUITests-Runner[42900:367542] Returning cached screen size
+2026-11-10 20:03:59.901760+0000 maestro-driver-iosUITests-Runner[42900:367542] Device orientation is 1
+2026-11-10 20:03:59.915801+0000 maestro-driver-iosUITests-Runner[42900:368374] [FlyingFox] <127.0.0.1> request: POST /viewHierarchy
+2026-11-10 20:03:59.918462+0000 maestro-driver-iosUITests-Runner[42900:367542] Detected running apps: ["com.napchime.app.acc"]
+2026-11-10 20:03:59.918980+0000 maestro-driver-iosUITests-Runner[42900:367542] [Start] View hierarchy snapshot for Application 'com.napchime.app.acc'
+2026-11-10 20:03:59.919062+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Starting getHierarchyWithFallback for element.
+    t =    77.74s Find the Application 'com.napchime.app.acc'
+2026-11-10 20:04:00.075082+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Successfully retrieved element hierarchy.
+2026-11-10 20:04:00.075462+0000 maestro-driver-iosUITests-Runner[42900:367542] Foreground app is not springboard skipping auto tapping on permissions
+2026-11-10 20:04:00.075682+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Fetch status bar hierarchy - start
+    t =    77.89s Checking existence of `StatusBar (First Match)`
+    t =    77.91s Get all elements bound by index for: Descendants matching type StatusBar
+    t =    77.94s Find the StatusBar (Element at index 0)
+    t =    77.99s Find the StatusBar (Element at index 1)
+2026-11-10 20:04:00.210540+0000 maestro-driver-iosUITests-Runner[42900:367542] Fetch status bar hierarchy - duration 0.1347949504852295
+2026-11-10 20:04:00.210728+0000 maestro-driver-iosUITests-Runner[42900:367542] [ViewHierarchyHandler] Fetch Safari WebView hierarchy - start
+2026-11-10 20:04:00.211620+0000 maestro-driver-iosUITests-Runner[42900:367542] Fetch Safari WebView hierarchy - duration 0.000867009162902832
+    t =    78.03s Find the Application 'com.apple.springboard'
+2026-11-10 20:04:00.234377+0000 maestro-driver-iosUITests-Runner[42900:367542] [Done] View hierarchy snapshot for Application 'com.napchime.app.acc' 
+2026-11-10 20:04:00.276935+0000 maestro-driver-iosUITests-Runner[42900:374809] [FlyingFox] <127.0.0.1> request: GET /screenshot
+2026-11-10 20:04:06.825258+0000 maestro-driver-iosUITests-Runner[42900:374809] [FlyingFox] <127.0.0.1> request: GET /status

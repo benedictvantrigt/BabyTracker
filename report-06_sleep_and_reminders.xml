@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="iPhone 17 Pro - iOS 26.5 - FCC5F673-7BEC-4A7D-8F2A-4DC35E2668EC" tests="1" failures="0" time="138.209" timestamp="2026-11-10T19:58:57">
+    <testcase id="Sleep timer, and leaves reminders scheduled for the alarm check" name="Sleep timer, and leaves reminders scheduled for the alarm check" classname="Sleep timer, and leaves reminders scheduled for the alarm check" file="/Users/runner/work/BabyTracker/BabyTracker/mobile/.maestro/06_sleep_and_reminders.yaml" time="137.811" timestamp="2026-11-10T19:58:57" status="SUCCESS"/>
+  </testsuite>
+</testsuites>

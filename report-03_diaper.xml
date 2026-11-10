@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="iPhone 17 Pro - iOS 26.5 - FCC5F673-7BEC-4A7D-8F2A-4DC35E2668EC" tests="1" failures="0" time="111.93" timestamp="2026-11-10T19:46:00">
+    <testcase id="One-tap diapers with undo" name="One-tap diapers with undo" classname="One-tap diapers with undo" file="/Users/runner/work/BabyTracker/BabyTracker/mobile/.maestro/03_diaper.yaml" time="111.849" timestamp="2026-11-10T19:46:00" status="SUCCESS"/>
+  </testsuite>
+</testsuites>

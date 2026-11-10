@@ -1,0 +1,34 @@
+
+ ⛅️ wrangler 4.152.0
+────────────────────
+Your Worker has access to the following bindings:
+Binding                  Resource            Mode
+env.FAMILY (Family)      Durable Object      local
+
+⎔ Starting local server...
+[wrangler:info] Ready on http://127.0.0.1:8787
+[wrangler:info] GET /health 200 OK (282ms)
+[wrangler:info] POST /v1/families/RBjP8wmVpl9cT2IRKvwZNA 201 Created (489ms)
+[wrangler:info] POST /v1/families/RBjP8wmVpl9cT2IRKvwZNA/changes 200 OK (12ms)
+[wrangler:info] GET /v1/families/RBjP8wmVpl9cT2IRKvwZNA/changes 200 OK (11ms)
+[wrangler:info] GET /v1/families/RBjP8wmVpl9cT2IRKvwZNA/changes 200 OK (7ms)
+[wrangler:info] POST /v1/families/RBjP8wmVpl9cT2IRKvwZNA/invites 201 Created (10ms)
+[wrangler:info] POST /v1/families/RBjP8wmVpl9cT2IRKvwZNA/changes 200 OK (9ms)
+[wrangler:info] GET /v1/families/RBjP8wmVpl9cT2IRKvwZNA/changes 200 OK (36ms)
+[wrangler:info] POST /v1/families/RBjP8wmVpl9cT2IRKvwZNA/join 201 Created (536ms)
+[wrangler:info] POST /v1/families/RBjP8wmVpl9cT2IRKvwZNA/changes 200 OK (183ms)
+[wrangler:info] GET /v1/families/RBjP8wmVpl9cT2IRKvwZNA/changes 200 OK (76ms)
+[wrangler:info] GET /v1/families/RBjP8wmVpl9cT2IRKvwZNA/changes 200 OK (1015ms)
+[wrangler:info] PUT /v1/families/RBjP8wmVpl9cT2IRKvwZNA/reminders 200 OK (453ms)
+[wrangler:info] GET /v1/families/RBjP8wmVpl9cT2IRKvwZNA/devices 200 OK (26ms)
+[wrangler:info] POST /v1/families/RBjP8wmVpl9cT2IRKvwZNA/changes 200 OK (322ms)
+[wrangler:info] GET /v1/families/RBjP8wmVpl9cT2IRKvwZNA/changes 200 OK (338ms)
+[wrangler:info] PUT /v1/families/RBjP8wmVpl9cT2IRKvwZNA/reminders 200 OK (477ms)
+[wrangler:info] GET /v1/families/RBjP8wmVpl9cT2IRKvwZNA/devices 200 OK (17ms)
+[wrangler:info] GET /v1/families/RBjP8wmVpl9cT2IRKvwZNA/changes 200 OK (71ms)
+[wrangler:info] GET /v1/families/RBjP8wmVpl9cT2IRKvwZNA/devices 200 OK (279ms)
+[wrangler:info] GET /v1/families/RBjP8wmVpl9cT2IRKvwZNA/changes 200 OK (33ms)
+[wrangler:info] GET /v1/families/RBjP8wmVpl9cT2IRKvwZNA/devices 200 OK (7ms)
+[wrangler:info] GET /v1/families/RBjP8wmVpl9cT2IRKvwZNA/changes 200 OK (20ms)
+[wrangler:info] GET /v1/families/RBjP8wmVpl9cT2IRKvwZNA/devices 200 OK (9ms)
+[wrangler:warn] The Workers runtime crashed unexpectedly and is being restarted (crash #1). Any additional runtime output above may indicate the cause.
