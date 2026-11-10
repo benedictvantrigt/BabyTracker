@@ -1,6 +1,6 @@
 # Roadmap
 
-The plan for Baby Tracker and where it stands. Update this file when a phase or feature is
+The plan for Napchime and where it stands. Update this file when a phase or feature is
 finished; `CHANGELOG.md` records what each released version contains.
 
 ## Goal

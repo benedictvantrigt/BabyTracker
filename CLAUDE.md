@@ -1,4 +1,4 @@
-# Baby Tracker
+# Napchime
 
 - Plan and current status: `docs/ROADMAP.md`. Read it before starting work and update it
   when a phase is finished.

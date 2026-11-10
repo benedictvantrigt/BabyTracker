@@ -32,7 +32,7 @@ export function encodeInvite(invite: Invite): string {
 
 export class InvalidInviteError extends Error {
   constructor() {
-    super('This is not a valid Baby Tracker invite code.');
+    super('This is not a valid Napchime invite code.');
   }
 }
 

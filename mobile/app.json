@@ -1,15 +1,15 @@
 {
   "expo": {
-    "name": "Baby Tracker",
-    "slug": "babytracker",
+    "name": "Napchime",
+    "slug": "napchime",
     "version": "0.7.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "babytracker",
+    "scheme": "napchime",
     "userInterfaceStyle": "automatic",
     "ios": {
       "icon": "./assets/expo.icon",
-      "bundleIdentifier": "com.babytracker.app",
+      "bundleIdentifier": "com.napchime.app",
       "entitlements": {
         "com.apple.developer.usernotifications.time-sensitive": true
       }
@@ -22,7 +22,7 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.babytracker.app",
+      "package": "com.napchime.app",
       "versionCode": 8,
       "permissions": [
         "android.permission.SCHEDULE_EXACT_ALARM",
@@ -54,7 +54,7 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "Baby Tracker uses the camera to scan your partner’s invite QR code.",
+          "cameraPermission": "Napchime uses the camera to scan your partner’s invite QR code.",
           "microphonePermission": false,
           "recordAudioAndroid": false,
           "barcodeScannerEnabled": true
@@ -68,7 +68,7 @@
           "widgets": [
             {
               "name": "Summary",
-              "label": "Baby Tracker",
+              "label": "Napchime",
               "description": "Last feed, sleep and diaper, with quick logging",
               "minWidth": "250dp",
               "minHeight": "110dp",

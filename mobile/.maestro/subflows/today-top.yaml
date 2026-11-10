@@ -1,6 +1,6 @@
 # Scrolls the Today screen back to the top (running timers, Sleep card) after tapping a
 # button further down.
-appId: com.babytracker.app.acc
+appId: com.napchime.app.acc
 ---
 - scrollUntilVisible:
     element:

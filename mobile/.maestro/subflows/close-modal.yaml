@@ -1,5 +1,5 @@
 # Closes a modal screen: Android's back button; on iOS, swipe the sheet down.
-appId: com.babytracker.app.acc
+appId: com.napchime.app.acc
 ---
 - runFlow:
     when:

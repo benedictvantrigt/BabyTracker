@@ -1,7 +1,7 @@
 # Closes the keyboard. Android: the back-style hideKeyboard. iOS: hideKeyboard can tap a
 # button under it, so tap a plain text instead (LABEL, a regex): screens use
 # keyboardShouldPersistTaps="handled", so a tap on text closes the keyboard and nothing else.
-appId: com.babytracker.app.acc
+appId: com.napchime.app.acc
 ---
 - runFlow:
     when:

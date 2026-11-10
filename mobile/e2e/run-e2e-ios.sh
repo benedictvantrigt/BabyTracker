@@ -8,7 +8,7 @@ set -uo pipefail
 APP="$1"   # path to the .app built for the Simulator
 UDID="$2"  # the booted Simulator
 OUT="$3"
-BUNDLE=com.babytracker.app.acc  # CI tests the acceptance build
+BUNDLE=com.napchime.app.acc  # CI tests the acceptance build
 HERE="$(cd "$(dirname "$0")" && pwd)"
 FLOWS="$(cd "$HERE/../.maestro" && pwd)"
 

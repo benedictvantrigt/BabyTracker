@@ -41,7 +41,7 @@ async function widgetRepo(): Promise<{ repo: Repo; inApp: boolean }> {
 function feedingUri(): string {
   const scheme = Constants.expoConfig?.scheme;
   const first = Array.isArray(scheme) ? scheme[0] : scheme;
-  return `${first ?? 'babytracker'}://entry/feeding`;
+  return `${first ?? 'napchime'}://entry/feeding`;
 }
 
 async function renderSummary(repo: Repo, now = Date.now()): Promise<WidgetRepresentation> {

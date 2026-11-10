@@ -1,4 +1,4 @@
-appId: com.babytracker.app.acc
+appId: com.napchime.app.acc
 name: Onboarding shows the default dashboard and the sleep plan
 ---
 - runFlow: subflows/onboard.yaml

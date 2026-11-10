@@ -1,4 +1,4 @@
-appId: com.babytracker.app.acc
+appId: com.napchime.app.acc
 name: Tummy time timer, temperature and growth
 ---
 - runFlow: subflows/onboard.yaml

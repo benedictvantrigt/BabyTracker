@@ -37,7 +37,7 @@ export default function InviteScreen() {
     <ThemedView style={styles.fill}>
       <ScrollView contentContainerStyle={styles.content}>
         <ThemedText themeColor="textSecondary">
-          On your partner’s phone: install Baby Tracker, tap “Join your partner” and scan this code.
+          On your partner’s phone: install Napchime, tap “Join your partner” and scan this code.
           It works once and expires after 15 minutes.
         </ThemedText>
 
