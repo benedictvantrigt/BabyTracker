@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Napchime privacy policy</title>
+<style>
+  :root { --bg: #ffffff; --fg: #1d1d1f; --muted: #5b5b66; --accent: #6E56CF; }
+  @media (prefers-color-scheme: dark) { :root { --bg: #151518; --fg: #ececf1; --muted: #a3a3ad; --accent: #9d8cf0; } }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 16px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  main { max-width: 720px; margin: 0 auto; padding: 32px 16px 64px; }
+  h1 { font-size: 1.8rem; margin-bottom: 0.2rem; }
+  h2 { font-size: 1.2rem; margin-top: 2rem; }
+  p.meta { color: var(--muted); margin-top: 0; }
+  a { color: var(--accent); }
+  li { margin: 0.3rem 0; }
+</style>
+</head>
+<body>
+<main>
+<h1>Napchime privacy policy</h1>
+<p class="meta">Last updated: {{DATE}}</p>
+
+<p>Napchime is a baby tracker for parents. It is built so that your baby's records stay on
+your phones: there is no account, no advertising, no analytics and no tracking. This policy
+explains what data the app handles, where it goes and how you can delete it.</p>
+
+<h2>Who is responsible</h2>
+<p>Napchime is published by {{ORGANISATION}}, {{ADDRESS}}. Questions about privacy:
+<a href="mailto:{{EMAIL}}">{{EMAIL}}</a>.</p>
+
+<h2>Data on your phone</h2>
+<p>Everything you enter (your baby's name and date of birth, feeds, sleep, diapers, tummy
+time, pumping, temperature, growth, notes and tags) and your settings are stored in a
+database on your phone. If you don't use partner sync, nothing leaves the phone.</p>
+<p>The camera is only used to scan your partner's invite QR code. No pictures are taken or
+stored.</p>
+
+<h2>Partner sync (optional)</h2>
+<p>When you link a partner's phone, the phones exchange changes through our sync server (the
+"relay"), which runs on Cloudflare Workers. All records are <strong>end-to-end
+encrypted</strong>: they are encrypted on your phone with a family key that only your
+family's phones have. The relay, and we, cannot read them.</p>
+<p>To do its job, the relay stores:</p>
+<ul>
+  <li>for each linked phone: a random public key that identifies it, when it joined, when it
+    last contacted the relay, and, if reminders by push are on, its push token;</li>
+  <li>the encrypted changes, until every phone in the family has received them, after which
+    they are deleted;</li>
+  <li>encrypted reminder texts with the time they are due, until they have been sent;</li>
+  <li>encrypted phone names and encrypted copies of the family key for each phone;</li>
+  <li>a fingerprint of an open invite code, for up to 15 minutes.</li>
+</ul>
+<p>Like any internet service, Cloudflare processes your IP address to deliver requests and
+keeps technical request logs for a few days to keep the service running and secure.</p>
+
+<h2>Push notifications</h2>
+<p>To wake a partner's phone after a change and to deliver reminders, the relay sends push
+messages through Firebase Cloud Messaging (Google). Google receives the phone's push token
+and the encrypted message; the content stays encrypted.</p>
+
+<h2>Who we share data with</h2>
+<p>We do not sell or share your data. The only services involved are the ones that run the
+relay and deliver push messages, acting on our behalf: Cloudflare, Inc. and Google LLC
+(Firebase). Data may be processed outside your country under their standard safeguards.</p>
+
+<h2>How long data is kept, and deleting it</h2>
+<ul>
+  <li><strong>On your phone:</strong> until you delete entries or uninstall the app.</li>
+  <li><strong>Remove a phone</strong> (Settings, partner sync): the relay drops that phone's
+    push token and name, and the family switches to a new key.</li>
+  <li><strong>Delete family</strong> (Settings, partner sync): everything about your family is
+    deleted from the relay straight away.</li>
+  <li>Otherwise, relay data is kept while the family uses sync.</li>
+</ul>
+
+<h2>Children</h2>
+<p>Napchime is meant for parents and caregivers, not for children to use. The data about your
+baby is entered and controlled by you.</p>
+
+<h2>Your rights</h2>
+<p>You can ask us for access to, correction of or deletion of personal data we hold about
+you, and you can object to its use. Because records are end-to-end encrypted, the relay only
+holds the technical data listed above, and "Delete family" removes it yourself. You can also
+lodge a complaint with your data protection authority{{AUTHORITY}}.</p>
+
+<h2>Changes</h2>
+<p>If this policy changes, we update this page and the date at the top.</p>
+</main>
+</body>
+</html>
