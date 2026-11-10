@@ -138,6 +138,26 @@ to one with the new key: Android requires the same signature. Move them one at a
 uninstall, install the new APK, and join again from the other phone's invite; the log comes
 back from that phone.
 
+### Google Play
+
+Every release also builds an Android App Bundle (`napchime-vX.Y.Z.aab` on the GitHub
+release), which is what Google Play takes. Play uses Play App Signing: Google holds the key
+that signs the app on phones, and the production key from "Signing keys" is our **upload
+key**. CI checks that the bundle carries that key (and the pin, when set) and that the app
+targets API 36, which Play requires.
+
+First upload, by hand in Play Console (organisation developer account):
+
+1. Create the app (name "Napchime", default language, app, free) and fill in the store
+   listing and App content declarations (`docs/store-listing.md`).
+2. Under Test and release → Setup → App signing, keep "Use Google-generated key". The first
+   bundle uploaded registers its certificate as the upload key.
+3. Upload `napchime-vX.Y.Z.aab` to the internal testing track first, then closed or
+   production. Each upload needs a higher `versionCode` (`mobile/app.json`).
+
+Phones that install from Play get Google's app signing key, so they update from Play only;
+the APK on the GitHub release no longer installs over them.
+
 ## Versions and branches
 
 - `main` is the released line; work happens on short-lived branches merged into `main` by
