@@ -2,6 +2,7 @@ import * as Notifications from 'expo-notifications';
 import { AndroidAudioContentType, AndroidAudioUsage, AndroidImportance } from 'expo-notifications';
 import { Platform } from 'react-native';
 
+import { LIVE_TIMER_KINDS } from '@/domain/entries';
 import type { Reminder } from '@/domain/reminders';
 import type { Entry } from '@/domain/types';
 
@@ -10,7 +11,13 @@ import { syncLiveTimers } from './live-timers';
 
 const CHANNEL_REMINDERS = 'reminders';
 const CHANNEL_ALARMS = 'alarms';
-const CHANNEL_TIMERS = 'timers';
+/**
+ * Default importance, so a running timer has an icon in the status bar (a low-importance
+ * channel files it under "Silent" without one); no sound or vibration. A channel's
+ * importance cannot be raised after it is created, hence a new id; 'timers' was the old one.
+ */
+const CHANNEL_TIMERS = 'live-timers';
+const OLD_CHANNEL_TIMERS = 'timers';
 
 const REMINDER_PREFIX = 'reminder-';
 const TIMER_PREFIX = 'timer-';
@@ -49,9 +56,12 @@ export async function setupNotificationChannels(): Promise<void> {
   await Notifications.setNotificationChannelAsync(CHANNEL_TIMERS, {
     name: 'Running timers',
     description: 'Ongoing sleep and feeding timers',
-    importance: AndroidImportance.LOW,
+    importance: AndroidImportance.DEFAULT,
     sound: null,
+    enableVibrate: false,
+    showBadge: false,
   });
+  await Notifications.deleteNotificationChannelAsync(OLD_CHANNEL_TIMERS);
 }
 
 export interface PermissionState {
@@ -89,7 +99,10 @@ export async function syncNotifications(
   running: Entry[],
   childName: string,
 ): Promise<void> {
-  const timers = running.map((e) => liveTimerFor(e, childName));
+  // Tummy time stays in the app: the lock-screen styles exist for sleep and feeding only.
+  const timers = running
+    .filter((e) => LIVE_TIMER_KINDS.includes(e.kind))
+    .map((e) => liveTimerFor(e, childName));
   // Live Activities need no notification permission, so these go first.
   const live = await syncLiveTimers(timers, CHANNEL_TIMERS).catch(() => false);
   if (!(await Notifications.getPermissionsAsync()).granted) return;

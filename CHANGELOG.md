@@ -3,6 +3,33 @@
 All notable changes to Baby Tracker. Versions follow [Semantic Versioning](https://semver.org/);
 before 1.0.0 a minor version marks a phase of the plan.
 
+## Unreleased
+
+- Android: a running sleep or feeding timer now has an icon in the status bar. Its
+  notification moved to a new "Running timers" channel at normal importance, still without
+  sound or vibration; the old low-importance channel filed it under "Silent", which has no
+  status bar icon before Android 16.
+- Switches no longer flicker when tapped (Customize Today, Settings): they showed the old
+  position again until the setting was saved and reloaded, then flipped. They now keep the
+  new position, and only go back when saving fails.
+- Sleep schedule: nap times no longer include the guide's optional extra sleep. Where the
+  guide gives two times ("15.30/15.45 - 17.00"), the shorter nap is used: later start,
+  earlier end. Changes for 3–6 weeks to 12–16 weeks, 5 and 6 months, and 2–3 years.
+  Likewise the later bedtime: 18:30 at 9–12 weeks, 19:00 at 12–16 weeks.
+- Sleep card: "Today's plan" shows the guide's day and night sleep for the baby's age
+  under the times.
+- Sleep totals: a sleep after the latest nap time (17:00 by default) now counts as day
+  sleep when it started before bedtime and ended by half an hour after it. Before, it was
+  left out of today's day sleep and total (or cut off at 17:00), and counted as part of
+  the next night. A sleep that runs on is still the night.
+- New records (#8, #9, #10, #11): tummy time (a timer), pumping (side and amount),
+  temperature (°C and where it was measured) and growth (weight, length and head
+  circumference). They are in the timeline, sync to the partner phone and take notes and
+  tags. A new Today card, "More records", starts and stops tummy time, opens the other
+  forms and shows today's tummy time, pumped milk and the latest temperature and growth.
+  It can be turned off or moved like the other cards. Phones on 0.7.0 skip these records:
+  update both phones. A new temperature or growth entry opens with the keyboard ready.
+
 ## [0.7.0] — 2026-11-08 — Live timers and security fixes
 
 - Live timers (#15): a running sleep or breastfeeding timer counts up outside the app without

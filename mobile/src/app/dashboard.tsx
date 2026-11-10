@@ -1,9 +1,9 @@
 import type { ComponentProps } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Switch, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { Button, Card, Icon } from '@/components/ui';
+import { Button, Card, Icon, SavedSwitch } from '@/components/ui';
 import { MaxContentWidth, Spacing } from '@/constants/theme';
 import { useAction, useAppData } from '@/data/app-data';
 import {
@@ -63,7 +63,7 @@ function CardRow({
 }: {
   id: DashboardCardId;
   visible: boolean;
-  onToggle: (on: boolean) => void;
+  onToggle: (on: boolean) => unknown;
   onUp?: () => void;
   onDown?: () => void;
 }) {
@@ -88,9 +88,9 @@ function CardRow({
         icon={{ ios: 'chevron.down', android: 'arrow_downward' }}
         onPress={onDown}
       />
-      <Switch
+      <SavedSwitch
         value={visible}
-        onValueChange={onToggle}
+        onChange={onToggle}
         accessibilityLabel={`Show ${title}`}
         testID={`show-${id}`}
       />

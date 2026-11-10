@@ -2,18 +2,27 @@ appId: com.babytracker.app.acc
 name: One-tap diapers with undo
 ---
 - runFlow: subflows/onboard.yaml
-- tapOn: 'Wet'
+- runFlow:
+    file: subflows/tap-today.yaml
+    env:
+      LABEL: 'Wet'
 - assertVisible: 'Diaper logged: wet'
 - takeScreenshot: 03-diaper-undo-banner
 - tapOn: 'UNDO'
 - assertVisible: 'No diaper change logged yet'
-- tapOn: 'Both'
+- runFlow:
+    file: subflows/tap-today.yaml
+    env:
+      LABEL: 'Both'
 - assertVisible: 'Last change .* ago'
 # The undo bar can cover the buttons, depending on how tall the cards above are.
 - extendedWaitUntil:
     notVisible: 'UNDO'
     timeout: 10000
-- tapOn: 'Solid'
+- runFlow:
+    file: subflows/tap-today.yaml
+    env:
+      LABEL: 'Solid'
 - scrollUntilVisible:
     element: '1 wet · 2 solid'
 - takeScreenshot: 03-diaper-totals

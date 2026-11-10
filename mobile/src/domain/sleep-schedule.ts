@@ -3,7 +3,9 @@ import type { Entry, EntryOf, Settings } from './types';
 
 // Age-based day schedules. Times are minutes after midnight for a day that starts at 07:00;
 // a different `dayStartMinute` shifts the whole day. Nap times are in-bed times: the baby
-// goes into bed at `start` and is taken out at `end`, also after a shorter sleep.
+// goes into bed at `start` and is taken out at `end`, also after a shorter sleep. Where the
+// guide gives two times ("15.30/15.45 - 17.00"), the later start and the earlier end are used:
+// the other one is optional extra sleep. Likewise the later of two bedtimes.
 
 /** Reference wake-up time the schedule times are written for. */
 const BASE_DAY_START = 7 * 60;
@@ -48,7 +50,7 @@ const STAGES: (ScheduleStage & { from: Age })[] = [
     id: 'w3',
     label: '3–6 weeks',
     from: { weeks: 3 },
-    naps: [nap(t(8, 30), t(10)), nap(t(11, 30), t(14)), nap(t(15, 30), t(17))],
+    naps: [nap(t(8, 30), t(10)), nap(t(11, 30), t(14)), nap(t(15, 45), t(17))],
     bedtime: t(18),
     wakeWindow: [75, 90],
     awakeBeforeBed: null,
@@ -59,7 +61,7 @@ const STAGES: (ScheduleStage & { from: Age })[] = [
     id: 'w6',
     label: '6–9 weeks',
     from: { weeks: 6 },
-    naps: [nap(t(8, 30), t(10)), nap(t(11, 30), t(14)), nap(t(15, 45), t(17))],
+    naps: [nap(t(8, 30), t(10)), nap(t(11, 30), t(14)), nap(t(16), t(17))],
     bedtime: t(18, 15),
     wakeWindow: [90, 90],
     awakeBeforeBed: null,
@@ -70,8 +72,8 @@ const STAGES: (ScheduleStage & { from: Age })[] = [
     id: 'w9',
     label: '9–12 weeks',
     from: { weeks: 9 },
-    naps: [nap(t(8, 45), t(10)), nap(t(11, 30), t(14)), nap(t(15, 45), t(17))],
-    bedtime: t(18, 15),
+    naps: [nap(t(9), t(10)), nap(t(11, 30), t(14)), nap(t(16), t(17))],
+    bedtime: t(18, 30),
     wakeWindow: [90, 105],
     awakeBeforeBed: null,
     daySleep: [300, 300],
@@ -81,8 +83,8 @@ const STAGES: (ScheduleStage & { from: Age })[] = [
     id: 'w12',
     label: '12–16 weeks',
     from: { weeks: 12 },
-    naps: [nap(t(8, 45), t(10)), nap(t(11, 30), t(14)), nap(t(16), t(17))],
-    bedtime: t(18, 30),
+    naps: [nap(t(9), t(10)), nap(t(11, 45), t(14)), nap(t(16), t(17))],
+    bedtime: t(19),
     wakeWindow: [90, 120],
     awakeBeforeBed: null,
     daySleep: [270, 270],
@@ -103,7 +105,7 @@ const STAGES: (ScheduleStage & { from: Age })[] = [
     id: 'm5',
     label: '5 months',
     from: { months: 5 },
-    naps: [nap(t(9, 15), t(10)), nap(t(12), t(14, 15)), nap(t(16, 30), t(17))],
+    naps: [nap(t(9, 15), t(10)), nap(t(12, 15), t(14, 15)), nap(t(16, 30), t(17))],
     bedtime: t(19),
     wakeWindow: [135, 135],
     awakeBeforeBed: null,
@@ -114,7 +116,7 @@ const STAGES: (ScheduleStage & { from: Age })[] = [
     id: 'm6',
     label: '6 months',
     from: { months: 6 },
-    naps: [nap(t(9, 15), t(10)), nap(t(12, 15), t(14, 15)), nap(t(16, 45), t(17))],
+    naps: [nap(t(9, 15), t(10)), nap(t(12, 30), t(14, 15)), nap(t(16, 45), t(17))],
     bedtime: t(19),
     wakeWindow: [150, 150],
     awakeBeforeBed: null,
@@ -169,7 +171,7 @@ const STAGES: (ScheduleStage & { from: Age })[] = [
     id: 'y2',
     label: '2–3 years',
     from: { months: 25 },
-    naps: [nap(t(12, 30), t(14, 30))],
+    naps: [nap(t(13), t(14, 30))],
     bedtime: t(19),
     wakeWindow: null,
     awakeBeforeBed: [270, 270],
@@ -338,11 +340,15 @@ export interface ScheduleStatus {
   current: { slot: PlanSlot | null; endAt: number; startedAt: number } | null;
   /** The next planned nap not yet slept, while awake. */
   next: PlanSlot | null;
-  /** Daytime sleep logged so far against the stage's target, in ms. */
+  /**
+   * Daytime sleep logged so far against the stage's target, in ms: the naps, and evening
+   * catnaps over by shortly after bedtime.
+   */
   daySleptMs: number;
   /**
    * The night that ended this morning, in ms: sleep starting from yesterday's latest nap
-   * end until an hour before today's day start. A night still running counts up to now.
+   * end until an hour before today's day start, without yesterday's evening catnaps. A
+   * night still running counts up to now.
    */
   nightSleptMs: number;
   /** Total sleep for the day so far, in ms: last night plus today's naps. */
@@ -354,6 +360,17 @@ export interface ScheduleStatus {
 
 function overlap(a0: number, a1: number, b0: number, b1: number): number {
   return Math.max(0, Math.min(a1, b1) - Math.max(a0, b0));
+}
+
+/** How long after the planned bedtime an evening catnap may end and still be day sleep. */
+const EVENING_NAP_SLACK = 30 * MINUTE;
+
+/**
+ * A sleep that started before bedtime and was over by bedtime + EVENING_NAP_SLACK, e.g.
+ * an extra nap after 17:00. Running past that, it is the night.
+ */
+function isEveningNap(e: EntryOf<'sleep'>, bedtimeAt: number, now: number): boolean {
+  return e.start < bedtimeAt && (e.end ?? now) <= bedtimeAt + EVENING_NAP_SLACK;
 }
 
 /**
@@ -412,16 +429,27 @@ export function scheduleStatus(
     ? null
     : (slots.find((s) => s.status === 'now' || s.status === 'upcoming') ?? null);
 
+  // Day sleep for the totals: the naps above, plus a sleep after the latest nap end that
+  // started before bedtime and was over by bedtime + EVENING_NAP_SLACK (an evening catnap).
+  // A sleep that runs on is the night, which belongs to the day it ends in.
   let daySleptMs = 0;
-  for (const e of daySleeps) {
-    daySleptMs += overlap(e.start, e.end ?? now, dayStart - HOUR, latestNapEnd);
+  for (const e of sleeps) {
+    if (e.start < dayStart - HOUR) continue;
+    if (e.start < latestNapEnd || isEveningNap(e, plan.bedtimeAt, now)) {
+      const until = plan.bedtimeAt + EVENING_NAP_SLACK;
+      daySleptMs += overlap(e.start, e.end ?? now, dayStart - HOUR, until);
+    }
   }
-  // The night belongs to the day it ends in, so tonight's sleep counts toward tomorrow.
-  // Yesterday's times are taken from an hour before midnight, safe across DST changes.
-  const nightFrom = scheduleTime(settings, startOfLocalDay(now) - HOUR, LATEST_NAP_END);
+  // Last night: sleep from yesterday's latest nap end until an hour before today's day
+  // start, except yesterday's evening catnaps (counted on that day). Yesterday's times are
+  // taken from an hour before midnight, safe across DST changes.
+  const yesterday = startOfLocalDay(now) - HOUR;
+  const nightFrom = scheduleTime(settings, yesterday, LATEST_NAP_END);
+  const yesterdayBed = scheduleTime(settings, yesterday, stage.stage.bedtime);
   let nightSleptMs = 0;
   for (const e of sleeps) {
-    if (e.start >= nightFrom && e.start < dayStart - HOUR) {
+    const lastNight = e.start >= nightFrom && e.start < dayStart - HOUR;
+    if (lastNight && !isEveningNap(e, yesterdayBed, now)) {
       nightSleptMs += Math.max(0, Math.min(e.end ?? now, now) - e.start);
     }
   }

@@ -106,6 +106,38 @@ describe('partner sync', () => {
     );
   });
 
+  it('syncs tummy time, pumping, temperature and growth', async () => {
+    const [a, b] = [await phone(), await phone()];
+    const child = await a.repo.addChild('Micky', null);
+    const engineA = await createFamily(a, relay.url);
+    await joinFamily(b, (await engineA.createInvite()).code);
+    const t = Date.now() - 60 * 60_000;
+    await a.repo.addEntry(child.id, { kind: 'tummy', start: t, end: t + 600_000, data: {} });
+    await a.repo.addEntry(child.id, {
+      kind: 'pumping',
+      start: t,
+      end: t + 900_000,
+      data: { side: 'both', amount: 110 },
+    });
+    await a.repo.addEntry(child.id, {
+      kind: 'temperature',
+      start: t,
+      end: t,
+      data: { celsius: 37.4, site: 'armpit' },
+    });
+    await a.repo.addEntry(child.id, {
+      kind: 'growth',
+      start: t,
+      end: t,
+      data: { weightGrams: 4250, lengthCm: 55, headCm: 37.5 },
+    });
+    await syncAll(a, b);
+    const kinds = (await entriesOf(b)).map((e) => e.kind).sort();
+    assert.deepEqual(kinds, ['growth', 'pumping', 'temperature', 'tummy']);
+    const growth = await b.repo.latestEntry((await b.repo.listChildren())[0].id, 'growth');
+    assert.deepEqual(growth?.data, { weightGrams: 4250, lengthCm: 55, headCm: 37.5 });
+  });
+
   it('settles conflicting edits on the most recent one, on both phones', async () => {
     const a = await phone();
     const b = await phone();

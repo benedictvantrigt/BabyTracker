@@ -187,11 +187,11 @@ describe('Repo', () => {
   it('stores the dashboard layout and drops unknown cards', async () => {
     const { repo } = await setup();
     expect((await repo.getSettings()).dashboardLayout).toEqual({
-      order: ['timers', 'sleep', 'feeding', 'diaper', 'today'],
+      order: ['timers', 'sleep', 'feeding', 'diaper', 'records', 'today'],
       off: [],
     });
     const layout = {
-      order: ['today', 'diaper', 'feeding', 'sleep', 'timers'],
+      order: ['today', 'records', 'diaper', 'feeding', 'sleep', 'timers'],
       off: ['feeding'],
     } as const;
     await repo.updateSettings({ dashboardLayout: { order: [...layout.order], off: ['feeding'] } });
@@ -200,7 +200,7 @@ describe('Repo', () => {
       dashboardLayout: { order: ['diaper', 'weather'], off: ['weather'] } as never,
     });
     expect((await repo.getSettings()).dashboardLayout).toEqual({
-      order: ['diaper', 'timers', 'sleep', 'feeding', 'today'],
+      order: ['diaper', 'timers', 'sleep', 'feeding', 'records', 'today'],
       off: [],
     });
   });
@@ -212,8 +212,8 @@ describe('Repo', () => {
       JSON.stringify(['diaper', 'sleep']),
     ]);
     expect((await repo.getSettings()).dashboardLayout).toEqual({
-      order: ['diaper', 'sleep', 'timers', 'feeding', 'today'],
-      off: ['timers', 'feeding', 'today'],
+      order: ['diaper', 'sleep', 'timers', 'feeding', 'records', 'today'],
+      off: ['timers', 'feeding', 'records', 'today'],
     });
     // Once a new layout is saved it wins over the old key.
     await repo.updateSettings({ dashboardLayout: { order: ['sleep'], off: [] } });

@@ -2,24 +2,35 @@ appId: com.babytracker.app.acc
 name: Breast feeding timers switch sides, bottle feed with amount
 ---
 - runFlow: subflows/onboard.yaml
-- tapOn: 'Left'
+- runFlow:
+    file: subflows/tap-today.yaml
+    env:
+      LABEL: 'Left'
+- runFlow: subflows/today-top.yaml
 - assertVisible: '(Edit )?Feeding · Left( at .*)?'
 - takeScreenshot: 02-feeding-left-running
 # The undo bar can cover the buttons, depending on how tall the cards above are.
 - extendedWaitUntil:
     notVisible: 'UNDO'
     timeout: 10000
-- tapOn: 'Right'
+- runFlow:
+    file: subflows/tap-today.yaml
+    env:
+      LABEL: 'Right'
+- runFlow: subflows/today-top.yaml
 - assertVisible: '(Edit )?Feeding · Right( at .*)?'
 - assertNotVisible: '(Edit )?Feeding · Left( at .*)?'
-- tapOn: 'Stop'
+- runFlow: subflows/tap-stop.yaml
 - assertNotVisible: '(Edit )?Feeding · Right( at .*)?'
 - assertVisible: 'Last: Right, .* ago'
 - assertVisible: 'Next due at .*'
 - extendedWaitUntil:
     notVisible: 'UNDO'
     timeout: 10000
-- tapOn: 'Bottle'
+- runFlow:
+    file: subflows/tap-today.yaml
+    env:
+      LABEL: 'Bottle'
 - assertVisible: 'Add feeding'
 - tapOn:
     id: 'feed-amount'

@@ -2,10 +2,17 @@ appId: com.babytracker.app.acc
 name: Timeline lists entries; edit and delete
 ---
 - runFlow: subflows/onboard.yaml
-- tapOn: 'Wet'
-- tapOn: 'Left'
+- runFlow:
+    file: subflows/tap-today.yaml
+    env:
+      LABEL: 'Wet'
+- runFlow:
+    file: subflows/tap-today.yaml
+    env:
+      LABEL: 'Left'
+- runFlow: subflows/today-top.yaml
 - assertVisible: '(Edit )?Feeding · Left( at .*)?'
-- tapOn: 'Stop'
+- runFlow: subflows/tap-stop.yaml
 - tapOn: 'Timeline'
 - assertVisible: 'TODAY'
 - assertVisible: '(Edit )?Feeding · Left( at .*)?'

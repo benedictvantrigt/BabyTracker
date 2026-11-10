@@ -5,17 +5,20 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { Button, Card, Icon, KIND_ICON } from '@/components/ui';
 import { Spacing } from '@/constants/theme';
+import { useLatestEntry } from '@/data/app-data';
 import type { Repo } from '@/db/repo';
 import type { DashboardCardId } from '@/domain/dashboard';
 import {
   KIND_LABEL,
   entryTitle,
   feedingLabel,
+  growthLabel,
   isNapStart,
   lastCompletedSleep,
   latest,
   runningEntries,
   summarizeDay,
+  temperatureLabel,
 } from '@/domain/entries';
 import { nextFeedAt, nextNapAt } from '@/domain/reminders';
 import {
@@ -51,6 +54,7 @@ export const DASHBOARD_CARD_COMPONENTS: Record<
   sleep: SleepCard,
   feeding: FeedingCard,
   diaper: DiaperCard,
+  records: RecordsCard,
   today: TodayCard,
 };
 
@@ -194,6 +198,7 @@ const SLOT_STATUS_LABEL: Record<SlotState['status'], string> = {
 function DayPlan({ schedule, now }: { schedule: ScheduleStatus; now: number }) {
   const [open, setOpen] = useState(false);
   const { daySleep, nightSleepHours } = schedule.stage.stage;
+  const nightTarget: [number, number] = [nightSleepHours * 60, nightSleepHours * 60];
   return (
     <View style={styles.plan}>
       <Pressable
@@ -210,6 +215,9 @@ function DayPlan({ schedule, now }: { schedule: ScheduleStatus; now: number }) {
             {`${schedule.slots.map((n) => formatClock(n.startAt)).join(' · ')} · bed ${formatClock(schedule.plan.bedtimeAt)}`}
           </ThemedText>
         )}
+        <ThemedText type="small" themeColor="textSecondary" testID="schedule-guide-sleep">
+          {`Sleep for this age: ${formatTarget(daySleep)} by day · ${formatTarget(nightTarget)} at night`}
+        </ThemedText>
       </Pressable>
       {open &&
         schedule.slots.map((slot) => (
@@ -235,7 +243,7 @@ function DayPlan({ schedule, now }: { schedule: ScheduleStatus; now: number }) {
             </ThemedText>
           </View>
           <ThemedText type="small" themeColor="textSecondary">
-            {`Night ${formatDuration(schedule.nightSleptMs)} of ${formatTarget([nightSleepHours * 60, nightSleepHours * 60])}`}
+            {`Night ${formatDuration(schedule.nightSleptMs)} of ${formatTarget(nightTarget)}`}
           </ThemedText>
           <ThemedText type="small" themeColor="textSecondary">
             {`Day sleep ${formatDuration(schedule.daySleptMs)} of ${formatTarget(daySleep)}`}
@@ -325,6 +333,64 @@ function DiaperCard({ child, entries, now, repo, run, logged }: DashboardCardPro
         />
       </View>
     </KindCard>
+  );
+}
+
+/** Tummy time as a timer; pumping, temperature and growth through the entry form. */
+function RecordsCard({ child, entries, now, repo, run, logged }: DashboardCardProps) {
+  const theme = useTheme();
+  const tummy = runningEntries(entries).find((e) => e.kind === 'tummy');
+  const today = summarizeDay(entries, now);
+  const temperature = useLatestEntry(child.id, 'temperature');
+  const growth = useLatestEntry(child.id, 'growth');
+  const toggleTummy = () =>
+    run(async () => {
+      if (tummy) {
+        await repo.stopEntry(tummy.id);
+        return;
+      }
+      const e = await repo.startTimer(child.id, 'tummy', {});
+      logged(e, 'Tummy time started');
+    });
+  const lines = [
+    tummy
+      ? `Tummy time since ${formatClock(tummy.start)} · ${formatDuration(today.tummyMs)} today`
+      : `Tummy time today ${formatDuration(today.tummyMs)}`,
+    today.pumpedMl > 0 && `Pumped today ${today.pumpedMl} ml`,
+    temperature &&
+      `Temperature ${temperatureLabel(temperature.data)} · ${formatAgo(temperature.start, now)}`,
+    growth && `Growth ${growthLabel(growth.data)} · ${formatAgo(growth.start, now)}`,
+  ].filter((line): line is string => Boolean(line));
+
+  return (
+    <Card testID="card-records">
+      <ThemedText type="smallBold" themeColor="textSecondary">
+        MORE RECORDS
+      </ThemedText>
+      {lines.map((line) => (
+        <ThemedText key={line} type="small">
+          {line}
+        </ThemedText>
+      ))}
+      <View style={styles.buttonRow}>
+        <Button
+          label={tummy ? 'Stop tummy time' : 'Tummy time'}
+          variant={tummy ? 'primary' : 'secondary'}
+          color={tummy ? theme.tummy : undefined}
+          style={styles.grow}
+          onPress={toggleTummy}
+        />
+        <Button label="Pumping" style={styles.grow} onPress={() => router.push('/entry/pumping')} />
+      </View>
+      <View style={styles.buttonRow}>
+        <Button
+          label="Temperature"
+          style={styles.grow}
+          onPress={() => router.push('/entry/temperature')}
+        />
+        <Button label="Growth" style={styles.grow} onPress={() => router.push('/entry/growth')} />
+      </View>
+    </Card>
   );
 }
 

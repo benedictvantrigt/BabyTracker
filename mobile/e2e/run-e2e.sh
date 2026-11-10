@@ -42,9 +42,11 @@ echo "== maestro $(maestro --version 2>&1 | tail -1) =="
 maestro_status=0
 
 # Emulator faults rather than test failures: no report (Maestro hung before the flow
-# ran) or the on-device driver died. A flow that hit one is run once more.
+# ran), the on-device driver died, or "Unknown error" (seen when adb lost the emulator:
+# "device offline"; a failed check names the check). A flow that hit one is run once more.
 infra_failure() { # report file
-  [ ! -s "$1" ] || grep -qE 'DeviceServerDied|StatusRuntimeException: UNAVAILABLE' "$1"
+  [ ! -s "$1" ] ||
+    grep -qE 'DeviceServerDied|StatusRuntimeException: UNAVAILABLE|<failure>Unknown error</failure>' "$1"
 }
 
 run_maestro() { # name, flow file, extra maestro args...
@@ -68,13 +70,17 @@ run_flow() { # flow file, extra maestro args...
   if infra_failure "$OUT/report-$name.xml"; then
     echo "== $name: emulator fault, running it once more ==" | tee -a "$OUT/maestro.txt"
     mv "$OUT/report-$name.xml" "$OUT/report-$name-attempt1.xml.txt" 2>/dev/null
+    # Back online, with the relay port mapping that an adb restart drops.
+    timeout 120 adb wait-for-device || true
+    adb reverse tcp:$RELAY_PORT tcp:$RELAY_PORT || true
     run_maestro "$name" "$flow" "$@" && return 0
   fi
   maestro_status=1
 }
 
 # 01-06 run on a fresh install each; 06 leaves reminders scheduled for the checks below.
-for flow in "$FLOWS"/0[1-6]_*.yaml; do run_flow "$flow"; done
+# 06 last: it leaves a feed running for the notification checks after the flows.
+for flow in "$FLOWS"/0[1-5]_*.yaml "$FLOWS"/08_*.yaml "$FLOWS"/06_*.yaml; do run_flow "$flow"; done
 free -m | tee "$OUT/memory.txt"
 
 # Notification sync is debounced; give it a moment after the last tap.
@@ -92,6 +98,8 @@ partner_attempt() {
   (cd "$HERE/.." && npx tsx e2e/partner.ts create "$PARTNER" "http://localhost:$RELAY_PORT") \
     2>&1 | tee -a "$OUT/partner.txt"
   [ -f "$PARTNER/invite.txt" ] || return 1
+  # The port mapping is lost when adb restarts (e.g. after a Maestro driver fault).
+  adb reverse tcp:$RELAY_PORT tcp:$RELAY_PORT
   run_maestro 07_partner_sync "$FLOWS/07_partner_sync.yaml" -e "INVITE=$(cat "$PARTNER/invite.txt")"
 }
 echo "== 07_partner_sync =="

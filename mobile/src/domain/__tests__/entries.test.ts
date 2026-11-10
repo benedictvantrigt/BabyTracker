@@ -26,6 +26,8 @@ describe('summarizeDay', () => {
       solid: 1,
       sleepMs: 5.5 * HOUR + 45 * MINUTE,
       naps: 1,
+      tummyMs: 0,
+      pumpedMl: 0,
     });
   });
 });
@@ -136,5 +138,63 @@ describe('time formatting', () => {
     expect(formatAge(born, new Date(2026, 1, 28, 12).getTime())).toBe('4 months');
     expect(formatAge('2025-10-31', new Date(2026, 1, 28, 12).getTime())).toBe('4 months');
     expect(formatAge('2025-10-31', new Date(2026, 2, 3, 12).getTime())).toBe('4 months 3 days');
+  });
+});
+
+describe('tummy time, pumping, temperature and growth', () => {
+  const now = at(12);
+
+  it('have titles', () => {
+    expect(entryTitle(entry('tummy', at(9), at(9, 10), {}))).toBe('Tummy time');
+    expect(entryTitle(entry('pumping', at(9), at(9, 15), { side: 'left', amount: 80 }))).toBe(
+      'Pumping · Left · 80 ml',
+    );
+    expect(entryTitle(entry('pumping', at(9), at(9, 15), { side: 'both' }))).toBe('Pumping · Both');
+    expect(entryTitle(entry('temperature', at(9), at(9), { celsius: 38 }))).toBe(
+      'Temperature · 38.0 °C',
+    );
+    expect(
+      entryTitle(entry('growth', at(9), at(9), { weightGrams: 4250, lengthCm: 55, headCm: 37.5 })),
+    ).toBe('Growth · 4.25 kg · 55 cm · head 37.5 cm');
+    expect(entryTitle(entry('growth', at(9), at(9), { headCm: 38 }))).toBe('Growth · head 38 cm');
+  });
+
+  it('validate measurements', () => {
+    const temperature = (celsius: number) =>
+      validateEntry({ kind: 'temperature', start: at(9), end: at(9), data: { celsius } }, now);
+    expect(temperature(37.2)).toBeNull();
+    expect(temperature(372)).toMatch(/between 34 and 43/);
+    expect(temperature(NaN)).toMatch(/between 34 and 43/);
+
+    const growth = (data: { weightGrams?: number; lengthCm?: number; headCm?: number }) =>
+      validateEntry({ kind: 'growth', start: at(9), end: at(9), data }, now);
+    expect(growth({ weightGrams: 4250 })).toBeNull();
+    expect(growth({})).toMatch(/weight, length or head/);
+    expect(growth({ weightGrams: 4250000 })).toMatch(/Weight/);
+    expect(growth({ lengthCm: 5.5 })).toMatch(/Length/);
+    expect(growth({ headCm: 370 })).toMatch(/Head/);
+    expect(
+      validateEntry({ kind: 'growth', start: at(9), end: at(10), data: { headCm: 37 } }, now),
+    ).toMatch(/no duration/);
+
+    expect(
+      validateEntry(
+        { kind: 'pumping', start: at(9), end: at(9, 15), data: { side: 'left', amount: 0 } },
+        now,
+      ),
+    ).toMatch(/Amount/);
+  });
+
+  it('count tummy time and pumped milk for the day', () => {
+    const entries = [
+      entry('tummy', at(9), at(9, 10), {}),
+      entry('tummy', at(11, 50), null, {}),
+      entry('tummy', at(9, 0, -1), at(9, 30, -1), {}),
+      entry('pumping', at(8), at(8, 15), { side: 'both', amount: 120 }),
+      entry('pumping', at(10), at(10, 15), { side: 'left' }),
+    ];
+    const day = summarizeDay(entries, now);
+    expect(day.tummyMs).toBe(20 * MINUTE);
+    expect(day.pumpedMl).toBe(120);
   });
 });

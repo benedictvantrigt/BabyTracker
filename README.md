@@ -10,6 +10,7 @@ See [docs/ROADMAP.md](docs/ROADMAP.md) for the plan and the feature backlog.
 ## Phase 1 — local MVP
 
 - Feeding (breast left/right/both, bottle with ml, formula/solids), sleep (nap/night), diapers (wet/solid/colour)
+- Tummy time (timer), pumping (side, ml), temperature (°C, where measured) and growth (weight, length, head circumference)
 - One-tap timers: tap Left/Right to start a feed, switching sides stops the other side; Start/Stop sleep
 - Today screen: running timers, time since last feed/diaper/sleep, next nap and feed, today's totals, undo
 - Customizable Today screen: show, hide and reorder cards (e.g. diapers first in the newborn weeks, sleep later)
@@ -150,6 +151,13 @@ back from that phone.
   relay, builds the production APK and creates tag and GitHub release `v0.4.0` with it.
 - `android-latest` stays a pre-release with the newest passing acceptance build of any
   branch, for testing.
+
+## About the sleep schedule
+
+The age-based sleep schedule (`mobile/src/domain/sleep-schedule.ts`) is an example day
+rhythm per age, put together by the developer from parenting guides. Every baby is
+different. This is general guidance, not medical advice; ask your doctor or nurse if you
+have concerns.
 
 ## Layout
 

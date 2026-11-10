@@ -3,7 +3,14 @@ import { DEFAULT_DASHBOARD, type DashboardLayout } from './dashboard';
 // Every record is an immutable-id row with timestamps and a soft-delete marker,
 // so the Phase 2 sync layer can replicate it as a last-writer-wins change log.
 
-export type EntryKind = 'feeding' | 'sleep' | 'diaper';
+export type EntryKind =
+  | 'feeding'
+  | 'sleep'
+  | 'diaper'
+  | 'tummy'
+  | 'pumping'
+  | 'temperature'
+  | 'growth';
 
 export type FeedingType = 'breast_milk' | 'formula' | 'fortified' | 'solid';
 export type FeedingMethod = 'left' | 'right' | 'both' | 'bottle' | 'self';
@@ -27,10 +34,40 @@ export interface DiaperData {
   color?: DiaperColor;
 }
 
+/** Tummy time is a timer with nothing else to record. */
+export type TummyData = Record<string, never>;
+
+export type PumpingSide = 'left' | 'right' | 'both';
+
+export interface PumpingData {
+  side: PumpingSide;
+  /** Millilitres. */
+  amount?: number;
+}
+
+export type TemperatureSite = 'armpit' | 'rectal' | 'ear' | 'forehead';
+
+export interface TemperatureData {
+  /** Degrees Celsius, to one decimal. */
+  celsius: number;
+  site?: TemperatureSite;
+}
+
+/** One measurement session; at least one of the three is set. */
+export interface GrowthData {
+  weightGrams?: number;
+  lengthCm?: number;
+  headCm?: number;
+}
+
 export interface EntryDataMap {
   feeding: FeedingData;
   sleep: SleepData;
   diaper: DiaperData;
+  tummy: TummyData;
+  pumping: PumpingData;
+  temperature: TemperatureData;
+  growth: GrowthData;
 }
 
 interface EntryBase<K extends EntryKind> {
@@ -53,7 +90,18 @@ interface EntryBase<K extends EntryKind> {
 export type FeedingEntry = EntryBase<'feeding'>;
 export type SleepEntry = EntryBase<'sleep'>;
 export type DiaperEntry = EntryBase<'diaper'>;
-export type Entry = FeedingEntry | SleepEntry | DiaperEntry;
+export type TummyEntry = EntryBase<'tummy'>;
+export type PumpingEntry = EntryBase<'pumping'>;
+export type TemperatureEntry = EntryBase<'temperature'>;
+export type GrowthEntry = EntryBase<'growth'>;
+export type Entry =
+  | FeedingEntry
+  | SleepEntry
+  | DiaperEntry
+  | TummyEntry
+  | PumpingEntry
+  | TemperatureEntry
+  | GrowthEntry;
 
 export type EntryOf<K extends EntryKind> = Extract<Entry, { kind: K }>;
 

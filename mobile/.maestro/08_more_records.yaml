@@ -1,0 +1,74 @@
+appId: com.babytracker.app.acc
+name: Tummy time timer, temperature and growth
+---
+- runFlow: subflows/onboard.yaml
+- scrollUntilVisible:
+    element:
+      id: 'card-records'
+- runFlow:
+    file: subflows/tap-today.yaml
+    env:
+      LABEL: 'Tummy time'
+- assertVisible: 'Stop tummy time'
+- takeScreenshot: 08-tummy-running
+# The undo bar can cover the buttons.
+- extendedWaitUntil:
+    notVisible: 'UNDO'
+    timeout: 10000
+- runFlow:
+    file: subflows/tap-today.yaml
+    env:
+      LABEL: 'Stop tummy time'
+- assertVisible: 'Tummy time today .*'
+- runFlow:
+    file: subflows/tap-today.yaml
+    env:
+      LABEL: 'Temperature'
+- assertVisible: 'Add temperature'
+# A new temperature opens with the field focused.
+- inputText: '37.4'
+# If the text did not land (the keyboard was not up yet), tap the field and type again.
+- runFlow:
+    when:
+      notVisible: '37.4'
+    commands:
+      - tapOn:
+          id: 'temperature-input'
+      - inputText: '37.4'
+- runFlow:
+    file: subflows/dismiss-keyboard.yaml
+    env:
+      # A label in view: the field's own label scrolls under the header with the keyboard up.
+      LABEL: 'Measured'
+- tapOn: 'Save'
+- scrollUntilVisible:
+    element: 'Temperature 37.4 °C · .*'
+- runFlow:
+    file: subflows/tap-today.yaml
+    env:
+      LABEL: 'Growth'
+- assertVisible: 'Add growth'
+# A new measurement opens with the weight field focused.
+- inputText: '4.25'
+# If the text did not land (the keyboard was not up yet), tap the field and type again.
+- runFlow:
+    when:
+      notVisible: '4.25'
+    commands:
+      - tapOn:
+          id: 'growth-weight'
+      - inputText: '4.25'
+- runFlow:
+    file: subflows/dismiss-keyboard.yaml
+    env:
+      LABEL: 'Length \(cm\)'
+- tapOn: 'Save'
+- scrollUntilVisible:
+    element: 'Growth 4.25 kg · .*'
+- takeScreenshot: 08-more-records
+# Timeline rows: Android exposes the row's texts, iOS its label ("Edit Growth · 4.25 kg at 10:15").
+- tapOn: 'Timeline'
+- assertVisible: '(Edit )?Growth · 4.25 kg( at .*)?'
+- assertVisible: '(Edit )?Temperature · 37.4 °C( at .*)?'
+- assertVisible: '(Edit )?Tummy time( at .*)?'
+- takeScreenshot: 08-timeline

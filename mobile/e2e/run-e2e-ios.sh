@@ -66,7 +66,8 @@ run_flow() { # flow file, extra maestro args...
   maestro_status=1
 }
 
-for flow in "$FLOWS"/0[1-6]_*.yaml; do run_flow "$flow"; done
+# 06 last: it leaves a feed running for the notification checks after the flows.
+for flow in "$FLOWS"/0[1-5]_*.yaml "$FLOWS"/08_*.yaml "$FLOWS"/06_*.yaml; do run_flow "$flow"; done
 xcrun simctl io "$UDID" screenshot "$OUT/screenshots/99-final-state.png" || true
 
 PARTNER="$OUT/partner"
