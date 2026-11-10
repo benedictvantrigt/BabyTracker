@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="test" tests="1" failures="0" time="64.76" timestamp="2026-11-10T19:18:27">
+    <testcase id="Sleep timer, and leaves reminders scheduled for the alarm check" name="Sleep timer, and leaves reminders scheduled for the alarm check" classname="Sleep timer, and leaves reminders scheduled for the alarm check" file="/home/runner/work/BabyTracker/BabyTracker/mobile/.maestro/06_sleep_and_reminders.yaml" time="64.732" timestamp="2026-11-10T19:18:27" status="SUCCESS"/>
+  </testsuite>
+</testsuites>

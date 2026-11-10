@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="test" tests="1" failures="0" time="76.888" timestamp="2026-11-10T19:12:07">
+    <testcase id="Breast feeding timers switch sides, bottle feed with amount" name="Breast feeding timers switch sides, bottle feed with amount" classname="Breast feeding timers switch sides, bottle feed with amount" file="/home/runner/work/BabyTracker/BabyTracker/mobile/.maestro/02_feeding.yaml" time="76.847" timestamp="2026-11-10T19:12:07" status="SUCCESS"/>
+  </testsuite>
+</testsuites>
