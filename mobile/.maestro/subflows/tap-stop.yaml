@@ -1,6 +1,6 @@
 # Taps Stop on the running timer card at the top of the Today screen, scrolling up to it
 # when the screen was scrolled down to a button further below.
-appId: com.babytracker.app.acc
+appId: com.napchime.app.acc
 ---
 - scrollUntilVisible:
     element: 'Stop'

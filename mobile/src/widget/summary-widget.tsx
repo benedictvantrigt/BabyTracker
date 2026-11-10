@@ -41,7 +41,7 @@ export function SummaryWidget({
         clickAction="OPEN_APP"
         style={{ ...root, justifyContent: 'center', alignItems: 'center' }}>
         <TextWidget
-          text="Open Baby Tracker to add your baby"
+          text="Open Napchime to add your baby"
           style={{ fontSize: 14, color: c.textSecondary as ColorProp }}
         />
       </FlexWidget>
@@ -49,7 +49,7 @@ export function SummaryWidget({
   }
 
   return (
-    <FlexWidget style={root} accessibilityLabel={`Baby Tracker: ${summary.childName}`}>
+    <FlexWidget style={root} accessibilityLabel={`Napchime: ${summary.childName}`}>
       <Row line={summary.feeding} color={c.feeding} c={c}>
         <WidgetButton
           label="Feed"

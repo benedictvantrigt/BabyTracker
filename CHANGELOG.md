@@ -1,10 +1,14 @@
 # Changelog
 
-All notable changes to Baby Tracker. Versions follow [Semantic Versioning](https://semver.org/);
+All notable changes to Napchime. Versions follow [Semantic Versioning](https://semver.org/);
 before 1.0.0 a minor version marks a phase of the plan.
 
 ## Unreleased
 
+- The app is now called Napchime: package and bundle ID `com.napchime.app` (acceptance
+  `com.napchime.app.acc`), link scheme `napchime://`. This is a new app for Android and iOS, so
+  phones with Baby Tracker installed need to install Napchime and rejoin the family. The
+  relay, the database file and the encryption are unchanged.
 - Android: a running sleep or feeding timer now has an icon in the status bar. Its
   notification moved to a new "Running timers" channel at normal importance, still without
   sound or vibration; the old low-importance channel filed it under "Silent", which has no

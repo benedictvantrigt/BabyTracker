@@ -1,4 +1,4 @@
-appId: com.babytracker.app.acc
+appId: com.napchime.app.acc
 name: Turn off, reorder and reset dashboard cards
 ---
 - runFlow: subflows/onboard.yaml

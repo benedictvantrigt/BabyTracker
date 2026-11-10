@@ -1,4 +1,4 @@
-# Baby Tracker
+# Napchime
 
 A baby tracker without self-hosting: data lives on the phones, and partners
 sync through a tiny relay that only ever sees encrypted data.
@@ -80,8 +80,8 @@ family:
 |---|---|---|
 | Relay Worker | `babytracker-relay-acc` (`wrangler deploy --env acc`) | `babytracker-relay` (`wrangler deploy --env=""`) |
 | Relay deploys | every push to `main` touching `relay/`; by hand from any branch | when a new version is released from `main`; by hand from `main` |
-| Firebase project | one with Android app `com.babytracker.app.acc` | one with Android app `com.babytracker.app` |
-| App | "Baby Tracker (acc)", `com.babytracker.app.acc` (`APP_VARIANT=acceptance`), installs next to production | "Baby Tracker", `com.babytracker.app` |
+| Firebase project | one with Android app `com.napchime.app.acc` | one with Android app `com.napchime.app` |
+| App | "Napchime (acc)", `com.napchime.app.acc` (`APP_VARIANT=acceptance`), installs next to production | "Napchime", `com.napchime.app` |
 | APK | `android-latest` pre-release; the E2E tests run on this build | the versioned GitHub release |
 
 Each relay has its own Durable Object storage and secrets, so the two never share data.
@@ -110,7 +110,7 @@ Release APKs are signed with our own keys (`mobile/plugins/with-release-signing.
 debug key in the Expo template, which is public: anyone holding it could build an APK that
 installs as an update over the app and reads its data. Each app has its own key:
 
-| | Acceptance (`com.babytracker.app.acc`) | Production (`com.babytracker.app`) |
+| | Acceptance (`com.napchime.app.acc`) | Production (`com.napchime.app`) |
 |---|---|---|
 | Where the secrets live | repository secrets | secrets of the GitHub environment `production`, deployment branches: `main` only |
 | Secrets | `ANDROID_KEYSTORE_ACC_BASE64`, `ANDROID_KEYSTORE_ACC_PASSWORD`, `ANDROID_KEY_ACC_ALIAS` | `ANDROID_KEYSTORE_PROD_BASE64`, `ANDROID_KEYSTORE_PROD_PASSWORD`, `ANDROID_KEY_PROD_ALIAS` |

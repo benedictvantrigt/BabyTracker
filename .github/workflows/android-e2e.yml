@@ -82,7 +82,7 @@ jobs:
       - name: Build acceptance APK (x86_64 for the emulator, arm64 for phones)
         working-directory: mobile
         env:
-          # The acceptance app (com.babytracker.app.acc) installs next to the production one.
+          # The acceptance app (com.napchime.app.acc) installs next to the production one.
           APP_VARIANT: acceptance
           # The acceptance relay, once deployed (repository variable RELAY_URL_ACC).
           EXPO_PUBLIC_RELAY_URL: ${{ vars.RELAY_URL_ACC }}
@@ -107,21 +107,21 @@ jobs:
           cd android
           ./gradlew assembleRelease -PreactNativeArchitectures=x86_64,arm64-v8a
           rm -f "$RUNNER_TEMP/release.keystore"
-          cp app/build/outputs/apk/release/app-release.apk ../babytracker.apk
+          cp app/build/outputs/apk/release/app-release.apk ../napchime.apk
           # Free the build daemons' memory for the emulator.
           ./gradlew --stop
 
       - name: Check the acceptance APK's signing key
         env:
           EXPECTED_CERT_SHA256: ${{ vars.ANDROID_CERT_SHA256_ACC }}
-        run: bash .github/scripts/verify-apk-signature.sh mobile/babytracker.apk allow-debug-key
+        run: bash .github/scripts/verify-apk-signature.sh mobile/napchime.apk allow-debug-key
 
       - name: Check the acceptance APK's manifest (widget receiver not exported)
-        run: bash .github/scripts/verify-apk-manifest.sh mobile/babytracker.apk
+        run: bash .github/scripts/verify-apk-manifest.sh mobile/napchime.apk
 
       - name: Remove build intermediates before the emulator
         run: |
-          cp mobile/android/app/build/outputs/apk/release/app-release.apk mobile/babytracker.apk
+          cp mobile/android/app/build/outputs/apk/release/app-release.apk mobile/napchime.apk
           rm -rf mobile/android/app/build mobile/android/build mobile/android/.cxx mobile/android/app/.cxx
           find mobile/node_modules -path '*/android/build' -type d -prune -exec rm -rf {} + || true
           find mobile/node_modules -path '*/android/.cxx' -type d -prune -exec rm -rf {} + || true
@@ -148,7 +148,7 @@ jobs:
           ram-size: 3072M
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none
-          script: bash mobile/e2e/run-e2e.sh mobile/babytracker.apk "$E2E_OUT"
+          script: bash mobile/e2e/run-e2e.sh mobile/napchime.apk "$E2E_OUT"
 
       - name: Upload results
         if: always()
@@ -187,10 +187,10 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release delete android-latest --yes --cleanup-tag || true
-          gh release create android-latest mobile/babytracker.apk \
+          gh release create android-latest mobile/napchime.apk \
             --prerelease --target "$GITHUB_SHA" \
             --title "Android acceptance build ${GITHUB_SHA::7}" \
-            --notes "Acceptance build (Baby Tracker (acc), acceptance relay) from ${GITHUB_SHA::7}. All E2E checks passed. Install on the phone: download babytracker.apk and open it."
+            --notes "Acceptance build (Napchime (acc), acceptance relay) from ${GITHUB_SHA::7}. All E2E checks passed. Install on the phone: download napchime.apk and open it."
 
   # A version in mobile/app.json that has no release yet becomes tag + release vX.Y.Z:
   # the production relay is deployed, then the production APK is built and released.
@@ -277,22 +277,22 @@ jobs:
           cd android
           ./gradlew assembleRelease -PreactNativeArchitectures=x86_64,arm64-v8a
           rm -f "$ANDROID_KEYSTORE_PATH"
-          cp app/build/outputs/apk/release/app-release.apk ../babytracker.apk
+          cp app/build/outputs/apk/release/app-release.apk ../napchime.apk
 
       - name: Check the production APK's signing key
         env:
           EXPECTED_CERT_SHA256: ${{ vars.ANDROID_CERT_SHA256_PROD }}
-        run: bash .github/scripts/verify-apk-signature.sh mobile/babytracker.apk require-release-key
+        run: bash .github/scripts/verify-apk-signature.sh mobile/napchime.apk require-release-key
 
       - name: Check the production APK's manifest (widget receiver not exported)
-        run: bash .github/scripts/verify-apk-manifest.sh mobile/babytracker.apk
+        run: bash .github/scripts/verify-apk-manifest.sh mobile/napchime.apk
 
       - name: Create the release
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ needs.release-check.outputs.tag }}
         run: |
-          cp mobile/babytracker.apk "babytracker-$TAG.apk"
-          gh release create "$TAG" "babytracker-$TAG.apk" \
-            --target "$GITHUB_SHA" --title "Baby Tracker $TAG" \
+          cp mobile/napchime.apk "napchime-$TAG.apk"
+          gh release create "$TAG" "napchime-$TAG.apk" \
+            --target "$GITHUB_SHA" --title "Napchime $TAG" \
             --notes "See CHANGELOG.md for what changed. All E2E checks passed on the acceptance build. Install on the phone: download the APK and open it."

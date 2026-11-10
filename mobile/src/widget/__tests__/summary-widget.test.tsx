@@ -25,7 +25,7 @@ describe('SummaryWidget', () => {
   it('builds with texts and click actions', () => {
     for (const dark of [false, true]) {
       const tree = buildWidgetTree(
-        <SummaryWidget summary={summary} feedingUri="babytracker://entry/feeding" dark={dark} />,
+        <SummaryWidget summary={summary} feedingUri="napchime://entry/feeding" dark={dark} />,
       );
       const nodes = flatten(tree);
       const texts = nodes.filter((n) => n.type === 'TextWidget').map((n) => n.props.text);

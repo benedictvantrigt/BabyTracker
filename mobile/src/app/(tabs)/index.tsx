@@ -75,7 +75,7 @@ function AddChild() {
         />
       </Card>
       <ThemedText themeColor="textSecondary" style={styles.center}>
-        Your partner already uses Baby Tracker?
+        Your partner already uses Napchime?
       </ThemedText>
       <Button label="Join your partner" onPress={() => router.push('/sync/join')} />
     </View>

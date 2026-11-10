@@ -1,5 +1,5 @@
 {
-  "name": "babytracker",
+  "name": "napchime",
   "version": "0.7.0",
   "main": "index.ts",
   "dependencies": {
