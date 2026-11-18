@@ -3,6 +3,10 @@
 All notable changes to Napchime. Versions follow [Semantic Versioning](https://semver.org/);
 before 1.0.0 a minor version marks a phase of the plan.
 
+## Unreleased
+
+- Privacy policy: the publisher is named without a street address; contact stays by email.
+
 ## [0.9.0] — 2026-11-18 — App icon, widget settings and store preparation
 
 - Android asks for fewer permissions. Removed: drawing over other apps, storage, fingerprint
