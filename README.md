@@ -155,6 +155,24 @@ First upload, by hand in Play Console (organisation developer account):
 3. Upload `napchime-vX.Y.Z.aab` to the internal testing track first, then closed or
    production. Each upload needs a higher `versionCode` (`mobile/app.json`).
 
+Later releases go up automatically. After the GitHub release, the workflow uploads the bundle
+to the track named in the repository variable `PLAY_TRACK` (for example `internal`); without the
+variable it skips the upload. `PLAY_RELEASE_STATUS` (default `completed`) can be set to `draft`
+while the app has never been published, which Play requires for releases made through the API.
+There is no key to store: the job exchanges its GitHub OIDC token for a short-lived token of
+the service account through Workload Identity Federation. The pieces, in Google Cloud project
+`com-napchime-app`:
+
+- Service account `play-publisher@com-napchime-app.iam.gserviceaccount.com`, with no
+  project roles. In Play Console (Users and permissions) it can view Napchime and release to
+  testing tracks, not to production; promote a tested release to production by hand.
+- Workload identity pool `github` with OIDC provider `babytracker`
+  (issuer `https://token.actions.githubusercontent.com`). Its condition only accepts tokens
+  from this repository (by ID, so a renamed or re-created repository doesn't match) in the
+  `production` environment, which only runs from `main`.
+- The pool may impersonate the service account (`roles/iam.workloadIdentityUser` for
+  `attribute.repository/benedictvantrigt/BabyTracker`).
+
 Phones that install from Play get Google's app signing key, so they update from Play only;
 the APK on the GitHub release no longer installs over them.
 

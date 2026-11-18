@@ -5,6 +5,10 @@ before 1.0.0 a minor version marks a phase of the plan.
 
 ## Unreleased
 
+- Google Play: every release also builds an Android App Bundle (`napchime-vX.Y.Z.aab`), signed
+  with the production key as Play upload key, and can upload it to a Play track by itself
+  (repository variable `PLAY_TRACK`) through Workload Identity Federation, without a stored
+  key (README, Google Play). The app links to its privacy policy.
 - The app is now called Napchime: package and bundle ID `com.napchime.app` (acceptance
   `com.napchime.app.acc`), link scheme `napchime://`. This is a new app for Android and iOS, so
   phones with Baby Tracker installed need to install Napchime and rejoin the family. The

@@ -235,6 +235,10 @@ jobs:
     # The production signing key lives in this environment's secrets, which only runs from
     # main can read (deployment branch rule), not the repository secrets every branch sees.
     environment: production
+    permissions:
+      contents: write
+      # Lets the job sign in to Google Cloud as the Play publisher (Workload Identity Federation).
+      id-token: write
     steps:
       - name: Free disk space
         run: |
@@ -313,3 +317,28 @@ jobs:
           gh release create "$TAG" "napchime-$TAG.apk" "napchime-$TAG.aab" \
             --target "$GITHUB_SHA" --title "Napchime $TAG" \
             --notes "See CHANGELOG.md for what changed. All E2E checks passed on the acceptance build. Install on the phone: download the APK and open it. The .aab is the bundle for Google Play."
+
+      # Google Play upload (README, Google Play). Runs when the repository variable PLAY_TRACK
+      # names a track (internal, alpha, beta, production). No key is stored: GitHub's OIDC token
+      # for this job, which only the production environment of this repository may use, is
+      # exchanged for a short-lived token of the play-publisher service account.
+      - name: Sign in to Google Play
+        id: play-auth
+        if: vars.PLAY_TRACK != ''
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: projects/921748666983/locations/global/workloadIdentityPools/github/providers/babytracker
+          service_account: play-publisher@com-napchime-app.iam.gserviceaccount.com
+          token_format: access_token
+          access_token_scopes: https://www.googleapis.com/auth/androidpublisher
+          create_credentials_file: false
+
+      - name: Upload the app bundle to Google Play
+        if: vars.PLAY_TRACK != ''
+        env:
+          PLAY_ACCESS_TOKEN: ${{ steps.play-auth.outputs.access_token }}
+          TAG: ${{ needs.release-check.outputs.tag }}
+        run: |
+          package=$(node -p "require('./mobile/app.json').expo.android.package")
+          bash .github/scripts/play-upload.sh mobile/napchime.aab "$package" "${{ vars.PLAY_TRACK }}" \
+            "$TAG" "${{ vars.PLAY_RELEASE_STATUS || 'completed' }}"
