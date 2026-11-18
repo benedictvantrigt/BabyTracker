@@ -3,6 +3,13 @@
 All notable changes to Napchime. Versions follow [Semantic Versioning](https://semver.org/);
 before 1.0.0 a minor version marks a phase of the plan.
 
+## Unreleased
+
+- New app icon: a white moon with a gold bell on lilac (#B4A5F2), replacing the Expo template
+  icon. The splash screen and the Android adaptive icon background are lilac too. The source is
+  `mobile/assets/images/napchime-mark.svg`; the Play Store icon and feature graphic are in
+  `docs/store/`.
+
 ## [0.8.0] — 2026-11-18 — Napchime, more records and Google Play
 
 - Google Play: every release also builds an Android App Bundle (`napchime-vX.Y.Z.aab`), signed
