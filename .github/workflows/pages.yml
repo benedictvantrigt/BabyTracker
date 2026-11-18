@@ -1,0 +1,40 @@
+# Publishes site/ (the privacy policy, #43) to GitHub Pages:
+# https://benedictvantrigt.github.io/BabyTracker/privacy/
+# Needs Settings -> Pages -> Source: "GitHub Actions" (once).
+name: Pages
+
+on:
+  push:
+    branches: [main]
+    paths: ['site/**', '.github/workflows/pages.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Refuse to publish unfilled placeholders
+        run: |
+          if grep -rn '{{' site/; then
+            echo "::error::site/ still contains {{...}} placeholders."
+            exit 1
+          fi
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - id: deployment
+        uses: actions/deploy-pages@v4

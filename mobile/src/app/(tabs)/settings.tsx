@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Alert, AppState, Platform, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import Constants from 'expo-constants';
+import { Alert, AppState, Linking, Platform, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 
 import { TabScreen } from '@/components/tab-screen';
 import { ThemedText } from '@/components/themed-text';
@@ -13,6 +14,7 @@ import {
   TimeOfDayField,
   ToggleRow,
 } from '@/components/ui';
+import { PRIVACY_POLICY_URL } from '@/constants/links';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useAction, useAppData } from '@/data/app-data';
 import { isCardOn } from '@/domain/dashboard';
@@ -135,8 +137,32 @@ export default function SettingsScreen() {
             </View>
           </Card>
         )}
+
+        <AboutCard />
       </ScrollView>
     </TabScreen>
+  );
+}
+
+/** App version and the privacy policy, which both stores require to be reachable in the app. */
+function AboutCard() {
+  return (
+    <Card testID="settings-about">
+      <ThemedText type="smallBold" themeColor="textSecondary">
+        ABOUT
+      </ThemedText>
+      <ThemedText type="small" themeColor="textSecondary">
+        {`Napchime ${Constants.expoConfig?.version ?? ''}`.trim()}
+      </ThemedText>
+      <Button
+        label="Privacy policy"
+        onPress={() =>
+          Linking.openURL(PRIVACY_POLICY_URL).catch(() =>
+            Alert.alert('Could not open the privacy policy', PRIVACY_POLICY_URL),
+          )
+        }
+      />
+    </Card>
   );
 }
 

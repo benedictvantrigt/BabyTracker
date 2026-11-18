@@ -119,6 +119,9 @@ jobs:
       - name: Check the acceptance APK's manifest (widget receiver not exported)
         run: bash .github/scripts/verify-apk-manifest.sh mobile/napchime.apk
 
+      - name: Check the acceptance APK's target SDK (Google Play requires API 36)
+        run: bash .github/scripts/verify-target-sdk.sh mobile/napchime.apk 36
+
       - name: Remove build intermediates before the emulator
         run: |
           cp mobile/android/app/build/outputs/apk/release/app-release.apk mobile/napchime.apk
@@ -227,10 +230,15 @@ jobs:
   release:
     needs: [release-check, relay-production]
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    # The app bundle builds native code for all four ABIs on top of the APK.
+    timeout-minutes: 90
     # The production signing key lives in this environment's secrets, which only runs from
     # main can read (deployment branch rule), not the repository secrets every branch sees.
     environment: production
+    permissions:
+      contents: write
+      # Lets the job sign in to Google Cloud as the Play publisher (Workload Identity Federation).
+      id-token: write
     steps:
       - name: Free disk space
         run: |
@@ -250,7 +258,7 @@ jobs:
           java-version: 17
       - uses: gradle/actions/setup-gradle@v4
 
-      - name: Build production APK
+      - name: Build production APK and app bundle
         working-directory: mobile
         env:
           # The production relay (repository variable RELAY_URL_PROD).
@@ -276,8 +284,12 @@ jobs:
           npx expo prebuild --platform android --no-install
           cd android
           ./gradlew assembleRelease -PreactNativeArchitectures=x86_64,arm64-v8a
+          # Google Play takes an Android App Bundle (#47), with every ABI: Play builds the APK
+          # for each phone from it. The key on the bundle is the upload key (Play App Signing).
+          ./gradlew bundleRelease
           rm -f "$ANDROID_KEYSTORE_PATH"
           cp app/build/outputs/apk/release/app-release.apk ../napchime.apk
+          cp app/build/outputs/bundle/release/app-release.aab ../napchime.aab
 
       - name: Check the production APK's signing key
         env:
@@ -287,12 +299,46 @@ jobs:
       - name: Check the production APK's manifest (widget receiver not exported)
         run: bash .github/scripts/verify-apk-manifest.sh mobile/napchime.apk
 
+      - name: Check the production APK's target SDK (Google Play requires API 36)
+        run: bash .github/scripts/verify-target-sdk.sh mobile/napchime.apk 36
+
+      - name: Check the app bundle's upload key
+        env:
+          EXPECTED_CERT_SHA256: ${{ vars.ANDROID_CERT_SHA256_PROD }}
+        run: bash .github/scripts/verify-aab-signature.sh mobile/napchime.aab
+
       - name: Create the release
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ needs.release-check.outputs.tag }}
         run: |
           cp mobile/napchime.apk "napchime-$TAG.apk"
-          gh release create "$TAG" "napchime-$TAG.apk" \
+          cp mobile/napchime.aab "napchime-$TAG.aab"
+          gh release create "$TAG" "napchime-$TAG.apk" "napchime-$TAG.aab" \
             --target "$GITHUB_SHA" --title "Napchime $TAG" \
-            --notes "See CHANGELOG.md for what changed. All E2E checks passed on the acceptance build. Install on the phone: download the APK and open it."
+            --notes "See CHANGELOG.md for what changed. All E2E checks passed on the acceptance build. Install on the phone: download the APK and open it. The .aab is the bundle for Google Play."
+
+      # Google Play upload (README, Google Play). Runs when the repository variable PLAY_TRACK
+      # names a track (internal, alpha, beta, production). No key is stored: GitHub's OIDC token
+      # for this job, which only the production environment of this repository may use, is
+      # exchanged for a short-lived token of the play-publisher service account.
+      - name: Sign in to Google Play
+        id: play-auth
+        if: vars.PLAY_TRACK != ''
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: projects/921748666983/locations/global/workloadIdentityPools/github/providers/babytracker
+          service_account: play-publisher@com-napchime-app.iam.gserviceaccount.com
+          token_format: access_token
+          access_token_scopes: https://www.googleapis.com/auth/androidpublisher
+          create_credentials_file: false
+
+      - name: Upload the app bundle to Google Play
+        if: vars.PLAY_TRACK != ''
+        env:
+          PLAY_ACCESS_TOKEN: ${{ steps.play-auth.outputs.access_token }}
+          TAG: ${{ needs.release-check.outputs.tag }}
+        run: |
+          package=$(node -p "require('./mobile/app.json').expo.android.package")
+          bash .github/scripts/play-upload.sh mobile/napchime.aab "$package" "${{ vars.PLAY_TRACK }}" \
+            "$TAG" "${{ vars.PLAY_RELEASE_STATUS || 'completed' }}"
