@@ -95,7 +95,8 @@ function addMonths(y: number, monthIndex: number, day: number, months: number): 
 
 /**
  * Age from an ISO birth date: "3 days" up to 2 weeks, "5 weeks 3 days" up to 13 weeks,
- * then "4 months 12 days".
+ * then "4 months 12 days". When the age isn't already in weeks, the whole weeks follow in
+ * brackets ("10 days (1 week)", "4 months 12 days (19 weeks)"): baby guides count in weeks.
  */
 export function formatAge(birthDate: string, now: number): string {
   const [y, mo, d] = birthDate.split('-').map(Number);
@@ -103,12 +104,15 @@ export function formatAge(birthDate: string, now: number): string {
   const today = startOfLocalDay(now);
   const days = daysBetween(born, today);
   if (days < 0) return '';
-  if (days < 14) return plural(days, 'day');
-  if (days < 7 * 13) return withDays(Math.floor(days / 7), 'week', days % 7);
+  const weeks = Math.floor(days / 7);
+  const inWeeks = ` (${plural(weeks, 'week')})`;
+  if (days < 7) return plural(days, 'day');
+  if (days < 14) return plural(days, 'day') + inWeeks;
+  if (days < 7 * 13) return withDays(weeks, 'week', days % 7);
   const nowDate = new Date(today);
   let months = (nowDate.getFullYear() - y) * 12 + (nowDate.getMonth() - (mo - 1));
   if (addMonths(y, mo - 1, d, months) > today) months -= 1;
-  return withDays(months, 'month', daysBetween(addMonths(y, mo - 1, d, months), today));
+  return withDays(months, 'month', daysBetween(addMonths(y, mo - 1, d, months), today)) + inWeeks;
 }
 
 export function toIsoDate(ms: number): string {

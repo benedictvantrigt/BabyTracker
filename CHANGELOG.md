@@ -3,6 +3,11 @@
 All notable changes to Napchime. Versions follow [Semantic Versioning](https://semver.org/);
 before 1.0.0 a minor version marks a phase of the plan.
 
+## Unreleased
+
+- The baby's age under the name shows the whole weeks in brackets when it isn't already in
+  weeks: "10 days (1 week)", "4 months 12 days (19 weeks)".
+
 ## [0.8.0] — 2026-11-18 — Napchime, more records and Google Play
 
 - Google Play: every release also builds an Android App Bundle (`napchime-vX.Y.Z.aab`), signed
