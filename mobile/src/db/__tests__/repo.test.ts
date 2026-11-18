@@ -220,6 +220,21 @@ describe('Repo', () => {
     expect((await repo.getSettings()).dashboardLayout.off).toEqual([]);
   });
 
+  it('keeps a layout per home-screen widget on this phone only', async () => {
+    const { repo } = await setup();
+    const full = { rows: ['feeding', 'sleep', 'diaper'], showInfo: true };
+    expect(await repo.getWidgetLayout(7)).toEqual(full);
+    const outboxBefore = await repo.outboxBatch(10);
+    await repo.setWidgetLayout(7, { rows: ['sleep'], showInfo: false });
+    expect(await repo.getWidgetLayout(7)).toEqual({ rows: ['sleep'], showInfo: false });
+    expect(await repo.getWidgetLayout(8)).toEqual(full);
+    // Not part of the settings, and nothing to send to the partner's phone.
+    expect(await repo.getSettings()).not.toHaveProperty('widgetLayout:7');
+    expect(await repo.outboxBatch(10)).toEqual(outboxBefore);
+    await repo.deleteWidgetLayout(7);
+    expect(await repo.getWidgetLayout(7)).toEqual(full);
+  });
+
   describe('family members (#41)', () => {
     const state = { familyId: 'f', relayUrl: 'https://relay.example', lastSeq: 0 };
 

@@ -3,6 +3,24 @@
 All notable changes to Napchime. Versions follow [Semantic Versioning](https://semver.org/);
 before 1.0.0 a minor version marks a phase of the plan.
 
+## [0.9.0] — 2026-11-18 — App icon, widget settings and store preparation
+
+- Android asks for fewer permissions. Removed: drawing over other apps, storage, fingerprint
+  and biometrics, Play licence check, install referrer and launcher badge counters, which
+  libraries and Expo's template added but Napchime doesn't use. CI now fails when an APK asks
+  for a permission that isn't on the list in `.github/scripts/verify-apk-permissions.sh`.
+- New app icon: a white moon with a gold bell on lilac (#B4A5F2), replacing the Expo template
+  icon. The splash screen and the Android adaptive icon background are lilac too. The source is
+  `mobile/assets/images/napchime-mark.svg`; the Play Store icon and feature graphic are in
+  `docs/store/`.
+- The baby's age under the name shows the whole weeks in brackets when it isn't already in
+  weeks: "10 days (1 week)", "4 months 12 days (19 weeks)".
+- Android widget: each widget on the home screen has its own settings. When you add it, and
+  later from its long-press menu ("Reconfigure", Android 12 and later), choose the rows
+  (feeding, sleep, diaper) and whether it shows the latest entries or buttons only. It can now
+  be made as small as 1×1: smaller sizes drop the latest entries, then rows, down to one
+  button for the first chosen row. The settings stay on the phone and are not synced.
+
 ## [0.8.0] — 2026-11-18 — Napchime, more records and Google Play
 
 - Google Play: every release also builds an Android App Bundle (`napchime-vX.Y.Z.aab`), signed
