@@ -3,6 +3,14 @@
 All notable changes to Napchime. Versions follow [Semantic Versioning](https://semver.org/);
 before 1.0.0 a minor version marks a phase of the plan.
 
+## Unreleased
+
+- Android widget: each widget on the home screen has its own settings. When you add it, and
+  later from its long-press menu ("Reconfigure", Android 12 and later), choose the rows
+  (feeding, sleep, diaper) and whether it shows the latest entries or buttons only. It can now
+  be made as small as 1×1: smaller sizes drop the latest entries, then rows, down to one
+  button for the first chosen row. The settings stay on the phone and are not synced.
+
 ## [0.8.0] — 2026-11-18 — Napchime, more records and Google Play
 
 - Google Play: every release also builds an Android App Bundle (`napchime-vX.Y.Z.aab`), signed

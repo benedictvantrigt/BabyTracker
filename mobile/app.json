@@ -69,14 +69,15 @@
             {
               "name": "Summary",
               "label": "Napchime",
-              "description": "Last feed, sleep and diaper, with quick logging",
-              "minWidth": "250dp",
-              "minHeight": "110dp",
+              "description": "Feed, sleep and diaper: latest entries and quick buttons, or buttons only",
+              "minWidth": "40dp",
+              "minHeight": "40dp",
               "targetCellWidth": 4,
               "targetCellHeight": 2,
               "maxResizeWidth": "500dp",
               "maxResizeHeight": "250dp",
               "resizeMode": "horizontal|vertical",
+              "widgetFeatures": "reconfigurable",
               "updatePeriodMillis": 1800000
             }
           ]
