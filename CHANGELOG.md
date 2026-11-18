@@ -5,6 +5,14 @@ before 1.0.0 a minor version marks a phase of the plan.
 
 ## Unreleased
 
+- Android asks for fewer permissions. Removed: drawing over other apps, storage, fingerprint
+  and biometrics, Play licence check, install referrer and launcher badge counters, which
+  libraries and Expo's template added but Napchime doesn't use. CI now fails when an APK asks
+  for a permission that isn't on the list in `.github/scripts/verify-apk-permissions.sh`.
+- New app icon: a white moon with a gold bell on lilac (#B4A5F2), replacing the Expo template
+  icon. The splash screen and the Android adaptive icon background are lilac too. The source is
+  `mobile/assets/images/napchime-mark.svg`; the Play Store icon and feature graphic are in
+  `docs/store/`.
 - The baby's age under the name shows the whole weeks in brackets when it isn't already in
   weeks: "10 days (1 week)", "4 months 12 days (19 weeks)".
 
