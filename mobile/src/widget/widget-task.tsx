@@ -7,6 +7,7 @@ import { Platform } from 'react-native';
 import {
   registerWidgetTaskHandler,
   requestWidgetUpdate,
+  type WidgetInfo,
   type WidgetRepresentation,
   type WidgetTaskHandlerProps,
 } from 'react-native-android-widget';
@@ -17,6 +18,7 @@ import { migrate } from '@/db/schema';
 import { isNapStart, runningEntries } from '@/domain/entries';
 import { DAY, startOfLocalDay } from '@/domain/time';
 import { widgetSummary } from '@/domain/widget';
+import { widgetView, type WidgetLayout } from '@/domain/widget-layout';
 import { refreshNotifications } from '@/notifications/refresh';
 import { publishReminders } from '@/sync/reminders';
 import { secureStore } from '@/sync/secure-store';
@@ -27,7 +29,7 @@ import { SUMMARY_WIDGET, SummaryWidget, WIDGET_ACTION } from './summary-widget';
 let ownRepo: Promise<Repo> | null = null;
 
 /** The app's repository when the app is running, else one opened for this task. */
-async function widgetRepo(): Promise<{ repo: Repo; inApp: boolean }> {
+export async function widgetRepo(): Promise<{ repo: Repo; inApp: boolean }> {
   const app = getAppRepo();
   if (app) return { repo: app, inApp: true };
   ownRepo ??= (async () => {
@@ -44,16 +46,30 @@ function feedingUri(): string {
   return `${first ?? 'napchime'}://entry/feeding`;
 }
 
-async function renderSummary(repo: Repo, now = Date.now()): Promise<WidgetRepresentation> {
-  const [settings, children] = await Promise.all([repo.getSettings(), repo.listChildren()]);
+/**
+ * The widget as `info` (one widget on the home screen) should show it: its own layout, or
+ * `layout` while its settings screen is open, fitted to its size.
+ */
+export async function renderSummary(
+  repo: Repo,
+  info: Pick<WidgetInfo, 'widgetId' | 'width' | 'height'>,
+  layout?: WidgetLayout,
+  now = Date.now(),
+): Promise<WidgetRepresentation> {
+  const [settings, children, stored] = await Promise.all([
+    repo.getSettings(),
+    repo.listChildren(),
+    layout ? Promise.resolve(layout) : repo.getWidgetLayout(info.widgetId),
+  ]);
+  const view = widgetView(stored, info.width, info.height);
   const child = children.find((c) => c.id === settings.activeChildId) ?? children[0];
   // From yesterday's midnight: last night, today's naps and the latest of each kind.
   const entries = child ? await repo.listEntries(child.id, startOfLocalDay(now) - DAY) : [];
   const summary = child ? widgetSummary(child, entries, settings, now) : null;
   const uri = feedingUri();
   return {
-    light: <SummaryWidget summary={summary} feedingUri={uri} dark={false} />,
-    dark: <SummaryWidget summary={summary} feedingUri={uri} dark />,
+    light: <SummaryWidget summary={summary} feedingUri={uri} dark={false} view={view} />,
+    dark: <SummaryWidget summary={summary} feedingUri={uri} dark view={view} />,
   };
 }
 
@@ -98,14 +114,17 @@ async function afterBackgroundWrite(repo: Repo) {
 }
 
 async function widgetTaskHandler(props: WidgetTaskHandlerProps): Promise<void> {
-  if (props.widgetAction === 'WIDGET_DELETED') return;
   const { repo, inApp } = await widgetRepo();
+  if (props.widgetAction === 'WIDGET_DELETED') {
+    await repo.deleteWidgetLayout(props.widgetInfo.widgetId);
+    return;
+  }
   if (props.widgetAction === 'WIDGET_CLICK') {
     const wrote = await handleClick(repo, props.clickAction, props.clickActionData);
     // In the app the write already triggers reminders, sync and a widget refresh.
     if (wrote && !inApp) await afterBackgroundWrite(repo);
   }
-  props.renderWidget(await renderSummary(repo));
+  props.renderWidget(await renderSummary(repo, props.widgetInfo));
 }
 
 /** Redraws the widgets on the home screen; call after the log or the settings change. */
@@ -113,7 +132,7 @@ export async function updateWidgets(repo: Repo): Promise<void> {
   if (Platform.OS !== 'android') return;
   await requestWidgetUpdate({
     widgetName: SUMMARY_WIDGET,
-    renderWidget: () => renderSummary(repo),
+    renderWidget: (info) => renderSummary(repo, info),
   });
 }
 

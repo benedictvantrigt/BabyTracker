@@ -1,6 +1,7 @@
 import { normalizeDashboard } from '@/domain/dashboard';
 import { normalizeTags, tagsByUse } from '@/domain/tags';
 import { validateEntry } from '@/domain/entries';
+import { normalizeWidgetLayout, type WidgetLayout } from '@/domain/widget-layout';
 import {
   DEFAULT_SETTINGS,
   SHARED_SETTINGS,
@@ -136,6 +137,8 @@ export interface SyncState {
 const SHARED_UPDATED_AT = 'sharedSettingsUpdatedAt';
 /** Settings key of the Today-screen layout up to 0.5 (visible card ids in order). */
 const LEGACY_DASHBOARD_KEY = 'dashboardCards';
+/** Settings key of a home-screen widget's layout, followed by the widget id. */
+const WIDGET_LAYOUT_PREFIX = 'widgetLayout:';
 
 export type ChangeListener = (event: { remote: boolean }) => void;
 
@@ -409,6 +412,27 @@ export class Repo {
       }
     });
     this.changed();
+  }
+
+  // Home-screen widget layouts: per widget on this phone, never synced.
+
+  async getWidgetLayout(widgetId: number): Promise<WidgetLayout> {
+    const row = await this.db.getFirstAsync<{ value: string }>(
+      'SELECT value FROM settings WHERE key = ?',
+      [`${WIDGET_LAYOUT_PREFIX}${widgetId}`],
+    );
+    return normalizeWidgetLayout(row ? JSON.parse(row.value) : null);
+  }
+
+  async setWidgetLayout(widgetId: number, layout: WidgetLayout): Promise<void> {
+    const key = `${WIDGET_LAYOUT_PREFIX}${widgetId}`;
+    await this.writeRawSetting(key, normalizeWidgetLayout(layout));
+  }
+
+  async deleteWidgetLayout(widgetId: number): Promise<void> {
+    await this.db.runAsync('DELETE FROM settings WHERE key = ?', [
+      `${WIDGET_LAYOUT_PREFIX}${widgetId}`,
+    ]);
   }
 
   private async writeRawSetting(key: string, value: unknown): Promise<void> {

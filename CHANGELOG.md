@@ -15,6 +15,11 @@ before 1.0.0 a minor version marks a phase of the plan.
   `docs/store/`.
 - The baby's age under the name shows the whole weeks in brackets when it isn't already in
   weeks: "10 days (1 week)", "4 months 12 days (19 weeks)".
+- Android widget: each widget on the home screen has its own settings. When you add it, and
+  later from its long-press menu ("Reconfigure", Android 12 and later), choose the rows
+  (feeding, sleep, diaper) and whether it shows the latest entries or buttons only. It can now
+  be made as small as 1×1: smaller sizes drop the latest entries, then rows, down to one
+  button for the first chosen row. The settings stay on the phone and are not synced.
 
 ## [0.8.0] — 2026-11-18 — Napchime, more records and Google Play
 

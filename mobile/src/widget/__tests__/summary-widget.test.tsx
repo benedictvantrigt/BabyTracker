@@ -4,6 +4,7 @@
 import { buildWidgetTree as build } from 'react-native-android-widget/lib/commonjs/api/build-widget-tree';
 
 import { widgetSummary } from '@/domain/widget';
+import type { WidgetView } from '@/domain/widget-layout';
 import { at, entry, kid, settings } from '@/domain/__tests__/fixtures';
 
 import { SummaryWidget, WIDGET_ACTION } from '../summary-widget';
@@ -38,6 +39,38 @@ describe('SummaryWidget', () => {
       );
       expect(actions.filter((a) => a === WIDGET_ACTION.logDiaper)).toHaveLength(2);
     }
+  });
+
+  const draw = (view: WidgetView) => {
+    const nodes = flatten(
+      buildWidgetTree(
+        <SummaryWidget summary={summary} feedingUri="x://feed" dark={false} view={view} />,
+      ),
+    );
+    return {
+      texts: nodes.filter((n) => n.type === 'TextWidget').map((n) => n.props.text),
+      actions: nodes.map((n) => n.props.clickAction).filter(Boolean),
+    };
+  };
+
+  it('shows only the chosen rows', () => {
+    const { texts } = draw({ kind: 'rows', rows: ['sleep'] });
+    expect(texts).toEqual(expect.arrayContaining(['Asleep since 12:05', 'Wake']));
+    expect(texts).not.toEqual(expect.arrayContaining(['Feed']));
+    expect(texts).not.toEqual(expect.arrayContaining(['Wet']));
+  });
+
+  it('draws buttons only, without the latest entries', () => {
+    const { texts, actions } = draw({ kind: 'buttons', lines: [['feeding', 'sleep', 'diaper']] });
+    expect(texts).toEqual(['Feed', 'Wake', 'Wet', 'Solid']);
+    expect(actions).not.toContain('OPEN_APP');
+  });
+
+  it('draws one button at the smallest size', () => {
+    expect(draw({ kind: 'single', row: 'sleep' })).toEqual({
+      texts: ['Wake'],
+      actions: [WIDGET_ACTION.toggleSleep],
+    });
   });
 
   it('asks to open the app when there is no baby yet', () => {
