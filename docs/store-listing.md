@@ -14,7 +14,7 @@ Android build does. Items marked **CHECK** need a decision before they go into P
 | Category | Parenting |
 | Tags | Baby tracker, Sleep tracker, Parenting |
 | Contact email | info@iter-it.nl (shown on the listing) |
-| Developer | ITER IT, Bestevaerstraat 128, Amsterdam, the Netherlands |
+| Developer | ITER IT, the Netherlands |
 | Website | https://github.com/benedictvantrigt/BabyTracker |
 | Privacy policy | https://benedictvantrigt.github.io/BabyTracker/privacy/ |
 
@@ -106,6 +106,6 @@ exemption for end-to-end encrypted data. Revisit if a reviewer asks.
 ## Account-level (Play Console, not per app)
 
 - **EU trader status (DSA)**: ITER IT publishes the app as a business, so declare it as a
-  trader; Play then shows the address, phone number and email on the listing. The phone
-  number is entered in Play Console only (not kept in this public repository).
+  trader; Play then shows the address, phone number and email on the listing. The address
+  and phone number are entered in Play Console only (not kept in this public repository).
 - **D-U-N-S / organisation verification**: done when creating the account.
