@@ -3,7 +3,7 @@
 All notable changes to Napchime. Versions follow [Semantic Versioning](https://semver.org/);
 before 1.0.0 a minor version marks a phase of the plan.
 
-## Unreleased
+## [0.8.0] — 2026-11-18 — Napchime, more records and Google Play
 
 - Google Play: every release also builds an Android App Bundle (`napchime-vX.Y.Z.aab`), signed
   with the production key as Play upload key, and can upload it to a Play track by itself

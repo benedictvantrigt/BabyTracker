@@ -23,14 +23,16 @@ per phone. The app is React Native (Expo), Android first, iOS later.
 | 1. Local MVP | Data model; feeding, sleep and diaper entry; timers; "time since last" dashboard; local reminders | ✅ Done in 0.1.0 (plus customizable Today screen, emulator E2E tests) |
 | 2. Sync | QR pairing, encrypted change log, Cloudflare relay, device removal, retention | ✅ 0.2.0 pairing, encryption and relay; 0.5.0 device removal with key rotation, retention, delete family; data import dropped |
 | 3. Notifications | Scheduled pushes through the relay, iOS Notification Service Extension, Android exact alarms, awake-window and feed rules | 🟡 0.3.0: done for Android; iOS started (#5: build config, local reminders) |
-| 4. Extras | Record types still missing (tummy time, pumping, growth, …), NFC tags, Live Activities / Live Updates, widgets, charts, growth curves, PDF/CSV export | 🟡 Started: sleep schedule (0.4.0); 0.6.0: #29, #30, #35, tags (#12), Android widget (#16); unreleased: tummy time, pumping, temperature, growth (#8–#11) |
-| 5. Hardening | Key recovery, backups, privacy statement, store submission, security review fixes | 🟡 Started: release signing with our own keys (#40), relay-proof key distribution (#41), widget receiver check (#42) |
+| 4. Extras | Record types still missing (tummy time, pumping, growth, …), NFC tags, Live Activities / Live Updates, widgets, charts, growth curves, PDF/CSV export | 🟡 Started: sleep schedule (0.4.0); 0.6.0: #29, #30, #35, tags (#12), Android widget (#16); 0.8.0: tummy time, pumping, temperature, growth (#8–#11) |
+| 5. Hardening | Key recovery, backups, privacy statement, store submission, security review fixes | 🟡 Started: release signing with our own keys (#40), relay-proof key distribution (#41), widget receiver check (#42); 0.8.0: app bundle and automatic Play upload (#47), privacy policy page |
 
 Current position: phases 1–3 are done for Android (Phase 2 completed in 0.5.0). Phase 4 has
 started with the age-based sleep schedule (#28, version 0.4.0); 0.6.0 added the Today
 screen layout (#35), total sleep (#30), age in days (#29), tags (#12) and the Android
 home-screen widget (#16, iOS still to do); 0.7.0 adds live timers on the lock screen (#15,
-not yet tested on a real iPhone) and the security fixes #40–#42 (Phase 5).
+not yet tested on a real iPhone) and the security fixes #40–#42 (Phase 5); 0.8.0 renames the
+app to Napchime (`com.napchime.app`), adds tummy time, pumping, temperature and growth
+(#8–#11) and is the first build for Google Play (internal testing).
 
 The server side runs in two environments, acceptance and production, each with its own
 relay Worker, Firebase project and app package (README: "Environments: acceptance and
