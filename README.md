@@ -146,7 +146,8 @@ that signs the app on phones, and the production key from "Signing keys" is our 
 key**. CI checks that the bundle carries that key (and the pin, when set) and that the app
 targets API 36, which Play requires.
 
-First upload, by hand in Play Console (organisation developer account):
+First upload, by hand in Play Console (organisation developer account; done for 0.8.0 on
+2026-11-18):
 
 1. Create the app (name "Napchime", default language, app, free) and fill in the store
    listing and App content declarations (`docs/store-listing.md`).
@@ -156,8 +157,9 @@ First upload, by hand in Play Console (organisation developer account):
    production. Each upload needs a higher `versionCode` (`mobile/app.json`).
 
 Later releases go up automatically. After the GitHub release, the workflow uploads the bundle
-to the track named in the repository variable `PLAY_TRACK` (for example `internal`); without the
-variable it skips the upload. `PLAY_RELEASE_STATUS` (default `completed`) can be set to `draft`
+to the track named in the repository variable `PLAY_TRACK` (set to `internal`); without the
+variable it skips the upload. Internal testers come from the Play email list "Internal
+testers" (Internal testing → Testers). `PLAY_RELEASE_STATUS` (default `completed`) can be set to `draft`
 while the app has never been published, which Play requires for releases made through the API.
 There is no key to store: the job exchanges its GitHub OIDC token for a short-lived token of
 the service account through Workload Identity Federation. The pieces, in Google Cloud project
