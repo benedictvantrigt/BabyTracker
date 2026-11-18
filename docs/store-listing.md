@@ -12,8 +12,8 @@ the Android build does.
 | App icon, feature graphic, screenshots | **To do**: the app still uses the Expo template icon (`mobile/assets/images/icon.png`); a Napchime icon is needed for the app and the listing. Screenshots need staged data (not the E2E ones: they show the emulator name and empty states) |
 | Category and tags | Parenting; tags Baby care, Parenting, Sleep |
 | Contact details | info@iter-it.nl, website; published |
-| Privacy policy, Ads, Sign-in details, Target audience, Data safety, Advertising ID (no), Government (no), Financial features (none), Health apps (sleep management; nutrition and weight), trader status (yes) | Saved; go to Google with the first review |
-| Content rating (IARC) | **To do**: the questionnaire means accepting IARC's terms |
+| Privacy policy, Ads, Sign-in details, Target audience, Data safety, Advertising ID (no), Government (no), Financial features (none), Health apps (sleep management; nutrition and weight), trader status (yes), content rating | Saved; go to Google with the first review |
+| Content rating (IARC) | Done: "All other app types", every question No; Everyone, PEGI 3, USK all ages, 3+ elsewhere. Contact for rating authorities: info@iter-it.nl |
 
 Saved declarations sit in Publishing overview until they are sent for review; internal
 testing works without that review. The listing description uses Play's `<b>` tags for the
