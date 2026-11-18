@@ -1,7 +1,23 @@
 # Google Play store listing and declarations
 
-Draft for the first Play Console submission (#50, #43, #44, #45). It describes only what the
-Android build does. Items marked **CHECK** need a decision before they go into Play Console.
+What is entered in Play Console for the Android app (#50, #43, #44, #45). It describes only what
+the Android build does.
+
+## Status in Play Console (2026-11-18)
+
+| Item | Status |
+|---|---|
+| Default language | English (United States); en-GB removed |
+| Store listing text (name, short and full description) | Saved as draft (en-US) |
+| App icon, feature graphic, screenshots | **To do**: the app still uses the Expo template icon (`mobile/assets/images/icon.png`); a Napchime icon is needed for the app and the listing. Screenshots need staged data (not the E2E ones: they show the emulator name and empty states) |
+| Category and tags | Parenting; tags Baby care, Parenting, Sleep |
+| Contact details | info@iter-it.nl, website; published |
+| Privacy policy, Ads, Sign-in details, Target audience, Data safety, Advertising ID (no), Government (no), Financial features (none), Health apps (sleep management; nutrition and weight), trader status (yes) | Saved; go to Google with the first review |
+| Content rating (IARC) | **To do**: the questionnaire means accepting IARC's terms |
+
+Saved declarations sit in Publishing overview until they are sent for review; internal
+testing works without that review. The listing description uses Play's `<b>` tags for the
+headings below.
 
 ## App details
 
@@ -71,21 +87,25 @@ The age range matches the stages in `mobile/src/domain/sleep-schedule.ts` (0 wee
 |---|---|
 | Privacy policy | URL above |
 | Ads | No ads |
-| App access | All functionality is available without special access. Reviewer note below. |
+| Advertising ID | No (the bundle has no `AD_ID` permission) |
+| Sign-in details (was App access) | "Yes, restricted" because partner sync needs a QR code and a second phone; reviewer note below (Play allows 500 characters) |
 | Content rating (IARC) | Utility/productivity-type app; no violence, sexual content, gambling, user-to-user chat or location sharing. Expected rating: Everyone / PEGI 3 |
 | Target audience | 18 and over (parents). Not designed for children, so the Families policy does not apply |
 | News app | No |
 | Government app | No |
 | Financial features | None |
-| Health apps | Yes: tracks a baby's sleep, feeding, temperature and growth (category "Health and fitness" → baby care / sleep tracking). Not a medical device; no diagnosis or treatment |
+| Health apps | Health and fitness → Sleep management, and Nutrition and weight management (feeds, growth). Not a medical device; no diagnosis or treatment |
 | Data safety | See below |
 
-### Reviewer note (App access)
+### Reviewer note (Sign-in details)
 
-> Napchime works without an account: open the app, enter a baby's name and date of birth,
-> and every feature except partner sync is available. Partner sync is optional and needs a
-> second phone: on phone A open Settings → Partner sync → Invite, and on phone B choose
-> "Join your partner" on the first screen and scan the QR code.
+As entered in Play Console (name "No sign-in; partner sync by QR code"):
+
+> No account or password exists. Open the app, enter any baby name and birth date: all
+> features work. Partner sync is optional and pairs two phones by QR code, no login: on phone
+> A open Settings > Partner sync > Invite partner; on phone B install the app, choose "Join
+> your partner" on the first screen and scan the QR code shown on phone A. Entries then
+> appear on both phones. To test with one phone, use an emulator as phone B.
 
 ### Data safety
 
@@ -97,6 +117,9 @@ Google does not count data that is end-to-end encrypted so that we can't read it
 | Does the app collect or share user data? | Yes (collected, not shared) |
 | Encrypted in transit? | Yes |
 | Can users request deletion? | Yes: "Delete family" in the app deletes all relay data; uninstalling deletes data on the phone |
+| Accounts | None ("My app does not allow users to create an account"; no outside login) |
+| Deletion link | The privacy policy URL (its "deleting it" section) |
+| Device or other IDs | Collected, not shared; not ephemeral; optional (only with partner sync); purpose: app functionality |
 | Data types collected | **Device or other IDs**: the device's public key and push token, for app functionality (sync and reminders). Optional: only when partner sync is used |
 | Not collected | Personal info, health and fitness, location, photos, contacts, app activity, crash logs: the baby's records are end-to-end encrypted, and the app has no analytics |
 
