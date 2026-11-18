@@ -3,6 +3,13 @@
 All notable changes to Napchime. Versions follow [Semantic Versioning](https://semver.org/);
 before 1.0.0 a minor version marks a phase of the plan.
 
+## Unreleased
+
+- Android asks for fewer permissions. Removed: drawing over other apps, storage, fingerprint
+  and biometrics, Play licence check, install referrer and launcher badge counters, which
+  libraries and Expo's template added but Napchime doesn't use. CI now fails when an APK asks
+  for a permission that isn't on the list in `.github/scripts/verify-apk-permissions.sh`.
+
 ## [0.8.0] — 2026-11-18 — Napchime, more records and Google Play
 
 - Google Play: every release also builds an Android App Bundle (`napchime-vX.Y.Z.aab`), signed
