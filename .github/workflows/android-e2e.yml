@@ -119,6 +119,9 @@ jobs:
       - name: Check the acceptance APK's manifest (widget receiver not exported)
         run: bash .github/scripts/verify-apk-manifest.sh mobile/napchime.apk
 
+      - name: Check the acceptance APK's permissions (only the ones Napchime needs)
+        run: bash .github/scripts/verify-apk-permissions.sh mobile/napchime.apk
+
       - name: Check the acceptance APK's target SDK (Google Play requires API 36)
         run: bash .github/scripts/verify-target-sdk.sh mobile/napchime.apk 36
 
@@ -298,6 +301,9 @@ jobs:
 
       - name: Check the production APK's manifest (widget receiver not exported)
         run: bash .github/scripts/verify-apk-manifest.sh mobile/napchime.apk
+
+      - name: Check the production APK's permissions (only the ones Napchime needs)
+        run: bash .github/scripts/verify-apk-permissions.sh mobile/napchime.apk
 
       - name: Check the production APK's target SDK (Google Play requires API 36)
         run: bash .github/scripts/verify-target-sdk.sh mobile/napchime.apk 36
