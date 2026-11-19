@@ -1,6 +1,7 @@
 # Google Play store listing and declarations
 
-What is entered in Play Console for the Android app (#50, #43, #44, #45). It describes only what
+What is entered in Play Console for the Android app (#50, #43, #44, #45); the App Store
+listing is in `docs/app-store-listing.md`. It describes only what
 the Android build does.
 
 ## Status in Play Console (2026-11-18)
