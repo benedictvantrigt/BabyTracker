@@ -3,6 +3,17 @@
 All notable changes to Napchime. Versions follow [Semantic Versioning](https://semver.org/);
 before 1.0.0 a minor version marks a phase of the plan.
 
+## Unreleased
+
+- Day sleep only (#80): Settings → Sleep → "Track night sleep" (per phone, not synced; on by
+  default). When off, this phone tracks naps only: outside the day hours the Sleep card shows
+  "Night · not tracked on this phone" without a Start sleep button, the widget's sleep button
+  starts no timer, and the phone shows no lock-screen timer for a night sleep, also one logged
+  on a partner's phone. In the morning the awake time and the awake timer count from the day
+  start (or a later logged wake-up), and without the schedule the first nap reminder is one
+  awake window after the day start. The bedtime reminder stays. The Sleep card shows day sleep
+  against the day target instead of night and total sleep. Night entries already logged stay.
+
 ## [0.10.0] — 2026-11-19 — My days, awake timer and feeds without a length
 
 - Awake timer (#73): between sleeps, the lock screen shows how long the baby has been awake,

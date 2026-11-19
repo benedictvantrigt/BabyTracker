@@ -165,6 +165,12 @@ export interface Settings {
   dutyDays: Weekday[];
   /** Whether this phone shows the awake timer outside the app (per phone, not synced). */
   awakeTimer: boolean;
+  /**
+   * Whether this phone tracks night sleep (per phone, not synced). When off it tracks day
+   * sleep only: no sleep timer starts at night, the morning counts from the day start, and
+   * the Today screen leaves out night totals. Night entries already logged stay.
+   */
+  nightSleep: boolean;
 }
 
 /** Reminder rules shared by the phones of a family; the rest of Settings is per phone. */
@@ -200,4 +206,5 @@ export const DEFAULT_SETTINGS: Settings = {
   feedTimer: true,
   dutyDays: [0, 1, 2, 3, 4, 5, 6],
   awakeTimer: true,
+  nightSleep: true,
 };

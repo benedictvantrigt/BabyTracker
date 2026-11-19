@@ -16,6 +16,7 @@ import { getAppRepo } from '@/data/app-repo';
 import { Repo } from '@/db/repo';
 import { migrate } from '@/db/schema';
 import { isNapStart, runningEntries } from '@/domain/entries';
+import { sleepTimerAllowed } from '@/domain/night-sleep';
 import { DAY, startOfLocalDay } from '@/domain/time';
 import { widgetSummary } from '@/domain/widget';
 import { widgetView, type WidgetLayout } from '@/domain/widget-layout';
@@ -84,6 +85,8 @@ async function handleClick(repo: Repo, action?: string, data?: Record<string, un
     const entries = await repo.listEntries(child.id, now - DAY);
     const sleeping = runningEntries(entries).find((e) => e.kind === 'sleep');
     if (sleeping) await repo.stopEntry(sleeping.id);
+    // Day sleep only on this phone: no sleep timer starts at night.
+    else if (!sleepTimerAllowed(settings, now)) return false;
     else await repo.startTimer(child.id, 'sleep', { nap: isNapStart(now, settings) });
     return true;
   }

@@ -275,6 +275,17 @@ function SleepCard({
         value={settings.napReminders}
         onChange={(v) => update({ napReminders: v })}
       />
+      <ToggleRow
+        label="Track night sleep"
+        description={
+          settings.nightSleep
+            ? 'Sleep is timed day and night (this phone)'
+            : 'Only naps are timed: at night no timers run, the bedtime reminder stays (this phone)'
+        }
+        value={settings.nightSleep}
+        onChange={(v) => update({ nightSleep: v })}
+        testID="toggle-night-sleep"
+      />
     </Card>
   );
 }
