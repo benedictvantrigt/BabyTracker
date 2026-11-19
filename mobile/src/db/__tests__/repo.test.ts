@@ -220,6 +220,17 @@ describe('Repo', () => {
     expect((await repo.getSettings()).dashboardLayout.off).toEqual([]);
   });
 
+  it('keeps the duty days on this phone only', async () => {
+    const { repo } = await setup();
+    expect((await repo.getSettings()).dutyDays).toEqual([0, 1, 2, 3, 4, 5, 6]);
+    const outboxBefore = await repo.outboxBatch(10);
+    await repo.updateSettings({ dutyDays: [1, 3, 5] });
+    expect((await repo.getSettings()).dutyDays).toEqual([1, 3, 5]);
+    expect(await repo.outboxBatch(10)).toEqual(outboxBefore);
+    await repo.updateSettings({ dutyDays: [] });
+    expect((await repo.getSettings()).dutyDays).toEqual([]);
+  });
+
   it('keeps a layout per home-screen widget on this phone only', async () => {
     const { repo } = await setup();
     const full = { rows: ['feeding', 'sleep', 'diaper'], showInfo: true };

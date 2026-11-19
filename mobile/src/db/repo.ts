@@ -1,4 +1,5 @@
 import { normalizeDashboard } from '@/domain/dashboard';
+import { normalizeDutyDays } from '@/domain/duty-days';
 import { normalizeTags, tagsByUse } from '@/domain/tags';
 import { validateEntry } from '@/domain/entries';
 import { normalizeWidgetLayout, type WidgetLayout } from '@/domain/widget-layout';
@@ -396,6 +397,7 @@ export class Repo {
     settings.dashboardLayout = normalizeDashboard(
       storedLayout ? settings.dashboardLayout : (legacyDashboard ?? settings.dashboardLayout),
     );
+    settings.dutyDays = normalizeDutyDays(settings.dutyDays);
     return settings;
   }
 

@@ -4,6 +4,7 @@ import { Alert, AppState, Linking, Platform, ScrollView, StyleSheet, TextInput, 
 
 import { TabScreen } from '@/components/tab-screen';
 import { ThemedText } from '@/components/themed-text';
+import { DutyDaysRow } from '@/components/duty-days';
 import { PartnerSyncCard } from '@/components/partner-sync-card';
 import {
   Button,
@@ -78,6 +79,9 @@ export default function SettingsScreen() {
             onChange={(v) => update({ remindersOnThisPhone: v })}
             testID="toggle-reminders-here"
           />
+          {settings.remindersOnThisPhone && (
+            <DutyDaysRow days={settings.dutyDays} onChange={(d) => update({ dutyDays: d })} />
+          )}
           <ToggleRow
             label="Awake timer"
             description="On the lock screen during the day: time awake, counting down to the next nap or bedtime"
@@ -102,6 +106,17 @@ export default function SettingsScreen() {
               min={60}
               max={8 * 60}
               onChange={(v) => update({ feedIntervalMinutes: v })}
+            />
+            <ToggleRow
+              label="Time feeds"
+              description={
+                settings.feedTimer
+                  ? 'Left and Right start a timer (this phone)'
+                  : 'Left and Right log the feed now, without a length (this phone)'
+              }
+              value={settings.feedTimer}
+              testID="toggle-feed-timer"
+              onChange={(v) => update({ feedTimer: v })}
             />
             <ToggleRow
               label="Daytime reminder"

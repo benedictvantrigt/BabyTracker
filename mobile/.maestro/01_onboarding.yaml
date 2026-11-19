@@ -14,7 +14,6 @@ name: Onboarding shows the default dashboard and the sleep plan
 # A newborn follows the age schedule: next nap or bedtime, and today's plan.
 - assertVisible:
     id: 'schedule-next'
-- assertVisible: 'Sleep today 0m of .*'
 - scrollUntilVisible:
     element:
       id: 'schedule-plan'
@@ -23,6 +22,11 @@ name: Onboarding shows the default dashboard and the sleep plan
 - assertVisible: 'Nap 1 .*'
 - assertVisible: 'Night .* of .*'
 - assertVisible: 'Day sleep .* of .*'
+# The day's total is the last line of the card (#55).
+- scrollUntilVisible:
+    element:
+      id: 'sleep-total'
+- assertVisible: 'Sleep today 0m of .*'
 - takeScreenshot: 01-sleep-plan
 - scrollUntilVisible:
     element:
