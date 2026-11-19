@@ -1,6 +1,8 @@
 # Closes the keyboard. Android: the back-style hideKeyboard. iOS: hideKeyboard can tap a
 # button under it, so tap a plain text instead (LABEL, a regex): screens use
 # keyboardShouldPersistTaps="handled", so a tap on text closes the keyboard and nothing else.
+# Then wait for the keyboard to slide away: a tap during that animation (e.g. on Save) can
+# be lost while the form is still moving.
 appId: com.napchime.app.acc
 ---
 - runFlow:
@@ -13,3 +15,4 @@ appId: com.napchime.app.acc
       platform: iOS
     commands:
       - tapOn: ${LABEL}
+      - waitForAnimationToEnd

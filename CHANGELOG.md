@@ -6,6 +6,14 @@ before 1.0.0 a minor version marks a phase of the plan.
 ## Unreleased
 
 - Privacy policy: the publisher is named without a street address; contact stays by email.
+- Feeding (#53): log a feed without a length. The feeding form has a "Length" switch; off
+  logs the feed at one moment. Settings → Feeding → "Time feeds" (per phone): when off, Left
+  and Right on the Today card log the feed now instead of starting a timer. Feeds without a
+  length show no duration in the timeline.
+- Sleep card (#54): the day plan shows slept against planned per nap ("30m of 2h 00m · too
+  short"), with a note that "too short" means less than half of the planned nap. The catch-up
+  advice now says the midday nap was missed or too short.
+- Sleep card (#55): "Sleep today … of …" is the last line of the card.
 - My days (#71): Settings → This phone has a row of day chips (Mo–Su) for the days this phone
   is on duty. On those days it shows every reminder and the running-timer notification; on
   the other days neither, so partners can split the days. A day runs from day start to the

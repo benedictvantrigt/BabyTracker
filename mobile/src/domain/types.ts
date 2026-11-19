@@ -154,6 +154,11 @@ export interface Settings {
   /** Whether this phone shows nap and feed reminders (per phone, not synced). */
   remindersOnThisPhone: boolean;
   /**
+   * Left and Right on the Feeding card start a timer; when off they log the feed at one
+   * moment, without a length (per phone, not synced).
+   */
+  feedTimer: boolean;
+  /**
    * Days of the week this phone is on duty (per phone, not synced): only then does it show
    * reminders and running-timer notifications. A day runs from day start to day start.
    */
@@ -190,5 +195,6 @@ export const DEFAULT_SETTINGS: Settings = {
   feedAlarmNight: true,
   dashboardLayout: DEFAULT_DASHBOARD,
   remindersOnThisPhone: true,
+  feedTimer: true,
   dutyDays: [0, 1, 2, 3, 4, 5, 6],
 };
