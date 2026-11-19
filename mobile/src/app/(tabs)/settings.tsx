@@ -4,6 +4,7 @@ import { Alert, AppState, Linking, Platform, ScrollView, StyleSheet, TextInput, 
 
 import { TabScreen } from '@/components/tab-screen';
 import { ThemedText } from '@/components/themed-text';
+import { DutyDaysRow } from '@/components/duty-days';
 import { PartnerSyncCard } from '@/components/partner-sync-card';
 import {
   Button,
@@ -78,6 +79,9 @@ export default function SettingsScreen() {
             onChange={(v) => update({ remindersOnThisPhone: v })}
             testID="toggle-reminders-here"
           />
+          {settings.remindersOnThisPhone && (
+            <DutyDaysRow days={settings.dutyDays} onChange={(d) => update({ dutyDays: d })} />
+          )}
         </Card>
 
         {sleepOn && <SleepCard child={activeChild} settings={settings} update={update} />}
