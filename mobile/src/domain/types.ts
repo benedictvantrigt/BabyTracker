@@ -163,6 +163,8 @@ export interface Settings {
    * reminders and running-timer notifications. A day runs from day start to day start.
    */
   dutyDays: Weekday[];
+  /** Whether this phone shows the awake timer outside the app (per phone, not synced). */
+  awakeTimer: boolean;
 }
 
 /** Reminder rules shared by the phones of a family; the rest of Settings is per phone. */
@@ -197,4 +199,5 @@ export const DEFAULT_SETTINGS: Settings = {
   remindersOnThisPhone: true,
   feedTimer: true,
   dutyDays: [0, 1, 2, 3, 4, 5, 6],
+  awakeTimer: true,
 };

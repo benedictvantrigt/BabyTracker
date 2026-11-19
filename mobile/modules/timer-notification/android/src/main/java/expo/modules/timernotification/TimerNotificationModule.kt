@@ -20,11 +20,16 @@ class TimerNotificationRecord : Record {
   @Field @Required val start: Double = 0.0
   @Field @Required val channelId: String = ""
   @Field val color: String? = null
+  /** For a countdown: the time it counts down to (past it, the clock counts on). */
+  @Field val countdownTo: Double? = null
+  /** When the notification removes itself if it has not been updated, in ms since the epoch. */
+  @Field val until: Double? = null
 }
 
 /**
  * An ongoing notification per running timer whose time counts up on its own (a chronometer from
- * the timer's start), so the app does not have to update it. On Android 16 and later it asks to be
+ * the timer's start), so the app does not have to update it. The awake timer counts down to the
+ * next nap instead, and goes on counting (as a negative time) once that has passed. On Android 16 and later it asks to be
  * promoted to a Live Update: a chip in the status bar and a prominent card on the lock screen.
  */
 class TimerNotificationModule : Module() {
@@ -61,15 +66,19 @@ class TimerNotificationModule : Module() {
       .setSmallIcon(smallIcon())
       .setContentTitle(timer.title)
       .setContentText(timer.text)
-      .setWhen(timer.start.toLong())
+      .setWhen((timer.countdownTo ?: timer.start).toLong())
       .setShowWhen(true)
       .setUsesChronometer(true)
+      .setChronometerCountDown(timer.countdownTo != null)
       .setOngoing(true)
       .setOnlyAlertOnce(true)
       .setSilent(true)
       .setContentIntent(openApp())
       .setRequestPromotedOngoing(true)
       .apply { timer.color?.let { setColor(Color.parseColor(it)) } }
+      .apply {
+        timer.until?.let { setTimeoutAfter(maxOf(1L, it.toLong() - System.currentTimeMillis())) }
+      }
       .build()
 
   private fun openApp(): PendingIntent? {

@@ -16,7 +16,10 @@ import type { LiveTimer } from './live-timer-content';
 type TimerActivityProps = {
   title: string;
   subtitle: string;
-  /** When the timer started, in milliseconds since the epoch. */
+  /**
+   * The timer's reference time, in milliseconds since the epoch: the start of a running timer
+   * (counting up), or the nap time for the awake timer (counting down, then up once passed).
+   */
   start: number;
   icon: NonNullable<ImageProps['systemName']>;
   tint: string;
@@ -25,6 +28,7 @@ type TimerActivityProps = {
 const ICON: Record<LiveTimer['kind'], TimerActivityProps['icon']> = {
   feeding: 'waterbottle.fill',
   sleep: 'moon.zzz.fill',
+  awake: 'sun.max.fill',
 };
 
 // Runs inside the widget extension, not the app: it may only use its props and the Expo UI
@@ -89,26 +93,26 @@ const TimerActivity = createLiveActivity<TimerActivityProps>('TimerActivity', (p
 function propsFor(t: LiveTimer): TimerActivityProps {
   return {
     title: t.title,
-    subtitle: `Started ${formatClock(t.start)}`,
-    start: t.start,
+    subtitle: t.countdownTo != null ? t.text : `Started ${formatClock(t.start)}`,
+    // SwiftUI's timer style counts down to a future date and up from a past one.
+    start: t.countdownTo ?? t.start,
     icon: ICON[t.kind],
-    tint: Colors.light[t.kind],
+    tint: Colors.light[t.kind === 'awake' ? 'sleep' : t.kind],
   };
 }
 
 let shown = '';
 
 /**
- * Live Activities on the lock screen and in the Dynamic Island, one per running timer. The timer
- * text counts up on its own, so an activity only changes when a timer starts or stops. Activities
+ * Live Activities on the lock screen and in the Dynamic Island, one per running timer and one for
+ * the awake timer. The timer text counts on its own, so an activity only changes when a timer
+ * starts or stops. Activities
  * are interchangeable: existing ones are updated to the current timers, extra ones end.
  */
 export async function syncLiveTimers(timers: LiveTimer[], _channelId: string): Promise<boolean> {
   try {
-    const wanted = timers
-      .slice()
-      .sort((a, b) => a.start - b.start)
-      .map(propsFor);
+    const sorted = timers.slice().sort((a, b) => a.start - b.start);
+    const wanted = sorted.map(propsFor);
     const activities = TimerActivity.getInstances();
     const signature = JSON.stringify(wanted);
     if (signature === shown && activities.length === wanted.length) return true;
@@ -116,9 +120,12 @@ export async function syncLiveTimers(timers: LiveTimer[], _channelId: string): P
     for (let i = 0; i < Math.max(activities.length, wanted.length); i++) {
       const activity = activities[i];
       const props = wanted[i];
-      if (activity && props) await activity.update(props);
+      // The awake timer goes stale at the end of the day if the app has not removed it.
+      const until = sorted[i]?.until;
+      const stale = until != null ? new Date(until) : undefined;
+      if (activity && props) await activity.update(props, stale);
       else if (activity) await activity.end('immediate');
-      else if (props) TimerActivity.start(props);
+      else if (props) TimerActivity.start(props, undefined, stale);
     }
     shown = signature;
     return true;

@@ -9,6 +9,10 @@ export interface TimerNotificationInput {
   channelId: string;
   /** Accent color, `#RRGGBB`. */
   color?: string;
+  /** For a countdown: the time it counts down to, in milliseconds since the epoch. */
+  countdownTo?: number;
+  /** When the notification removes itself if not updated, in milliseconds since the epoch. */
+  until?: number;
 }
 
 interface TimerNotificationModule {

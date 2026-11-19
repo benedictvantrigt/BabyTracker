@@ -5,6 +5,13 @@ before 1.0.0 a minor version marks a phase of the plan.
 
 ## Unreleased
 
+- Awake timer (#73): between sleeps, the lock screen shows how long the baby has been awake,
+  counting down to the next nap: the next planned nap or bedtime with the sleep schedule on,
+  else the awake window. It keeps counting once the nap is overdue, shows only during the day
+  hours (a wake-up up to an hour before the day start counts as the morning) and makes way for
+  the sleep timer when a sleep starts. Android: ongoing notification or Live Update, removed at
+  the end of the day; iOS: Live Activity. Both phones show it; turn it off per phone in
+  Settings → This phone.
 - Privacy policy: the publisher is named without a street address; contact stays by email.
 - Feeding (#53): log a feed without a length. The feeding form has a "Length" switch; off
   logs the feed at one moment. Settings → Feeding → "Time feeds" (per phone): when off, Left
@@ -15,8 +22,8 @@ before 1.0.0 a minor version marks a phase of the plan.
   advice now says the midday nap was missed or too short.
 - Sleep card (#55): "Sleep today … of …" is the last line of the card.
 - My days (#71): Settings → This phone has a row of day chips (Mo–Su) for the days this phone
-  is on duty. On those days it shows every reminder and the running-timer notification; on
-  the other days neither, so partners can split the days. A day runs from day start to the
+  is on duty. On those days it shows every reminder, the running-timer notification and the
+  awake timer; on the other days none of them, so partners can split the days. A day runs from day start to the
   next day start, so a night feed counts toward the evening before. Saved per phone, not
   synced; all days are on by default. A running timer's notification appears or goes at the
   next refresh after the day changes (opening the app, a new entry or a partner's change).
