@@ -11,7 +11,10 @@ import {
   useState,
   type ReactNode,
 } from 'react';
-import { Alert, AppState } from 'react-native';
+import Constants from 'expo-constants';
+import { Alert, AppState, Platform } from 'react-native';
+
+import ReminderKey from '../../modules/reminder-key';
 
 import { useAppData } from '@/data/app-data';
 
@@ -63,16 +66,35 @@ interface SyncContextValue {
 const SyncContext = createContext<SyncContextValue | null>(null);
 
 /**
- * This phone's FCM token, or null when the build has no Firebase config. On iOS the
- * device token is an APNs token, which the relay (FCM only) cannot use: null there too,
- * so the iPhone keeps scheduling its reminders itself.
+ * This phone's push token, or null when the build cannot receive the relay's pushes. Android:
+ * the FCM token (null without Firebase config). iPhone: the APNs token, prefixed "apns:", only
+ * in builds with the notification service extension that decrypts pushed reminders (#6);
+ * without it the iPhone keeps scheduling its reminders itself.
  */
 async function devicePushToken(): Promise<string | null> {
   try {
     const token = await Notifications.getDevicePushTokenAsync();
-    return token.type === 'android' && typeof token.data === 'string' ? token.data : null;
+    if (typeof token.data !== 'string') return null;
+    if (token.type === 'android') return token.data;
+    if (token.type === 'ios' && iosNotificationService()) return `apns:${token.data}`;
+    return null;
   } catch {
     return null;
+  }
+}
+
+function iosNotificationService(): boolean {
+  return Constants.expoConfig?.extra?.iosNotificationService === true;
+}
+
+/** Hands the reminder key to the iOS notification extension; null clears it (#6). */
+function shareReminderKey(engine: SyncEngine | null) {
+  if (Platform.OS !== 'ios' || !ReminderKey) return;
+  try {
+    const shared = engine?.reminderKey();
+    ReminderKey.set(shared?.familyId ?? null, shared?.key ?? null);
+  } catch {
+    // The next sync round tries again.
   }
 }
 
@@ -110,6 +132,7 @@ export function SyncProvider({ children }: { children: ReactNode }) {
     setStatus((s) => ({ ...s, syncing: true }));
     try {
       const { pushed, pulled } = await current.sync();
+      shareReminderKey(current);
       if (pushed > 0 || pulled > 0 || mustPublish.current) {
         mustPublish.current = false;
         await publishReminders(repo, current);
@@ -119,6 +142,7 @@ export function SyncProvider({ children }: { children: ReactNode }) {
       if (isRemovedError(e) && engine.current === current) {
         // Removed by a partner, or the family was deleted: stop here, keep the log.
         engine.current = null;
+        shareReminderKey(null);
         await endSyncHere(deps);
         setStatus({ enabled: false, syncing: false, lastSyncAt: null, error: null, push: false });
         Alert.alert(
@@ -138,6 +162,7 @@ export function SyncProvider({ children }: { children: ReactNode }) {
   const attach = useCallback(
     (next: SyncEngine | null) => {
       engine.current = next;
+      if (!next) shareReminderKey(null);
       mustPublish.current = true;
       setStatus({
         enabled: Boolean(next),

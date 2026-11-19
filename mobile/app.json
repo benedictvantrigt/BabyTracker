@@ -2,7 +2,7 @@
   "expo": {
     "name": "Napchime",
     "slug": "napchime",
-    "version": "0.10.0",
+    "version": "0.11.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "napchime",
@@ -15,6 +15,9 @@
       },
       "entitlements": {
         "com.apple.developer.usernotifications.time-sensitive": true
+      },
+      "infoPlist": {
+        "NSAlarmKitUsageDescription": "Napchime rings the night feed reminder like an alarm clock, also in silent mode or Focus. You can turn this off in Settings."
       }
     },
     "android": {
@@ -26,7 +29,7 @@
       },
       "predictiveBackGestureEnabled": false,
       "package": "com.napchime.app",
-      "versionCode": 11,
+      "versionCode": 12,
       "permissions": [
         "android.permission.SCHEDULE_EXACT_ALARM",
         "android.permission.POST_NOTIFICATIONS"

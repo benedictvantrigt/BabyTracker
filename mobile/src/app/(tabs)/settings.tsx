@@ -2,6 +2,9 @@ import { useCallback, useEffect, useState } from 'react';
 import Constants from 'expo-constants';
 import { Alert, AppState, Linking, Platform, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 
+import NightAlarm from '../../../modules/night-alarm';
+import TimerNotification from '../../../modules/timer-notification';
+
 import { TabScreen } from '@/components/tab-screen';
 import { ThemedText } from '@/components/themed-text';
 import { DutyDaysRow } from '@/components/duty-days';
@@ -31,6 +34,7 @@ import {
 import type { Child, Settings } from '@/domain/types';
 import { useTheme } from '@/hooks/use-theme';
 import { useSync } from '@/sync/app-sync';
+import { requestNightAlarms } from '@/notifications/night-alarms';
 import {
   getPermissionState,
   requestExactAlarmPermission,
@@ -91,6 +95,32 @@ export default function SettingsScreen() {
           />
         </Card>
 
+        {(sleepOn || feedingOn) && (
+          <Card testID="settings-daytime">
+            <ThemedText type="smallBold" themeColor="textSecondary">
+              DAYTIME
+            </ThemedText>
+            <ThemedText type="small" themeColor="textSecondary">
+              Sleep starting in this window counts as a nap. Outside it, feeding reminders become
+              alarms.
+            </ThemedText>
+            <View style={styles.row}>
+              <ThemedText style={styles.grow}>Day starts</ThemedText>
+              <TimeOfDayField
+                minute={settings.dayStartMinute}
+                onChange={(m) => update({ dayStartMinute: m })}
+              />
+            </View>
+            <View style={styles.row}>
+              <ThemedText style={styles.grow}>Day ends</ThemedText>
+              <TimeOfDayField
+                minute={settings.dayEndMinute}
+                onChange={(m) => update({ dayEndMinute: m })}
+              />
+            </View>
+          </Card>
+        )}
+
         {sleepOn && <SleepCard child={activeChild} settings={settings} update={update} />}
 
         {feedingOn && (
@@ -131,32 +161,22 @@ export default function SettingsScreen() {
               value={settings.feedAlarmNight}
               onChange={(v) => update({ feedAlarmNight: v })}
             />
-          </Card>
-        )}
-
-        {(sleepOn || feedingOn) && (
-          <Card testID="settings-daytime">
-            <ThemedText type="smallBold" themeColor="textSecondary">
-              DAYTIME
-            </ThemedText>
-            <ThemedText type="small" themeColor="textSecondary">
-              Sleep starting in this window counts as a nap. Outside it, feeding reminders become
-              alarms.
-            </ThemedText>
-            <View style={styles.row}>
-              <ThemedText style={styles.grow}>Day starts</ThemedText>
-              <TimeOfDayField
-                minute={settings.dayStartMinute}
-                onChange={(m) => update({ dayStartMinute: m })}
+            {settings.feedAlarmNight && NightAlarm?.isAvailable() && (
+              <ToggleRow
+                label="Ring like an alarm clock"
+                description={
+                  NightAlarm.authorizationState() === 'denied'
+                    ? 'Not allowed: turn on Alarms for Napchime in the iPhone Settings app'
+                    : 'Night feeds ring as an alarm, also in silent mode and Focus (this phone)'
+                }
+                value={settings.nightFeedAlarmKit}
+                testID="toggle-night-alarmkit"
+                onChange={(v) => {
+                  update({ nightFeedAlarmKit: v });
+                  if (v) requestNightAlarms();
+                }}
               />
-            </View>
-            <View style={styles.row}>
-              <ThemedText style={styles.grow}>Day ends</ThemedText>
-              <TimeOfDayField
-                minute={settings.dayEndMinute}
-                onChange={(m) => update({ dayEndMinute: m })}
-              />
-            </View>
+            )}
           </Card>
         )}
 
@@ -211,7 +231,7 @@ function SleepCard({
       </ThemedText>
       <ToggleRow
         label="Follow the age schedule"
-        description="Planned naps and bedtime for the baby's age, from the day start below"
+        description="Planned naps and bedtime for the baby's age, from the day start above"
         value={settings.sleepSchedule}
         onChange={(v) => update({ sleepSchedule: v })}
         testID="toggle-schedule"
@@ -363,7 +383,10 @@ function PermissionsCard() {
     return () => sub.remove();
   }, [refresh]);
 
-  if (!state || (state.notifications && state.exactAlarms)) return null;
+  // Android 16+: timers show as Live Updates unless the user turned that off (#51).
+  const liveUpdatesOff = Platform.OS === 'android' && TimerNotification?.canPostPromoted?.() === false;
+
+  if (!state || (state.notifications && state.exactAlarms && !liveUpdatesOff)) return null;
 
   return (
     <Card>
@@ -394,6 +417,18 @@ function PermissionsCard() {
                 .then(refresh)
                 .catch((e: Error) => Alert.alert('Not available in this build', e.message))
             }
+          />
+        </>
+      )}
+      {liveUpdatesOff && state.notifications && (
+        <>
+          <ThemedText type="small">
+            Live Updates are off for Napchime, so running timers don’t show in the status bar or as a
+            card on the lock screen.
+          </ThemedText>
+          <Button
+            label="Allow Live Updates"
+            onPress={() => TimerNotification?.openPromotedSettings()}
           />
         </>
       )}

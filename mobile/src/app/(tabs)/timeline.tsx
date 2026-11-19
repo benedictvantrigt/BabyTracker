@@ -29,7 +29,7 @@ export default function TimelineScreen() {
     tag && tags.some((t) => t.toLocaleLowerCase() === tag.toLocaleLowerCase()) ? tag : null;
   const shown = filter ? entries.filter((e) => hasTag(e, filter)) : entries;
 
-  const sections = groupByDay(shown).map((g) => ({
+  const sections = groupByDay(shown, now).map((g) => ({
     title: formatDayLabel(g.dayStart, now),
     data: g.entries,
   }));

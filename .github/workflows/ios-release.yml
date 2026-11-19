@@ -9,6 +9,10 @@ name: Release to TestFlight
 #   IOS_DIST_CERT_P12_BASE64, IOS_DIST_CERT_PASSWORD   Apple Distribution certificate + key
 #   IOS_PROFILE_APP_BASE64                              App Store profile for com.napchime.app
 #   IOS_PROFILE_WIDGETS_BASE64                          App Store profile for the widget extension
+#   IOS_PROFILE_NSE_BASE64 (optional)                   App Store profile for the notification
+#                                                       service extension (#6); without it the
+#                                                       app is built without the extension and
+#                                                       the iPhone schedules reminders itself
 #   ASC_KEY_ID, ASC_ISSUER_ID, ASC_KEY_P8               App Store Connect API key (App Manager
 #                                                       role: uploads builds and hands them to
 #                                                       external testers)
@@ -65,6 +69,7 @@ jobs:
           CERT_PASSWORD: ${{ secrets.IOS_DIST_CERT_PASSWORD }}
           PROFILE_APP: ${{ secrets.IOS_PROFILE_APP_BASE64 }}
           PROFILE_WIDGETS: ${{ secrets.IOS_PROFILE_WIDGETS_BASE64 }}
+          PROFILE_NSE: ${{ secrets.IOS_PROFILE_NSE_BASE64 }}
           TEAM_ID: ${{ vars.IOS_TEAM_ID }}
         run: |
           if [ -z "$CERT_P12" ] || [ -z "$CERT_PASSWORD" ] || [ -z "$PROFILE_APP" ] || [ -z "$PROFILE_WIDGETS" ] || [ -z "$TEAM_ID" ]; then
@@ -82,7 +87,15 @@ jobs:
           security set-key-partition-list -S apple-tool:,apple: -k "$keychain_password" "$keychain" > /dev/null
           security list-keychains -d user -s "$keychain" $(security list-keychains -d user | tr -d '"')
           mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles"
-          for p in "$PROFILE_APP" "$PROFILE_WIDGETS"; do
+          profiles=("$PROFILE_APP" "$PROFILE_WIDGETS")
+          if [ -n "$PROFILE_NSE" ]; then
+            profiles+=("$PROFILE_NSE")
+            # The prebuild and archive steps add the notification service extension (#6).
+            echo "IOS_NOTIFICATION_SERVICE=1" >> "$GITHUB_ENV"
+          else
+            echo "::notice::No IOS_PROFILE_NSE_BASE64: building without the notification service extension (#6)."
+          fi
+          for p in "${profiles[@]}"; do
             printf '%s' "$p" | base64 -d > "$RUNNER_TEMP/profile.mobileprovision"
             security cms -D -i "$RUNNER_TEMP/profile.mobileprovision" > "$RUNNER_TEMP/profile.plist"
             uuid=$(/usr/libexec/PlistBuddy -c 'Print :UUID' "$RUNNER_TEMP/profile.plist")

@@ -10,9 +10,12 @@
     "bindings": [{ "name": "FAMILY", "class_name": "Family" }]
   },
   "migrations": [{ "tag": "v1", "new_sqlite_classes": ["Family"] }],
+  // iOS pushes (#6) go to the app with this bundle ID; the APNs key itself is a secret.
+  "vars": { "APNS_TOPIC": "com.napchime.app" },
   "env": {
     "acc": {
       "name": "babytracker-relay-acc",
+      "vars": { "APNS_TOPIC": "com.napchime.app.acc" },
       "durable_objects": {
         "bindings": [{ "name": "FAMILY", "class_name": "Family" }]
       },

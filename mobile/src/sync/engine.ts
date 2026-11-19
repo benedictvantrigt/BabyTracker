@@ -234,6 +234,11 @@ export class SyncEngine {
     return open(this.familyKey.key, sealed, this.reminderContext(), { legacy: true });
   }
 
+  /** The key pushed reminders are sealed with, for the iOS notification extension (#6). */
+  reminderKey(): { familyId: string; key: string } {
+    return { familyId: this.client.familyId, key: b64url.encode(this.familyKey.key) };
+  }
+
   private reminderContext(): string {
     return sealContext.reminder(this.client.familyId);
   }

@@ -47,6 +47,9 @@ jobs:
         env:
           APP_VARIANT: acceptance
           EXPO_PUBLIC_RELAY_URL: ${{ vars.RELAY_URL_ACC }}
+          # Always compile the notification service extension here (#6); the App Store build
+          # has it only once its profile is set up.
+          IOS_NOTIFICATION_SERVICE: '1'
         run: npx expo prebuild --platform ios
 
       # Signed locally ("-", no Apple account): an unsigned app has no entitlements, and the
@@ -55,6 +58,11 @@ jobs:
         env:
           APP_VARIANT: acceptance
           EXPO_PUBLIC_RELAY_URL: ${{ vars.RELAY_URL_ACC }}
+          # Always compile the notification service extension here (#6); the App Store build
+          # has it only once its profile is set up.
+          IOS_NOTIFICATION_SERVICE: '1'
+          # The AlarmKit prompt (#7) would pop up mid-flow and cover the app.
+          EXPO_PUBLIC_ALARMKIT_AUTO_PROMPT: '0'
         run: |
           set -o pipefail
           workspace=$(ls -d ios/*.xcworkspace | head -n 1)

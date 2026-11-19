@@ -44,6 +44,10 @@ jobs:
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
       FIREBASE_SERVICE_ACCOUNT_ACC: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_ACC }}
       FIREBASE_SERVICE_ACCOUNT_PROD: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_PROD }}
+      # iPhone pushes (#6): an APNs auth key from the Apple Developer account (Keys).
+      APNS_KEY_P8: ${{ secrets.APNS_KEY_P8 }}
+      APNS_KEY_ID: ${{ secrets.APNS_KEY_ID }}
+      APNS_TEAM_ID: ${{ vars.IOS_TEAM_ID }}
       WRANGLER_SEND_METRICS: 'false'
     steps:
       - uses: actions/checkout@v4
@@ -75,6 +79,13 @@ jobs:
             printf '%s' "$service_account" | npx wrangler secret put FCM_SERVICE_ACCOUNT --env="$env"
           else
             echo "::notice::No Firebase service account for $TARGET; this relay runs without push."
+          fi
+          if [ -n "$APNS_KEY_P8" ] && [ -n "$APNS_KEY_ID" ] && [ -n "$APNS_TEAM_ID" ]; then
+            printf '%s' "$APNS_KEY_P8" | npx wrangler secret put APNS_KEY_P8 --env="$env"
+            printf '%s' "$APNS_KEY_ID" | npx wrangler secret put APNS_KEY_ID --env="$env"
+            printf '%s' "$APNS_TEAM_ID" | npx wrangler secret put APNS_TEAM_ID --env="$env"
+          else
+            echo "::notice::No APNs key (secrets APNS_KEY_P8, APNS_KEY_ID); this relay sends no iPhone pushes."
           fi
           url=$(grep -oE 'https://[a-z0-9.-]+\.workers\.dev' deploy.log | head -1)
           echo "Relay ($TARGET) deployed at: $url" | tee -a "$GITHUB_STEP_SUMMARY"

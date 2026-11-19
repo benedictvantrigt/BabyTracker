@@ -213,6 +213,7 @@ for App Store review, which the workflow never does. The token is signed with op
 | variable `IOS_TEAM_ID` (repository) | Apple team ID; without it the iOS release is skipped |
 | variable `TESTFLIGHT_UPLOAD` (repository) | `true` to upload; otherwise the app is only built and signed |
 | variable `TESTFLIGHT_EXTERNAL_GROUP` (repository) | External TestFlight group that gets each build (`External testers`); without it only the internal group gets builds |
+| `IOS_PROFILE_NSE_BASE64` (optional) | App Store profile for `com.napchime.app.NotificationService`, the extension that decrypts pushed reminders (#6); without it the app is built without the extension and the iPhone schedules its reminders itself |
 
 One-time setup in the developer portal: App IDs `com.napchime.app` (App Groups, Push
 Notifications, Time Sensitive Notifications) and `com.napchime.app.ExpoWidgetsTarget` (App
@@ -231,6 +232,21 @@ left out of the App Store countries). The app therefore sets `ITSAppUsesNonExemp
 to `false` (`ios.config.usesNonExemptEncryption`), so builds need no compliance question per
 upload. `true` would make App Store Connect demand a compliance code from approved
 documentation and refuse the upload (error 90592).
+
+**Reminders by push on iPhone (#6).** The relay sends iPhone pushes straight to APNs with a
+token-based APNs auth key; a notification service extension decrypts each reminder with the
+family key, which the app keeps in the App Group keychain. Two pieces turn it on:
+
+1. Developer portal → Keys: create a key with "Apple Push Notifications service (APNs)"
+   (Sandbox & Production). Add the `.p8` contents as repository secret `APNS_KEY_P8` and its
+   key ID as `APNS_KEY_ID`; the "Deploy relay" workflow hands them, with `IOS_TEAM_ID`, to both
+   relays as Worker secrets (run it once by hand for production, from `main`).
+2. Developer portal → Identifiers: App ID `com.napchime.app.NotificationService` with App
+   Groups (`group.com.napchime.app`); then an App Store profile for it, added as secret
+   `IOS_PROFILE_NSE_BASE64` in the `production` environment.
+
+Until both are there the iPhone sends the relay no push token and schedules its reminders
+itself. The simulator build always compiles the extension.
 
 Xcode: the runner's Xcode builds with the iOS 26 SDK; from April 2027 Apple requires the iOS 27
 SDK (Xcode 27) for uploads.

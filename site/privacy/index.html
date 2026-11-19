@@ -19,7 +19,7 @@
 <body>
 <main>
 <h1>Napchime privacy policy</h1>
-<p class="meta">Last updated: 18 November 2026</p>
+<p class="meta">Last updated: 19 November 2026</p>
 
 <p>Napchime is a baby tracker for parents. It is built so that your baby's records stay on
 your phones: there is no account, no advertising, no analytics and no tracking. This policy
@@ -56,13 +56,14 @@ keeps technical request logs for a few days to keep the service running and secu
 
 <h2>Push notifications</h2>
 <p>To wake a partner's phone after a change and to deliver reminders, the relay sends push
-messages through Firebase Cloud Messaging (Google). Google receives the phone's push token
-and the encrypted message; the content stays encrypted.</p>
+messages through Firebase Cloud Messaging (Google) to Android phones and through the Apple Push
+Notification service (Apple) to iPhones. Google or Apple receives the phone's push token and the
+encrypted message; the content stays encrypted and is decrypted on the phone.</p>
 
 <h2>Who we share data with</h2>
 <p>We do not sell or share your data. The only services involved are the ones that run the
-relay and deliver push messages, acting on our behalf: Cloudflare, Inc. and Google LLC
-(Firebase). Data may be processed outside your country under their standard safeguards.</p>
+relay and deliver push messages, acting on our behalf: Cloudflare, Inc., Google LLC
+(Firebase) and Apple Inc. (push notifications to iPhones). Data may be processed outside your country under their standard safeguards.</p>
 
 <h2>How long data is kept, and deleting it</h2>
 <ul>
@@ -71,7 +72,10 @@ relay and deliver push messages, acting on our behalf: Cloudflare, Inc. and Goog
     push token and name, and the family switches to a new key.</li>
   <li><strong>Delete family</strong> (Settings, partner sync): everything about your family is
     deleted from the relay straight away.</li>
-  <li>Otherwise, relay data is kept while the family uses sync.</li>
+  <li><strong>Unused families:</strong> when none of a family's phones has contacted the relay
+    for 12 months, everything about that family is deleted from the relay.</li>
+  <li><strong>Unused phones:</strong> a phone that has not contacted the relay for 90 days loses
+    its push token on the relay; it gets a new one the next time it syncs.</li>
 </ul>
 
 <h2>Children</h2>

@@ -299,11 +299,25 @@ export function summarizeDay(entries: Entry[], now: number): DaySummary {
 }
 
 /** Groups entries (newest first) into local days, newest day first. */
-export function groupByDay(entries: Entry[]): { dayStart: number; entries: Entry[] }[] {
-  const sorted = entries.filter((e) => e.deletedAt === null).sort((a, b) => b.start - a.start);
+/**
+ * Entries grouped by local day, newest first. An entry sits at its end time, so a night
+ * that started yesterday shows under the day it ended, above what happened while the baby
+ * slept. Running entries (no end yet) stay at the top of today.
+ */
+export function groupByDay(
+  entries: Entry[],
+  now: number = Date.now(),
+): { dayStart: number; entries: Entry[] }[] {
+  const at = (e: Entry) => e.end ?? Math.max(now, e.start);
+  const sorted = entries
+    .filter((e) => e.deletedAt === null)
+    .sort((a, b) => {
+      if ((a.end === null) !== (b.end === null)) return a.end === null ? -1 : 1;
+      return at(b) - at(a) || b.start - a.start;
+    });
   const groups: { dayStart: number; entries: Entry[] }[] = [];
   for (const e of sorted) {
-    const day = startOfLocalDay(e.start);
+    const day = startOfLocalDay(at(e));
     const last = groups[groups.length - 1];
     if (last && last.dayStart === day) last.entries.push(e);
     else groups.push({ dayStart: day, entries: [e] });
