@@ -6,6 +6,15 @@ name: Sleep timer, and leaves reminders scheduled for the alarm check
 - tapOn: 'Settings'
 - scrollUntilVisible:
     element: 'THIS PHONE'
+# My days: a day turns off and on again (all days on, so the reminders below still fire).
+- scrollUntilVisible:
+    element:
+      id: 'duty-day-1'
+- assertVisible: 'My days'
+- tapOn:
+    id: 'duty-day-1'
+- tapOn:
+    id: 'duty-day-1'
 - scrollUntilVisible:
     element:
       id: 'toggle-feed-day'

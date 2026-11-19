@@ -1,4 +1,5 @@
 import type { Repo } from '@/db/repo';
+import { isOnDuty } from '@/domain/duty-days';
 import { runningEntries } from '@/domain/entries';
 import { computeReminders } from '@/domain/reminders';
 import { DAY } from '@/domain/time';
@@ -8,7 +9,9 @@ import { syncNotifications } from './scheduler';
 /**
  * Brings this phone's notifications in line with the log: one ongoing notification per
  * running timer, and nap/feed reminders scheduled on the phone, unless they are switched
- * off here or the sync server delivers them by push. Works without the UI (background push).
+ * off here or the sync server delivers them by push. Only on this phone's duty days: a
+ * reminder that falls on another day is left out, and so are the timers while today isn't
+ * one. Works without the UI (background push).
  */
 export async function refreshNotifications(repo: Repo, now = Date.now()): Promise<void> {
   const [settings, children, sync] = await Promise.all([
@@ -20,6 +23,9 @@ export async function refreshNotifications(repo: Repo, now = Date.now()): Promis
   if (!child) return;
   const entries = await repo.listEntries(child.id, now - 2 * DAY);
   const localReminders = settings.remindersOnThisPhone && !sync?.pushActive;
-  const reminders = localReminders ? computeReminders(entries, settings, child, now) : [];
-  await syncNotifications(reminders, runningEntries(entries), child.name);
+  const reminders = localReminders
+    ? computeReminders(entries, settings, child, now).filter((r) => isOnDuty(settings, r.fireAt))
+    : [];
+  const running = isOnDuty(settings, now) ? runningEntries(entries) : [];
+  await syncNotifications(reminders, running, child.name);
 }

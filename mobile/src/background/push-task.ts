@@ -7,6 +7,7 @@ import * as TaskManager from 'expo-task-manager';
 
 import { Repo } from '@/db/repo';
 import { migrate } from '@/db/schema';
+import { isOnDuty } from '@/domain/duty-days';
 import { refreshNotifications } from '@/notifications/refresh';
 import { presentPushedReminder } from '@/notifications/scheduler';
 import { openReminder } from '@/sync/reminders';
@@ -45,7 +46,10 @@ async function handle(message: Message): Promise<boolean> {
       await engine.sync().catch(() => {});
       reminder = openReminder(engine, message.payload);
     }
-    if (!reminder || !settings.remindersOnThisPhone) return false;
+    // A pushed reminder is due now: shown only on this phone's duty days.
+    if (!reminder || !settings.remindersOnThisPhone || !isOnDuty(settings, Date.now())) {
+      return false;
+    }
     await presentPushedReminder(message.tag, reminder);
     return true;
   }
