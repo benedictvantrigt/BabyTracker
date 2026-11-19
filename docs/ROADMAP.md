@@ -24,7 +24,7 @@ per phone. The app is React Native (Expo), Android first, iOS later.
 | 2. Sync | QR pairing, encrypted change log, Cloudflare relay, device removal, retention | ✅ 0.2.0 pairing, encryption and relay; 0.5.0 device removal with key rotation, retention, delete family; data import dropped |
 | 3. Notifications | Scheduled pushes through the relay, iOS Notification Service Extension, Android exact alarms, awake-window and feed rules | 🟡 0.3.0: done for Android; iOS started (#5: build config, local reminders) |
 | 4. Extras | Record types still missing (tummy time, pumping, growth, …), NFC tags, Live Activities / Live Updates, widgets, charts, growth curves, PDF/CSV export | 🟡 Started: sleep schedule (0.4.0); 0.6.0: #29, #30, #35, tags (#12), Android widget (#16); 0.8.0: tummy time, pumping, temperature, growth (#8–#11); 0.9.0: widget settings per widget and sizes down to 1×1 (#16), age in weeks; 0.10.0: awake timer (#73), feeds without a length (#53), nap feedback (#54, #55), My days per phone (#71) |
-| 5. Hardening | Key recovery, backups, privacy statement, store submission, security review fixes | 🟡 Started: release signing with our own keys (#40), relay-proof key distribution (#41), widget receiver check (#42); 0.8.0: app bundle, Play App Signing and automatic upload to internal testing (#47, done), privacy policy page; 0.9.0: own app icon, minimal Android permissions, Play listing and declarations entered |
+| 5. Hardening | Key recovery, backups, privacy statement, store submission, security review fixes | 🟡 Started: release signing with our own keys (#40), relay-proof key distribution (#41), widget receiver check (#42); 0.8.0: app bundle, Play App Signing and automatic upload to internal testing (#47, done), privacy policy page; 0.9.0: own app icon, minimal Android permissions, Play listing and declarations entered; Apple developer account, App Store Connect app and automatic TestFlight upload |
 
 Current position: phases 1–3 are done for Android (Phase 2 completed in 0.5.0). Phase 4 has
 started with the age-based sleep schedule (#28, version 0.4.0); 0.6.0 added the Today
@@ -115,7 +115,7 @@ Other extras:
 - #23 Key backup within a platform
 - #24 Backups / data export for safekeeping
 - #25 Privacy statement
-- #26 Final package name and store submission (package `com.napchime.app` since 0.8.0; Android on internal testing)
+- #26 Final package name and store submission (package `com.napchime.app` since 0.8.0; Android on internal testing; iOS: App Store Connect app and TestFlight upload from CI since 2026-11-19)
 - #47 Android store build pipeline (done in 0.8.0: AAB, Play App Signing, target SDK 36, keyless upload to internal testing)
 - #40 Sign release APKs with our own key, not the template debug keystore (done; keys set up per README)
 - #41 Don't trust the relay's device list for key wrapping (done: encrypted member list, context-bound sealing, safety code)

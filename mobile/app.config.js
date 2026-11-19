@@ -8,6 +8,12 @@ const fs = require('fs');
 const path = require('path');
 
 module.exports = ({ config }) => {
+  // One build number for both stores: the iOS build number follows android.versionCode, which
+  // goes up by one per release (README, Versions and branches).
+  config = {
+    ...config,
+    ios: { ...config.ios, buildNumber: String(config.android.versionCode) },
+  };
   if (process.env.APP_VARIANT === 'acceptance') {
     config = {
       ...config,

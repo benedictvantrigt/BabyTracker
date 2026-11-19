@@ -180,6 +180,50 @@ the service account through Workload Identity Federation. The pieces, in Google 
 Phones that install from Play get Google's app signing key, so they update from Play only;
 the APK on the GitHub release no longer installs over them.
 
+### App Store (TestFlight)
+
+The iPhone app follows the same path as Play: after a new version is released from `main`,
+the "Release to TestFlight" workflow (`.github/workflows/ios-release.yml`) builds the production
+app (`com.napchime.app`, production relay) on a macOS runner, signs it with our own
+distribution certificate and uploads it to App Store Connect. It lands in TestFlight; the
+internal group "Internal testers" gets each build automatically. Submitting to App Review is
+done by hand. The iOS build number follows `android.versionCode` (`mobile/app.config.js`), so
+there is one number to raise per release. If the upload fails, the GitHub release stays; run
+the workflow by hand (Actions, from `main`) with the tag, or with `main` to build the current
+code. A TestFlight build needs a higher build number than the last upload of the same version.
+
+Apple has no keyless sign-in like Workload Identity Federation, so the job uses an App Store
+Connect API key with the **Developer** role: it can upload builds and manage internal testers,
+not change the listing or submit for review. Everything sits in the `production` environment
+(main only):
+
+| Secret / variable | What |
+|---|---|
+| `IOS_DIST_CERT_P12_BASE64`, `IOS_DIST_CERT_PASSWORD` | Apple Distribution certificate with its private key (`.p12`, base64) |
+| `IOS_PROFILE_APP_BASE64` | App Store provisioning profile for `com.napchime.app` |
+| `IOS_PROFILE_WIDGETS_BASE64` | App Store provisioning profile for `com.napchime.app.ExpoWidgetsTarget` (Live Activities) |
+| `ASC_KEY_ID`, `ASC_ISSUER_ID`, `ASC_KEY_P8` | App Store Connect API key (Users and Access → Integrations, team key, Developer role) |
+| variable `IOS_TEAM_ID` (repository) | Apple team ID; without it the iOS release is skipped |
+| variable `TESTFLIGHT_UPLOAD` (repository) | `true` to upload; otherwise the app is only built and signed |
+
+One-time setup in the developer portal: App IDs `com.napchime.app` (App Groups, Push
+Notifications, Time Sensitive Notifications) and `com.napchime.app.ExpoWidgetsTarget` (App
+Groups), app group `group.com.napchime.app`, an Apple Distribution certificate from our own
+key, and an App Store profile per App ID (team `Z57QL9Z83W`, individual membership: the App
+Store lists the developer by name; certificate and profiles set up on 2026-11-19, valid until
+2027-11-19). In App Store Connect the app record "Napchime" (Apple ID 6836845283, SKU
+`napchime`, English (U.S.)) and the team API key "GitHub Actions" (Developer role). The
+certificate's private key, the `.p12` password, the profiles and the API key are kept offline
+as well, like the Android keystore. A new capability means new profiles: regenerate them and
+replace the two profile secrets. The certificate expires after a year.
+
+Export compliance: the sync encrypts with standard algorithms (`@noble`), so the app declares
+`ITSAppUsesNonExemptEncryption` (mass-market exemption, no French declaration; France is left
+out of the App Store countries).
+
+CI checks the `.ipa` before upload (`.github/scripts/verify-ipa.sh`): every bundle signed for
+distribution, production push, no debugging entitlement.
+
 ## Versions and branches
 
 - `main` is the released line; work happens on short-lived branches merged into `main` by
