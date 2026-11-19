@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import Constants from 'expo-constants';
 import { Alert, AppState, Linking, Platform, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 
+import NightAlarm from '../../../modules/night-alarm';
 import TimerNotification from '../../../modules/timer-notification';
 
 import { TabScreen } from '@/components/tab-screen';
@@ -159,6 +160,19 @@ export default function SettingsScreen() {
               value={settings.feedAlarmNight}
               onChange={(v) => update({ feedAlarmNight: v })}
             />
+            {settings.feedAlarmNight && NightAlarm?.isAvailable() && (
+              <ToggleRow
+                label="Ring like an alarm clock"
+                description={
+                  NightAlarm.authorizationState() === 'denied'
+                    ? 'Not allowed: turn on Alarms for Napchime in the iPhone Settings app'
+                    : 'Night feeds ring as an alarm, also in silent mode and Focus (this phone)'
+                }
+                value={settings.nightFeedAlarmKit}
+                testID="toggle-night-alarmkit"
+                onChange={(v) => update({ nightFeedAlarmKit: v })}
+              />
+            )}
           </Card>
         )}
 

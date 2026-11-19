@@ -171,6 +171,11 @@ export interface Settings {
    * the Today screen leaves out night totals. Night entries already logged stay.
    */
   nightSleep: boolean;
+  /**
+   * iPhone with iOS 26+: the night feed reminder rings as an AlarmKit alarm, also in silent
+   * mode and Focus (per phone, not synced). Elsewhere the setting has no effect.
+   */
+  nightFeedAlarmKit: boolean;
 }
 
 /** Reminder rules shared by the phones of a family; the rest of Settings is per phone. */
@@ -207,4 +212,5 @@ export const DEFAULT_SETTINGS: Settings = {
   dutyDays: [0, 1, 2, 3, 4, 5, 6],
   awakeTimer: true,
   nightSleep: true,
+  nightFeedAlarmKit: true,
 };

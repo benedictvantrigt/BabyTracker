@@ -6,6 +6,7 @@ import { DAY } from '@/domain/time';
 import type { Entry } from '@/domain/types';
 
 import { awakeTimerFor } from './live-timer-content';
+import { nightAlarmsReady, scheduleNightAlarms } from './night-alarms';
 import { syncNotifications } from './scheduler';
 
 /**
@@ -25,10 +26,16 @@ export async function refreshNotifications(repo: Repo, now = Date.now()): Promis
   const child = children.find((c) => c.id === settings.activeChildId) ?? children[0];
   if (!child) return;
   const entries = await repo.listEntries(child.id, now - 2 * DAY);
-  const localReminders = settings.remindersOnThisPhone && !sync?.pushActive;
-  const reminders = localReminders
+  const planned = settings.remindersOnThisPhone
     ? computeReminders(entries, settings, child, now).filter((r) => isOnDuty(settings, r.fireAt))
     : [];
+  // iOS 26+: night feeds ring as AlarmKit alarms (#7), scheduled here also when the other
+  // reminders come by push; the pushed copy then shows quietly (#6).
+  const alarmKit =
+    settings.nightFeedAlarmKit && (await nightAlarmsReady(planned.some((r) => r.alarm)));
+  await scheduleNightAlarms(alarmKit ? planned.filter((r) => r.alarm) : []);
+  const localReminders = settings.remindersOnThisPhone && !sync?.pushActive;
+  const reminders = localReminders ? planned.filter((r) => !(alarmKit && r.alarm)) : [];
   const onDuty = isOnDuty(settings, now);
   const running = onDuty
     ? runningEntries(entries).filter((e) => settings.nightSleep || !isNightSleep(e))

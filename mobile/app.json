@@ -15,6 +15,9 @@
       },
       "entitlements": {
         "com.apple.developer.usernotifications.time-sensitive": true
+      },
+      "infoPlist": {
+        "NSAlarmKitUsageDescription": "Napchime rings the night feed reminder like an alarm clock, also in silent mode or Focus. You can turn this off in Settings."
       }
     },
     "android": {
