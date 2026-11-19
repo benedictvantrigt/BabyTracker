@@ -161,6 +161,8 @@ to the track named in the repository variable `PLAY_TRACK` (set to `internal`); 
 variable it skips the upload. Internal testers come from the Play email list "Internal
 testers" (Internal testing → Testers). `PLAY_RELEASE_STATUS` (default `completed`) can be set to `draft`
 while the app has never been published, which Play requires for releases made through the API.
+If the upload fails, the GitHub release is still made; run the "Upload to Google Play"
+workflow (Actions, from `main`) with the tag to upload that release's bundle again.
 There is no key to store: the job exchanges its GitHub OIDC token for a short-lived token of
 the service account through Workload Identity Federation. The pieces, in Google Cloud project
 `com-napchime-app`:

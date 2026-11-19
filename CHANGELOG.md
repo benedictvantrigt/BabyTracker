@@ -14,6 +14,12 @@ before 1.0.0 a minor version marks a phase of the plan.
   short"), with a note that "too short" means less than half of the planned nap. The catch-up
   advice now says the midday nap was missed or too short.
 - Sleep card (#55): "Sleep today … of …" is the last line of the card.
+- My days (#71): Settings → This phone has a row of day chips (Mo–Su) for the days this phone
+  is on duty. On those days it shows every reminder and the running-timer notification; on
+  the other days neither, so partners can split the days. A day runs from day start to the
+  next day start, so a night feed counts toward the evening before. Saved per phone, not
+  synced; all days are on by default. A running timer's notification appears or goes at the
+  next refresh after the day changes (opening the app, a new entry or a partner's change).
 
 ## [0.9.0] — 2026-11-18 — App icon, widget settings and store preparation
 

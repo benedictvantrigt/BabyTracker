@@ -1,4 +1,5 @@
 import { DEFAULT_DASHBOARD, type DashboardLayout } from './dashboard';
+import type { Weekday } from './duty-days';
 
 // Every record is an immutable-id row with timestamps and a soft-delete marker,
 // so the Phase 2 sync layer can replicate it as a last-writer-wins change log.
@@ -157,6 +158,11 @@ export interface Settings {
    * moment, without a length (per phone, not synced).
    */
   feedTimer: boolean;
+  /**
+   * Days of the week this phone is on duty (per phone, not synced): only then does it show
+   * reminders and running-timer notifications. A day runs from day start to day start.
+   */
+  dutyDays: Weekday[];
 }
 
 /** Reminder rules shared by the phones of a family; the rest of Settings is per phone. */
@@ -190,4 +196,5 @@ export const DEFAULT_SETTINGS: Settings = {
   dashboardLayout: DEFAULT_DASHBOARD,
   remindersOnThisPhone: true,
   feedTimer: true,
+  dutyDays: [0, 1, 2, 3, 4, 5, 6],
 };
