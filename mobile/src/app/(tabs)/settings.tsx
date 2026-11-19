@@ -91,6 +91,32 @@ export default function SettingsScreen() {
           />
         </Card>
 
+        {(sleepOn || feedingOn) && (
+          <Card testID="settings-daytime">
+            <ThemedText type="smallBold" themeColor="textSecondary">
+              DAYTIME
+            </ThemedText>
+            <ThemedText type="small" themeColor="textSecondary">
+              Sleep starting in this window counts as a nap. Outside it, feeding reminders become
+              alarms.
+            </ThemedText>
+            <View style={styles.row}>
+              <ThemedText style={styles.grow}>Day starts</ThemedText>
+              <TimeOfDayField
+                minute={settings.dayStartMinute}
+                onChange={(m) => update({ dayStartMinute: m })}
+              />
+            </View>
+            <View style={styles.row}>
+              <ThemedText style={styles.grow}>Day ends</ThemedText>
+              <TimeOfDayField
+                minute={settings.dayEndMinute}
+                onChange={(m) => update({ dayEndMinute: m })}
+              />
+            </View>
+          </Card>
+        )}
+
         {sleepOn && <SleepCard child={activeChild} settings={settings} update={update} />}
 
         {feedingOn && (
@@ -131,32 +157,6 @@ export default function SettingsScreen() {
               value={settings.feedAlarmNight}
               onChange={(v) => update({ feedAlarmNight: v })}
             />
-          </Card>
-        )}
-
-        {(sleepOn || feedingOn) && (
-          <Card testID="settings-daytime">
-            <ThemedText type="smallBold" themeColor="textSecondary">
-              DAYTIME
-            </ThemedText>
-            <ThemedText type="small" themeColor="textSecondary">
-              Sleep starting in this window counts as a nap. Outside it, feeding reminders become
-              alarms.
-            </ThemedText>
-            <View style={styles.row}>
-              <ThemedText style={styles.grow}>Day starts</ThemedText>
-              <TimeOfDayField
-                minute={settings.dayStartMinute}
-                onChange={(m) => update({ dayStartMinute: m })}
-              />
-            </View>
-            <View style={styles.row}>
-              <ThemedText style={styles.grow}>Day ends</ThemedText>
-              <TimeOfDayField
-                minute={settings.dayEndMinute}
-                onChange={(m) => update({ dayEndMinute: m })}
-              />
-            </View>
           </Card>
         )}
 
@@ -211,7 +211,7 @@ function SleepCard({
       </ThemedText>
       <ToggleRow
         label="Follow the age schedule"
-        description="Planned naps and bedtime for the baby's age, from the day start below"
+        description="Planned naps and bedtime for the baby's age, from the day start above"
         value={settings.sleepSchedule}
         onChange={(v) => update({ sleepSchedule: v })}
         testID="toggle-schedule"
