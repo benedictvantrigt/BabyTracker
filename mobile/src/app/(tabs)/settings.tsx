@@ -34,6 +34,7 @@ import {
 import type { Child, Settings } from '@/domain/types';
 import { useTheme } from '@/hooks/use-theme';
 import { useSync } from '@/sync/app-sync';
+import { requestNightAlarms } from '@/notifications/night-alarms';
 import {
   getPermissionState,
   requestExactAlarmPermission,
@@ -170,7 +171,10 @@ export default function SettingsScreen() {
                 }
                 value={settings.nightFeedAlarmKit}
                 testID="toggle-night-alarmkit"
-                onChange={(v) => update({ nightFeedAlarmKit: v })}
+                onChange={(v) => {
+                  update({ nightFeedAlarmKit: v });
+                  if (v) requestNightAlarms();
+                }}
               />
             )}
           </Card>

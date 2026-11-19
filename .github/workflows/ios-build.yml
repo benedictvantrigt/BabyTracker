@@ -61,6 +61,8 @@ jobs:
           # Always compile the notification service extension here (#6); the App Store build
           # has it only once its profile is set up.
           IOS_NOTIFICATION_SERVICE: '1'
+          # The AlarmKit prompt (#7) would pop up mid-flow and cover the app.
+          EXPO_PUBLIC_ALARMKIT_AUTO_PROMPT: '0'
         run: |
           set -o pipefail
           workspace=$(ls -d ios/*.xcworkspace | head -n 1)
