@@ -2,6 +2,8 @@ import { useCallback, useEffect, useState } from 'react';
 import Constants from 'expo-constants';
 import { Alert, AppState, Linking, Platform, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 
+import TimerNotification from '../../../modules/timer-notification';
+
 import { TabScreen } from '@/components/tab-screen';
 import { ThemedText } from '@/components/themed-text';
 import { DutyDaysRow } from '@/components/duty-days';
@@ -363,7 +365,10 @@ function PermissionsCard() {
     return () => sub.remove();
   }, [refresh]);
 
-  if (!state || (state.notifications && state.exactAlarms)) return null;
+  // Android 16+: timers show as Live Updates unless the user turned that off (#51).
+  const liveUpdatesOff = Platform.OS === 'android' && TimerNotification?.canPostPromoted?.() === false;
+
+  if (!state || (state.notifications && state.exactAlarms && !liveUpdatesOff)) return null;
 
   return (
     <Card>
@@ -394,6 +399,18 @@ function PermissionsCard() {
                 .then(refresh)
                 .catch((e: Error) => Alert.alert('Not available in this build', e.message))
             }
+          />
+        </>
+      )}
+      {liveUpdatesOff && state.notifications && (
+        <>
+          <ThemedText type="small">
+            Live Updates are off for Napchime, so running timers don’t show in the status bar or as a
+            card on the lock screen.
+          </ThemedText>
+          <Button
+            label="Allow Live Updates"
+            onPress={() => TimerNotification?.openPromotedSettings()}
           />
         </>
       )}

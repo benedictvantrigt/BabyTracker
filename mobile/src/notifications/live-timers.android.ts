@@ -14,7 +14,13 @@ export async function syncLiveTimers(timers: LiveTimer[], channelId: string): Pr
   for (const id of TimerNotification.activeIds()) {
     if (!running.has(id)) TimerNotification.dismiss(id);
   }
+  // A timer the user swiped away stays away until it stops (#51); then its id is forgotten.
+  const dismissed = new Set(TimerNotification.dismissedIds?.() ?? []);
+  for (const id of dismissed) {
+    if (!running.has(id)) TimerNotification.forgetDismissed(id);
+  }
   for (const t of timers) {
+    if (dismissed.has(t.id)) continue;
     TimerNotification.show({
       id: t.id,
       title: t.title,

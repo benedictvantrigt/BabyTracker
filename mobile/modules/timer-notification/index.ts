@@ -19,6 +19,14 @@ interface TimerNotificationModule {
   show(timer: TimerNotificationInput): void;
   dismiss(id: string): void;
   activeIds(): string[];
+  /** Timer ids the user swiped away; `show` posts nothing for them. */
+  dismissedIds(): string[];
+  /** Forgets a swiped-away timer once it stopped. */
+  forgetDismissed(id: string): void;
+  /** Whether Live Updates are allowed (Android 16+); `null` on older Android versions. */
+  canPostPromoted(): boolean | null;
+  /** Opens the system setting for Live Updates. */
+  openPromotedSettings(): void;
 }
 
 /** Android only; `null` on other platforms or in Expo Go. */
