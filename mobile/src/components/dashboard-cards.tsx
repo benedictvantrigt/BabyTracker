@@ -244,11 +244,6 @@ function DayPlan({
             </ThemedText>
           </View>
         ))}
-      {open && schedule.slots.some((slot) => slot.status === 'short') && (
-        <ThemedText type="small" themeColor="textSecondary" testID="schedule-short-note">
-          Too short: slept less than half of the planned nap.
-        </ThemedText>
-      )}
       {open && (
         <>
           <View style={styles.planRow}>

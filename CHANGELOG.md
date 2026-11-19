@@ -3,8 +3,11 @@
 All notable changes to Napchime. Versions follow [Semantic Versioning](https://semver.org/);
 before 1.0.0 a minor version marks a phase of the plan.
 
-## Unreleased
+## [Unreleased]
 
+- Sleep card (#81): the day plan no longer says "too short". A too-short nap shows slept
+  against planned like any finished nap ("30m of 2h 00m"), and the note explaining
+  "too short" is gone. The catch-up advice stays.
 - Day sleep only (#80): Settings → Sleep → "Track night sleep" (per phone, not synced; on by
   default). When off, this phone tracks naps only: outside the day hours the Sleep card shows
   "Night · not tracked on this phone" without a Start sleep button, the widget's sleep button
