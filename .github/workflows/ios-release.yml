@@ -9,11 +9,13 @@ name: Release to TestFlight
 #   IOS_DIST_CERT_P12_BASE64, IOS_DIST_CERT_PASSWORD   Apple Distribution certificate + key
 #   IOS_PROFILE_APP_BASE64                              App Store profile for com.napchime.app
 #   IOS_PROFILE_WIDGETS_BASE64                          App Store profile for the widget extension
-#   ASC_KEY_ID, ASC_ISSUER_ID, ASC_KEY_P8               App Store Connect API key (Developer role:
-#                                                       uploads builds, cannot submit for review)
+#   ASC_KEY_ID, ASC_ISSUER_ID, ASC_KEY_P8               App Store Connect API key (App Manager
+#                                                       role: uploads builds and hands them to
+#                                                       external testers)
 # Repository variables:
-#   IOS_TEAM_ID       Apple Developer team ID
-#   TESTFLIGHT_UPLOAD "true" to upload; otherwise the app is built and signed, not uploaded
+#   IOS_TEAM_ID                Apple Developer team ID
+#   TESTFLIGHT_UPLOAD          "true" to upload; otherwise the app is built and signed, not uploaded
+#   TESTFLIGHT_EXTERNAL_GROUP  external TestFlight group that gets each build (Beta App Review)
 on:
   workflow_dispatch:
     inputs:
@@ -30,7 +32,8 @@ on:
 jobs:
   testflight:
     runs-on: macos-latest
-    timeout-minutes: 90
+    # Build and upload take about 30 minutes; waiting for Apple to process the build up to 60.
+    timeout-minutes: 150
     # Only this environment (main only) holds the signing certificate and the API key.
     environment: production
     permissions:
@@ -138,6 +141,30 @@ jobs:
           trap 'rm -f "$key"' EXIT
           xcrun altool --upload-app --type ios --file napchime.ipa \
             --apiKey "$ASC_KEY_ID" --apiIssuer "$ASC_ISSUER_ID" --output-format normal
+
+      # The internal group gets every build by itself; an external group needs each build added
+      # and submitted for Beta App Review. The "What to Test" text is this version's CHANGELOG
+      # entry. Waits for Apple to process the build (usually 5-30 minutes).
+      - name: Hand the build to external testers
+        if: vars.TESTFLIGHT_UPLOAD == 'true' && vars.TESTFLIGHT_EXTERNAL_GROUP != ''
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+          GROUP: ${{ vars.TESTFLIGHT_EXTERNAL_GROUP }}
+        run: |
+          export ASC_KEY_PATH="$RUNNER_TEMP/asc.p8"
+          printf '%s\n' "$ASC_KEY_P8" > "$ASC_KEY_PATH"
+          trap 'rm -f "$ASC_KEY_PATH"' EXIT
+          version=$(node -p "require('./app.json').expo.version")
+          build=$(node -p "require('./app.json').expo.android.versionCode")
+          notes=$(awk -v v="$version" '
+            index($0, "## [" v "]") == 1 { on = 1; next }
+            on && /^## \[/ { exit }
+            on { print }' ../CHANGELOG.md | sed '/./,$!d' | head -c 3900)
+          [ -n "$notes" ] || notes="Napchime $version. See CHANGELOG.md for what changed."
+          bash ../ci/.github/scripts/testflight-distribute.sh 6836845283 "$build" "$GROUP" \
+            "Napchime $version"$'\n\n'"$notes"
 
       - name: Remove the signing keychain
         if: always()
