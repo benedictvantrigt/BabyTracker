@@ -3,8 +3,25 @@
 All notable changes to Napchime. Versions follow [Semantic Versioning](https://semver.org/);
 before 1.0.0 a minor version marks a phase of the plan.
 
-## [Unreleased]
+## [0.11.0] — 2026-11-19 — Night alarm, end-time timeline and relay retention
 
+- Timeline (#70): entries with a length sit at their end time, so a night shows above what
+  happened while the baby slept, under the day it ended. Running timers stay on top.
+- Settings (#64): the Daytime card (day start and end) now comes right before the Sleep card
+  whose schedule it drives.
+- iPhone night alarm (#7): on iOS 26 and later the night feed reminder rings like an alarm
+  clock (AlarmKit), also in silent mode and Focus. iOS asks once, the first time a night feed
+  is planned while the app is open. Turn it off per phone in Settings → Feeding → "Ring like an
+  alarm clock". Without permission or on older iOS the time-sensitive notification stays.
+- Android timer notification (#51): a timer you swipe away stays away until it stops. If Live
+  Updates are turned off for Napchime (Android 16+), Settings shows a link to turn them on.
+- Relay retention (#59): a family none of whose phones synced for 12 months is deleted from the
+  sync server; a phone silent for 90 days loses its push token until it syncs again. The
+  Partner sync card and the privacy policy say so.
+- iPhone reminders by push (#6): the relay can push to iPhones through APNs and a notification
+  service extension decrypts the reminder before it shows. Off until the APNs key and the
+  extension's profile are set up (README, App Store); until then the iPhone schedules its
+  reminders itself, as before.
 - Sleep card (#81): the day plan no longer says "too short". A too-short nap shows slept
   against planned like any finished nap ("30m of 2h 00m"), and the note explaining
   "too short" is gone. The catch-up advice stays.
