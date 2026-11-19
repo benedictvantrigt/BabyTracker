@@ -19,7 +19,7 @@
 <body>
 <main>
 <h1>Napchime privacy policy</h1>
-<p class="meta">Last updated: 18 November 2026</p>
+<p class="meta">Last updated: 19 November 2026</p>
 
 <p>Napchime is a baby tracker for parents. It is built so that your baby's records stay on
 your phones: there is no account, no advertising, no analytics and no tracking. This policy
@@ -71,7 +71,10 @@ relay and deliver push messages, acting on our behalf: Cloudflare, Inc. and Goog
     push token and name, and the family switches to a new key.</li>
   <li><strong>Delete family</strong> (Settings, partner sync): everything about your family is
     deleted from the relay straight away.</li>
-  <li>Otherwise, relay data is kept while the family uses sync.</li>
+  <li><strong>Unused families:</strong> when none of a family's phones has contacted the relay
+    for 12 months, everything about that family is deleted from the relay.</li>
+  <li><strong>Unused phones:</strong> a phone that has not contacted the relay for 90 days loses
+    its push token on the relay; it gets a new one the next time it syncs.</li>
 </ul>
 
 <h2>Children</h2>

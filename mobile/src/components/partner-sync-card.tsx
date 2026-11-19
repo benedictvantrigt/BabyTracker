@@ -188,6 +188,11 @@ export function PartnerSyncCard() {
           ? 'Reminders arrive by push from the sync server, so they follow your partner’s logging even while this app is closed.'
           : 'Reminders are scheduled on this phone. Push is not available in this build, so they update when the app syncs.'}
       </ThemedText>
+      <ThemedText type="small" themeColor="textSecondary" testID="relay-retention">
+        A family whose phones don’t sync for 12 months is deleted from the sync server, and a phone
+        that doesn’t sync for 90 days stops getting reminders by push until it syncs again. Your
+        phones keep everything they logged.
+      </ThemedText>
       <Button
         label="Invite partner"
         variant="primary"

@@ -18,6 +18,10 @@ const MAX_REMINDER_AHEAD_MS = 2 * 24 * 60 * 60_000;
 /** A reminder delivered later than this after its time is dropped by FCM. */
 const REMINDER_TTL_SECONDS = 30 * 60;
 const SYNC_NUDGE_TTL_SECONDS = 60 * 60;
+/** A family none of whose phones contacted the relay for this long is deleted (#59). */
+export const FAMILY_TTL_MS = 365 * 24 * 60 * 60_000;
+/** A phone that did not contact the relay for this long loses its push token (#59). */
+export const PUSH_TOKEN_TTL_MS = 90 * 24 * 60 * 60_000;
 /** Sealed per-device data: device labels and wrapped family keys. */
 const MAX_SEALED_BYTES = 1024;
 
@@ -121,6 +125,8 @@ export class Family extends DurableObject<FcmEnv> {
 
     if (!this.isMember(signed.deviceId)) return error('not_a_member', 403);
     this.sql.exec('UPDATE devices SET last_seen_at = ? WHERE id = ?', now, signed.deviceId);
+    // Families from before #59 have no alarm yet; one is needed to clean up after them.
+    if ((await this.ctx.storage.getAlarm()) === null) await this.scheduleAlarm();
     if (route === 'POST /invites') return this.createInvite(signed.deviceId, body, now);
     if (route === 'POST /changes') return this.push(signed.deviceId, body, now);
     if (route === 'GET /changes') return this.pull(signed.deviceId, url, now);
@@ -358,11 +364,40 @@ export class Family extends DurableObject<FcmEnv> {
 
   /** Deletes the family from the relay: devices, log, invites and reminders. */
   private async deleteFamily(): Promise<Response> {
+    await this.wipe();
+    return json({ ok: true });
+  }
+
+  private async wipe(): Promise<void> {
     for (const table of ['devices', 'invites', 'changes', 'reminders', 'meta', 'key_wraps']) {
       this.sql.exec(`DELETE FROM ${table}`);
     }
     await this.ctx.storage.deleteAlarm();
-    return json({ ok: true });
+  }
+
+  /** When a phone of this family last contacted the relay (or joined); null for no family. */
+  private lastActivity(): number | null {
+    return this.sql
+      .exec(
+        'SELECT MAX(COALESCE(last_seen_at, created_at)) AS t FROM devices WHERE revoked_at IS NULL',
+      )
+      .one().t as number | null;
+  }
+
+  /**
+   * Retention (#59): deletes the family when none of its phones contacted the relay for
+   * FAMILY_TTL_MS, and drops the push token of a phone silent for PUSH_TOKEN_TTL_MS.
+   * Returns false when the family is gone.
+   */
+  private expire(now: number): boolean {
+    const last = this.lastActivity();
+    if (last !== null && now - last >= FAMILY_TTL_MS) return false;
+    this.sql.exec(
+      `UPDATE devices SET push_token = NULL
+       WHERE push_token IS NOT NULL AND COALESCE(last_seen_at, created_at) <= ?`,
+      now - PUSH_TOKEN_TTL_MS,
+    );
+    return true;
   }
 
   private listDevices(): Response {
@@ -452,15 +487,34 @@ export class Family extends DurableObject<FcmEnv> {
     return json({ applied: true });
   }
 
+  /** The alarm fires for the next reminder, or to clean up after an unused family (#59). */
   private async scheduleAlarm(): Promise<void> {
-    const next = this.sql.exec('SELECT MIN(fire_at) AS t FROM reminders').one().t as number | null;
-    if (next === null) await this.ctx.storage.deleteAlarm();
-    else await this.ctx.storage.setAlarm(next);
+    const reminder = this.sql.exec('SELECT MIN(fire_at) AS t FROM reminders').one().t as
+      | number
+      | null;
+    const last = this.lastActivity();
+    const token = this.sql
+      .exec(
+        `SELECT MIN(COALESCE(last_seen_at, created_at)) AS t FROM devices
+         WHERE revoked_at IS NULL AND push_token IS NOT NULL`,
+      )
+      .one().t as number | null;
+    const times = [
+      reminder,
+      last === null ? null : last + FAMILY_TTL_MS,
+      token === null ? null : token + PUSH_TOKEN_TTL_MS,
+    ].filter((t): t is number => t !== null);
+    if (times.length === 0) await this.ctx.storage.deleteAlarm();
+    else await this.ctx.storage.setAlarm(Math.min(...times));
   }
 
   /** Durable Object alarm: push every reminder that is due, then wait for the next one. */
   async alarm(): Promise<void> {
     const now = Date.now();
+    if (!this.expire(now)) {
+      await this.wipe();
+      return;
+    }
     const due = this.sql
       .exec('SELECT tag, fire_at, body FROM reminders WHERE fire_at <= ?', now + 1000)
       .toArray();
