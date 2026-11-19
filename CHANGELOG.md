@@ -3,7 +3,7 @@
 All notable changes to Napchime. Versions follow [Semantic Versioning](https://semver.org/);
 before 1.0.0 a minor version marks a phase of the plan.
 
-## Unreleased
+## [0.10.0] — 2026-11-19 — My days, awake timer and feeds without a length
 
 - Awake timer (#73): between sleeps, the lock screen shows how long the baby has been awake,
   counting down to the next nap: the next planned nap or bedtime with the sleep schedule on,
