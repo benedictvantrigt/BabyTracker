@@ -60,6 +60,26 @@ describe('computeReminders', () => {
   });
 });
 
+describe('day sleep only (night sleep not tracked on this phone)', () => {
+  const dayOnly = { ...settings, nightSleep: false };
+  const evening = [entry('sleep', at(16, 15), at(17), { nap: true })];
+
+  it('keeps the bedtime reminder from the schedule', () => {
+    const fourMonths = kid('Micky', '2026-06-20');
+    const reminders = computeReminders(evening, dayOnly, fourMonths, at(17, 30));
+    expect(reminders.find((r) => r.id === 'bed')).toMatchObject({ fireAt: at(18, 45) });
+  });
+
+  it('counts the first nap of the morning from the day start with the awake window', () => {
+    const plain = { ...dayOnly, sleepSchedule: false };
+    const [nap] = computeReminders(evening, plain, micky, at(21));
+    expect(nap).toMatchObject({ id: 'nap', fireAt: at(8, 30, 1) });
+    // With the night tracked, the nap waits for the night to be logged.
+    expect(computeReminders(evening, { ...plain, nightSleep: true }, micky, at(21))).toEqual([]);
+    expect(nextNapAt(evening, plain, at(9, 0, 1))).toBe(at(8, 30, 1));
+  });
+});
+
 describe('next times for the dashboard', () => {
   it('reports the next nap and feed regardless of reminder toggles', () => {
     const entries = [
@@ -67,11 +87,11 @@ describe('next times for the dashboard', () => {
       entry('feeding', at(11, 5), at(11, 20), { type: 'formula', method: 'bottle', amount: 120 }),
     ];
     const off = { ...settings, napReminders: false, feedAlarmNight: false };
-    expect(nextNapAt(entries, off)).toBe(at(12, 30));
+    expect(nextNapAt(entries, off, at(11, 30))).toBe(at(12, 30));
     expect(nextFeedAt(entries, off)).toBe(at(15, 5));
   });
 
   it('has no next nap while a sleep timer runs', () => {
-    expect(nextNapAt([entry('sleep', at(10), null, { nap: true })], settings)).toBeNull();
+    expect(nextNapAt([entry('sleep', at(10), null, { nap: true })], settings, at(11))).toBeNull();
   });
 });

@@ -1,4 +1,5 @@
-import { lastCompletedSleep, latest } from './entries';
+import { latest } from './entries';
+import { awakeWindowFrom } from './night-sleep';
 import { planDay, scheduleStatus, stageFor, type ScheduleStatus } from './sleep-schedule';
 import { DAY, MINUTE, formatClock, formatDuration, isDaytime } from './time';
 import type { Child, Entry, Settings } from './types';
@@ -37,15 +38,16 @@ export function computeReminders(
   if (settings.napReminders && schedule) {
     reminders.push(...scheduleReminders(schedule, child, settings, asleep, now));
   } else if (settings.napReminders && !asleep) {
-    const sleep = lastCompletedSleep(live);
-    if (sleep && sleep.end !== null) {
-      const fireAt = sleep.end + settings.awakeWindowMinutes * MINUTE;
+    // Without night sleep tracked on this phone, the morning counts from the day start.
+    const woke = awakeWindowFrom(live, settings, now);
+    if (woke !== null) {
+      const fireAt = woke + settings.awakeWindowMinutes * MINUTE;
       if (fireAt > now && isDaytime(fireAt, settings.dayStartMinute, settings.dayEndMinute)) {
         reminders.push({
           id: 'nap',
           fireAt,
           title: 'Nap time',
-          body: `${childName} has been awake ${formatDuration(fireAt - sleep.end)} (since ${formatClock(sleep.end)}).`,
+          body: `${childName} has been awake ${formatDuration(fireAt - woke)} (since ${formatClock(woke)}).`,
           alarm: false,
         });
       }
@@ -140,11 +142,11 @@ function scheduleReminders(
 }
 
 /** Next nap time for display on the dashboard, ignoring whether reminders are enabled. */
-export function nextNapAt(entries: Entry[], settings: Settings): number | null {
+export function nextNapAt(entries: Entry[], settings: Settings, now: number): number | null {
   const live = entries.filter((e) => e.deletedAt === null);
   if (live.some((e) => e.kind === 'sleep' && e.end === null)) return null;
-  const sleep = lastCompletedSleep(live);
-  return sleep?.end != null ? sleep.end + settings.awakeWindowMinutes * MINUTE : null;
+  const woke = awakeWindowFrom(live, settings, now);
+  return woke !== null ? woke + settings.awakeWindowMinutes * MINUTE : null;
 }
 
 export function nextFeedAt(entries: Entry[], settings: Settings): number | null {

@@ -109,6 +109,7 @@ Other extras:
 - #73 Awake timer on the lock screen, counting down to the next nap (0.10.0)
 - #81 Day plan: drop the "too short" texts (done)
 - #71 My days: choose per phone which days it shows reminders (0.10.0)
+- #80 Option to track day sleep only, not night sleep (done)
 
 ### Phase 5: Hardening — [milestone](https://github.com/benedictvantrigt/BabyTracker/milestone/5)
 

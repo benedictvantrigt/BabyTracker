@@ -15,6 +15,16 @@ name: Sleep timer, and leaves reminders scheduled for the alarm check
     id: 'duty-day-1'
 - tapOn:
     id: 'duty-day-1'
+# Track night sleep: off and on again (on, so Start sleep shows whatever the CI clock says).
+- scrollUntilVisible:
+    element:
+      id: 'toggle-night-sleep'
+- tapOn:
+    id: 'toggle-night-sleep'
+- assertVisible: 'Only naps are timed.*'
+- tapOn:
+    id: 'toggle-night-sleep'
+- assertVisible: 'Sleep is timed day and night.*'
 - scrollUntilVisible:
     element:
       id: 'toggle-feed-day'

@@ -1,4 +1,5 @@
-import { diaperLabel, feedingLabel, lastCompletedSleep, latest, runningEntries } from './entries';
+import { diaperLabel, feedingLabel, latest, runningEntries } from './entries';
+import { isUntrackedNight, lastWake, nextDayStart } from './night-sleep';
 import { nextFeedAt, nextNapAt } from './reminders';
 import { scheduleStatus } from './sleep-schedule';
 import { formatClock } from './time';
@@ -54,10 +55,13 @@ export function widgetSummary(
     sleep = { title: `Asleep since ${formatClock(runningSleep.start)}`, detail: '' };
     const schedule = settings.sleepSchedule ? scheduleStatus(entries, child, settings, now) : null;
     if (schedule?.current) sleep.detail = `until ${formatClock(schedule.current.endAt)}`;
+  } else if (isUntrackedNight(settings, now)) {
+    // Day sleep only on this phone: the night is not timed.
+    sleep = { title: 'Night', detail: `day starts ${formatClock(nextDayStart(settings, now))}` };
   } else {
-    const lastSleep = lastCompletedSleep(entries);
+    const woke = lastWake(entries, settings, now);
     sleep = {
-      title: lastSleep?.end != null ? `Awake since ${formatClock(lastSleep.end)}` : 'No sleep yet',
+      title: woke !== null ? `Awake since ${formatClock(woke)}` : 'No sleep yet',
       detail: nextSleepDetail(child, entries, settings, now),
     };
   }
@@ -88,6 +92,6 @@ function nextSleepDetail(
       return '';
     }
   }
-  const napAt = nextNapAt(entries, settings);
+  const napAt = nextNapAt(entries, settings, now);
   return napAt ? `nap ${formatClock(napAt)}` : '';
 }

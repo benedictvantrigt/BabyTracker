@@ -33,6 +33,19 @@ describe('widgetSummary', () => {
     expect(s.sleeping).toBe(true);
   });
 
+  it('shows the night as untracked, and the morning from the day start, for day sleep only', () => {
+    const dayOnly = { ...settings, nightSleep: false };
+    const entries = [entry('sleep', at(16, 15, -1), at(17, 0, -1), { nap: true })];
+    expect(widgetSummary(fourMonths, entries, dayOnly, at(5)).sleep).toEqual({
+      title: 'Night',
+      detail: 'day starts 07:00',
+    });
+    expect(widgetSummary(fourMonths, entries, dayOnly, at(8)).sleep).toEqual({
+      title: 'Awake since 07:00',
+      detail: 'nap 09:00',
+    });
+  });
+
   it('uses the awake window without the schedule, and handles an empty log', () => {
     const entries = [entry('sleep', at(9), at(10), { nap: true })];
     expect(widgetSummary(fourMonths, entries, noSchedule, at(10, 30)).sleep).toEqual({

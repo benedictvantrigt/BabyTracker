@@ -53,6 +53,13 @@ export function isDaytime(ms: number, dayStartMinute: number, dayEndMinute: numb
   return m >= dayStartMinute && m < dayEndMinute;
 }
 
+/** Epoch ms for a time of day (minutes after midnight) on the local day of `ms`. */
+export function atMinuteOfDay(ms: number, minute: number): number {
+  const d = new Date(ms);
+  d.setHours(Math.floor(minute / 60), minute % 60, 0, 0);
+  return d.getTime();
+}
+
 export function formatMinuteOfDay(minute: number): string {
   return `${pad(Math.floor(minute / 60))}:${pad(minute % 60)}`;
 }

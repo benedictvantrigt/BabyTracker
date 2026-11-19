@@ -35,7 +35,7 @@ describe('awakeTimerFor', () => {
   it('counts down from waking to the end of the awake window', () => {
     const nap = entry('sleep', at(9), at(10, 12), { nap: true });
     expect(awakeTimerFor([nap], noKid, plain, at(10, 30))).toEqual({
-      id: `awake-${nap.id}-${at(11, 57)}`,
+      id: `awake-${at(10, 12)}-${at(11, 57)}`,
       kind: 'awake',
       title: `Micky awake since ${formatClock(at(10, 12))}`,
       text: `Nap at ${formatClock(at(11, 57))}`,
@@ -85,5 +85,16 @@ describe('awakeTimerFor', () => {
     const waking = entry('sleep', at(19, 0, -1), at(3), { nap: false });
     expect(awakeTimerFor([waking], noKid, plain, at(7, 30))).toBeNull();
     expect(awakeTimerFor([], noKid, plain, at(10))).toBeNull();
+  });
+
+  it('counts the morning from the day start when tracking day sleep only', () => {
+    const dayOnly = { ...plain, nightSleep: false };
+    const evening = entry('sleep', at(17, 0, -1), at(18, 0, -1), { nap: true });
+    expect(awakeTimerFor([evening], noKid, dayOnly, at(7, 30))).toMatchObject({
+      start: at(7),
+      countdownTo: at(8, 45),
+    });
+    expect(awakeTimerFor([], noKid, dayOnly, at(7, 30))?.start).toBe(at(7));
+    expect(awakeTimerFor([evening], noKid, dayOnly, at(5))).toBeNull();
   });
 });

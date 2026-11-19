@@ -14,12 +14,12 @@ import {
   feedingLabel,
   growthLabel,
   isNapStart,
-  lastCompletedSleep,
   latest,
   runningEntries,
   summarizeDay,
   temperatureLabel,
 } from '@/domain/entries';
+import { isUntrackedNight, lastWake, nextDayStart } from '@/domain/night-sleep';
 import { nextFeedAt, nextNapAt } from '@/domain/reminders';
 import {
   isNewStage,
@@ -78,9 +78,11 @@ function TimersCard({ entries, now, repo, run }: DashboardCardProps) {
 function SleepCard({ child, settings, entries, now, repo, run, logged }: DashboardCardProps) {
   const theme = useTheme();
   const sleeping = runningEntries(entries).find((e) => e.kind === 'sleep');
-  const lastSleep = lastCompletedSleep(entries);
+  const woke = lastWake(entries, settings, now);
+  // Day sleep only on this phone: at night no sleep timer runs and no awake time counts.
+  const untrackedNight = !sleeping && isUntrackedNight(settings, now);
   const schedule = settings.sleepSchedule ? scheduleStatus(entries, child, settings, now) : null;
-  const napAt = schedule ? null : nextNapAt(entries, settings);
+  const napAt = schedule ? null : nextNapAt(entries, settings, now);
   const startSleep = () =>
     run(async () => {
       const e = await repo.startTimer(child.id, 'sleep', {
@@ -96,14 +98,20 @@ function SleepCard({ child, settings, entries, now, repo, run, logged }: Dashboa
           New schedule: {schedule.stage.stage.label}, {schedule.plan.naps.length} naps a day
         </ThemedText>
       )}
-      <ThemedText>
+      <ThemedText testID="sleep-status">
         {sleeping
           ? `Asleep since ${formatClock(sleeping.start)}`
-          : lastSleep?.end != null
-            ? `Awake ${formatDuration(now - lastSleep.end)} (since ${formatClock(lastSleep.end)})`
-            : 'No sleep logged yet'}
+          : untrackedNight
+            ? 'Night · not tracked on this phone'
+            : woke !== null
+              ? `Awake ${formatDuration(now - woke)} (since ${formatClock(woke)})`
+              : 'No sleep logged yet'}
       </ThemedText>
-      {schedule ? (
+      {untrackedNight ? (
+        <ThemedText type="small" themeColor="textSecondary" testID="schedule-next">
+          {`Day starts at ${formatClock(nextDayStart(settings, now))}`}
+        </ThemedText>
+      ) : schedule ? (
         <ScheduleLines schedule={schedule} sleeping={!!sleeping} now={now} />
       ) : (
         !sleeping &&
@@ -115,13 +123,15 @@ function SleepCard({ child, settings, entries, now, repo, run, logged }: Dashboa
           </ThemedText>
         )
       )}
-      {!sleeping && (
+      {!sleeping && !untrackedNight && (
         <Button label="Start sleep" variant="primary" color={theme.sleep} onPress={startSleep} />
       )}
-      {schedule && <DayPlan schedule={schedule} now={now} />}
+      {schedule && <DayPlan schedule={schedule} now={now} night={settings.nightSleep} />}
       {schedule && (
         <ThemedText type="small" themeColor="textSecondary" testID="sleep-total">
-          {`Sleep today ${formatDuration(schedule.totalSleptMs)} of ${formatTarget(totalSleepTarget(schedule.stage.stage))}`}
+          {settings.nightSleep
+            ? `Sleep today ${formatDuration(schedule.totalSleptMs)} of ${formatTarget(totalSleepTarget(schedule.stage.stage))}`
+            : `Day sleep today ${formatDuration(schedule.daySleptMs)} of ${formatTarget(schedule.stage.stage.daySleep)}`}
         </ThemedText>
       )}
     </KindCard>
@@ -185,8 +195,19 @@ function adviceText(advice: SleepAdvice): string {
   }
 }
 
-/** Today's planned naps and bedtime with what was slept, and day sleep against the target. */
-function DayPlan({ schedule, now }: { schedule: ScheduleStatus; now: number }) {
+/**
+ * Today's planned naps and bedtime with what was slept, and day sleep against the target.
+ * Night sleep and its target only when this phone tracks the night.
+ */
+function DayPlan({
+  schedule,
+  now,
+  night,
+}: {
+  schedule: ScheduleStatus;
+  now: number;
+  night: boolean;
+}) {
   const [open, setOpen] = useState(false);
   const { daySleep, nightSleepHours } = schedule.stage.stage;
   const nightTarget: [number, number] = [nightSleepHours * 60, nightSleepHours * 60];
@@ -207,7 +228,9 @@ function DayPlan({ schedule, now }: { schedule: ScheduleStatus; now: number }) {
           </ThemedText>
         )}
         <ThemedText type="small" themeColor="textSecondary" testID="schedule-guide-sleep">
-          {`Sleep for this age: ${formatTarget(daySleep)} by day · ${formatTarget(nightTarget)} at night`}
+          {night
+            ? `Sleep for this age: ${formatTarget(daySleep)} by day · ${formatTarget(nightTarget)} at night`
+            : `Day sleep for this age: ${formatTarget(daySleep)}`}
         </ThemedText>
       </Pressable>
       {open &&
@@ -231,9 +254,11 @@ function DayPlan({ schedule, now }: { schedule: ScheduleStatus; now: number }) {
               {schedule.plan.bedtimeAt <= now ? 'past' : ''}
             </ThemedText>
           </View>
-          <ThemedText type="small" themeColor="textSecondary">
-            {`Night ${formatDuration(schedule.nightSleptMs)} of ${formatTarget(nightTarget)}`}
-          </ThemedText>
+          {night && (
+            <ThemedText type="small" themeColor="textSecondary">
+              {`Night ${formatDuration(schedule.nightSleptMs)} of ${formatTarget(nightTarget)}`}
+            </ThemedText>
+          )}
           <ThemedText type="small" themeColor="textSecondary">
             {`Day sleep ${formatDuration(schedule.daySleptMs)} of ${formatTarget(daySleep)}`}
           </ThemedText>
