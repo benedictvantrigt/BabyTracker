@@ -186,15 +186,22 @@ The iPhone app follows the same path as Play: after a new version is released fr
 the "Release to TestFlight" workflow (`.github/workflows/ios-release.yml`) builds the production
 app (`com.napchime.app`, production relay) on a macOS runner, signs it with our own
 distribution certificate and uploads it to App Store Connect. It lands in TestFlight; the
-internal group "Internal testers" gets each build automatically. Submitting to App Review is
+internal group "Internal testers" gets each build automatically. The workflow then waits for
+Apple to process the build, adds it to the external group named in the repository variable
+`TESTFLIGHT_EXTERNAL_GROUP` ("External testers": family testers invited by email, no App Store
+Connect access) with this version's CHANGELOG entry as "What to Test", and submits it for Beta
+App Review; Apple reviews the first build of a version, later ones mostly go straight through
+(`.github/scripts/testflight-distribute.sh`). Submitting to App Review for the App Store is
 done by hand. The iOS build number follows `android.versionCode` (`mobile/app.config.js`), so
 there is one number to raise per release. If the upload fails, the GitHub release stays; run
 the workflow by hand (Actions, from `main`) with the tag, or with `main` to build the current
 code. A TestFlight build needs a higher build number than the last upload of the same version.
 
 Apple has no keyless sign-in like Workload Identity Federation, so the job uses an App Store
-Connect API key with the **Developer** role: it can upload builds and manage internal testers,
-not change the listing or submit for review. Everything sits in the `production` environment
+Connect API key with the **App Manager** role. The Developer role can upload builds but may not
+add them to external groups (403); App Manager also allows editing the listing and submitting
+for App Store review, which the workflow never does. The token is signed with openssl
+(`.github/scripts/asc-jwt.sh`). Everything sits in the `production` environment
 (main only):
 
 | Secret / variable | What |
@@ -202,9 +209,10 @@ not change the listing or submit for review. Everything sits in the `production`
 | `IOS_DIST_CERT_P12_BASE64`, `IOS_DIST_CERT_PASSWORD` | Apple Distribution certificate with its private key (`.p12`, base64) |
 | `IOS_PROFILE_APP_BASE64` | App Store provisioning profile for `com.napchime.app` |
 | `IOS_PROFILE_WIDGETS_BASE64` | App Store provisioning profile for `com.napchime.app.ExpoWidgetsTarget` (Live Activities) |
-| `ASC_KEY_ID`, `ASC_ISSUER_ID`, `ASC_KEY_P8` | App Store Connect API key (Users and Access → Integrations, team key, Developer role) |
+| `ASC_KEY_ID`, `ASC_ISSUER_ID`, `ASC_KEY_P8` | App Store Connect API key (Users and Access → Integrations, team key, App Manager role) |
 | variable `IOS_TEAM_ID` (repository) | Apple team ID; without it the iOS release is skipped |
 | variable `TESTFLIGHT_UPLOAD` (repository) | `true` to upload; otherwise the app is only built and signed |
+| variable `TESTFLIGHT_EXTERNAL_GROUP` (repository) | External TestFlight group that gets each build (`External testers`); without it only the internal group gets builds |
 
 One-time setup in the developer portal: App IDs `com.napchime.app` (App Groups, Push
 Notifications, Time Sensitive Notifications) and `com.napchime.app.ExpoWidgetsTarget` (App
@@ -212,7 +220,7 @@ Groups), app group `group.com.napchime.app`, an Apple Distribution certificate f
 key, and an App Store profile per App ID (team `Z57QL9Z83W`, individual membership: the App
 Store lists the developer by name; certificate and profiles set up on 2026-11-19, valid until
 2027-11-19). In App Store Connect the app record "Napchime" (Apple ID 6836845283, SKU
-`napchime`, English (U.S.)) and the team API key "GitHub Actions" (Developer role). The
+`napchime`, English (U.S.)) and the team API key "GitHub Actions TestFlight" (App Manager role; it replaced the Developer-role key "GitHub Actions", revoked on 2026-11-19). The
 certificate's private key, the `.p12` password, the profiles and the API key are kept offline
 as well, like the Android keystore. A new capability means new profiles: regenerate them and
 replace the two profile secrets. The certificate expires after a year.
