@@ -6,7 +6,7 @@ import { LIVE_TIMER_KINDS } from '@/domain/entries';
 import type { Reminder } from '@/domain/reminders';
 import type { Entry } from '@/domain/types';
 
-import { liveTimerFor } from './live-timer-content';
+import { liveTimerFor, type LiveTimer } from './live-timer-content';
 import { syncLiveTimers } from './live-timers';
 
 const CHANNEL_REMINDERS = 'reminders';
@@ -55,7 +55,7 @@ export async function setupNotificationChannels(): Promise<void> {
   });
   await Notifications.setNotificationChannelAsync(CHANNEL_TIMERS, {
     name: 'Running timers',
-    description: 'Ongoing sleep and feeding timers',
+    description: 'Running sleep and feeding timers, and the time awake until the next nap',
     importance: AndroidImportance.DEFAULT,
     sound: null,
     enableVibrate: false,
@@ -90,19 +90,21 @@ export async function requestExactAlarmPermission(): Promise<boolean> {
 }
 
 /**
- * Replaces all pending reminders with `reminders` and shows each running timer outside the app:
- * as a live timer where the platform has one, otherwise as an ongoing notification. Idempotent;
- * call after every change.
+ * Replaces all pending reminders with `reminders` and shows each running timer, and the awake
+ * timer if any, outside the app: as a live timer where the platform has one, otherwise as an
+ * ongoing notification. Idempotent; call after every change.
  */
 export async function syncNotifications(
   reminders: Reminder[],
   running: Entry[],
   childName: string,
+  awake: LiveTimer | null = null,
 ): Promise<void> {
   // Tummy time stays in the app: the lock-screen styles exist for sleep and feeding only.
   const timers = running
     .filter((e) => LIVE_TIMER_KINDS.includes(e.kind))
     .map((e) => liveTimerFor(e, childName));
+  if (awake) timers.push(awake);
   // Live Activities need no notification permission, so these go first.
   const live = await syncLiveTimers(timers, CHANNEL_TIMERS).catch(() => false);
   if (!(await Notifications.getPermissionsAsync()).granted) return;

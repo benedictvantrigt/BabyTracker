@@ -5,6 +5,13 @@ before 1.0.0 a minor version marks a phase of the plan.
 
 ## Unreleased
 
+- Awake timer (#73): between sleeps, the lock screen shows how long the baby has been awake,
+  counting down to the next nap: the next planned nap or bedtime with the sleep schedule on,
+  else the awake window. It keeps counting once the nap is overdue, shows only during the day
+  hours (a wake-up up to an hour before the day start counts as the morning) and makes way for
+  the sleep timer when a sleep starts. Android: ongoing notification or Live Update, removed at
+  the end of the day; iOS: Live Activity. Both phones show it; turn it off per phone in
+  Settings → This phone.
 - Privacy policy: the publisher is named without a street address; contact stays by email.
 
 ## [0.9.0] — 2026-11-18 — App icon, widget settings and store preparation

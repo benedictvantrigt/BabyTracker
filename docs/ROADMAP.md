@@ -104,6 +104,7 @@ Other extras:
 - #29 Show days in the age under the baby's name (done)
 - #30 Show total sleep needed per the schedule and total slept that day (done)
 - #35 Today screen layout: keep turned-off cards in place, and hide their settings (done)
+- #73 Awake timer on the lock screen, counting down to the next nap (done, unreleased)
 
 ### Phase 5: Hardening — [milestone](https://github.com/benedictvantrigt/BabyTracker/milestone/5)
 

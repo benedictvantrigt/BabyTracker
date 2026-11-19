@@ -152,6 +152,8 @@ export interface Settings {
   dashboardLayout: DashboardLayout;
   /** Whether this phone shows nap and feed reminders (per phone, not synced). */
   remindersOnThisPhone: boolean;
+  /** Whether this phone shows the awake timer outside the app (per phone, not synced). */
+  awakeTimer: boolean;
 }
 
 /** Reminder rules shared by the phones of a family; the rest of Settings is per phone. */
@@ -184,4 +186,5 @@ export const DEFAULT_SETTINGS: Settings = {
   feedAlarmNight: true,
   dashboardLayout: DEFAULT_DASHBOARD,
   remindersOnThisPhone: true,
+  awakeTimer: true,
 };

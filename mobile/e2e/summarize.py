@@ -3,6 +3,7 @@
 Checks, besides the Maestro flows:
 - the app has at least one alarm pending with Android (nap and/or feed reminder);
 - the running feed timer shows an ongoing notification;
+- (informational) the awake timer after flow 06 stopped a sleep, shown only in the daytime;
 - after flow 07, the partner phone (played by e2e/partner.ts) received the app's diaper.
 """
 
@@ -61,6 +62,8 @@ def main() -> int:
 
     alarms = pending_alarms(alarm_text)
     timer_notification = "Feeding · Left" in notif_text and f"pkg={PKG}" in notif_text
+    # Only between the day start and end on the device clock, so it does not gate the run.
+    awake_timer = "Micky awake since" in notif_text
 
     partner_file = out / "partner" / "check.json"
     partner = json.loads(partner_file.read_text()) if partner_file.exists() else {}
@@ -88,6 +91,10 @@ def main() -> int:
         lines.append(f"- {when:%H:%M} UTC (in {delta:.0f} min)")
     if not alarms:
         lines.append("- none")
+    lines += ["", "## Awake timer", ""]
+    lines.append(
+        "- shown (ongoing notification)" if awake_timer else "- not shown (expected only in daytime)"
+    )
     shots = sorted(p.name for p in (out / "screenshots").glob("*.png"))
     lines += ["", "## Screenshots", ""] + [f"- screenshots/{s}" for s in shots]
 

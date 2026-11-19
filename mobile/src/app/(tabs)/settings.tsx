@@ -78,6 +78,13 @@ export default function SettingsScreen() {
             onChange={(v) => update({ remindersOnThisPhone: v })}
             testID="toggle-reminders-here"
           />
+          <ToggleRow
+            label="Awake timer"
+            description="On the lock screen during the day: time awake, counting down to the next nap or bedtime"
+            value={settings.awakeTimer}
+            onChange={(v) => update({ awakeTimer: v })}
+            testID="toggle-awake-timer"
+          />
         </Card>
 
         {sleepOn && <SleepCard child={activeChild} settings={settings} update={update} />}
