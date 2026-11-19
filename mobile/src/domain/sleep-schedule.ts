@@ -329,16 +329,15 @@ export interface SlotState extends PlanSlot {
 
 /**
  * What the day plan shows next to a nap: slept against planned, and its status.
- * A nap is "too short" when its time is over and the baby slept less than half of it.
+ * A too-short nap (time over, less than half slept) shows like a finished one.
  */
 export function slotLabel(slot: SlotState): string {
   const planned = formatDuration(slot.endAt - slot.startAt);
   const slept = formatDuration(slot.sleptMs);
   switch (slot.status) {
     case 'done':
-      return `${slept} of ${planned}`;
     case 'short':
-      return `${slept} of ${planned} · too short`;
+      return `${slept} of ${planned}`;
     case 'sleeping':
       return `${slept} of ${planned} · sleeping`;
     case 'missed':

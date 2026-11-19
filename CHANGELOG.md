@@ -3,6 +3,12 @@
 All notable changes to Napchime. Versions follow [Semantic Versioning](https://semver.org/);
 before 1.0.0 a minor version marks a phase of the plan.
 
+## [Unreleased]
+
+- Sleep card (#81): the day plan no longer says "too short". A too-short nap shows slept
+  against planned like any finished nap ("30m of 2h 00m"), and the note explaining
+  "too short" is gone. The catch-up advice stays.
+
 ## [0.10.0] — 2026-11-19 — My days, awake timer and feeds without a length
 
 - Awake timer (#73): between sleeps, the lock screen shows how long the baby has been awake,
