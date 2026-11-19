@@ -223,7 +223,7 @@ export class Repo {
   async listEntries(childId: string, since: number): Promise<Entry[]> {
     const rows = await this.db.getAllAsync<EntryRow>(
       `SELECT ${ENTRY_COLUMNS} FROM entries
-       WHERE child_id = ? AND deleted_at IS NULL AND (start >= ? OR "end" IS NULL)
+       WHERE child_id = ? AND deleted_at IS NULL AND ("end" IS NULL OR "end" >= ?)
        ORDER BY start DESC`,
       [childId, since],
     );

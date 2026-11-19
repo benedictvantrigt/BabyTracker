@@ -113,6 +113,16 @@ describe('labels and grouping', () => {
     ]);
   });
 
+  it('places entries at their end time; running ones on top of today', () => {
+    const night = entry('sleep', at(20, 0, -1), at(6), { nap: false });
+    const feed = entry('feeding', at(3), at(3, 20), { type: 'breast_milk', method: 'left' });
+    const diaper = entry('diaper', at(6, 30), at(6, 30), { wet: true, solid: false });
+    const running = entry('sleep', at(5, 0, -1), null, { nap: true });
+    const evening = entry('diaper', at(19, 0, -1), at(19, 0, -1), { wet: true, solid: false });
+    const groups = groupByDay([feed, night, evening, running, diaper], at(7));
+    expect(groups.map((g) => g.entries)).toEqual([[running, diaper, night, feed], [evening]]);
+  });
+
   it('classifies naps by the daytime window', () => {
     expect(isNapStart(at(13), settings)).toBe(true);
     expect(isNapStart(at(20), settings)).toBe(false);
