@@ -1,9 +1,10 @@
 import { Family } from './family';
+import type { ApnsEnv } from './apns';
 import type { FcmEnv } from './fcm';
 
 export { Family };
 
-export interface Env extends FcmEnv {
+export interface Env extends FcmEnv, ApnsEnv {
   FAMILY: DurableObjectNamespace<Family>;
 }
 

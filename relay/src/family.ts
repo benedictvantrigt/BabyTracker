@@ -1,7 +1,16 @@
 import { DurableObject } from 'cloudflare:workers';
 
 import { sha256Hex, verifyRequest } from './auth';
-import { fcmConfigured, sendPushes, type FcmEnv, type PushMessage } from './fcm';
+import { APNS_PREFIX, apnsConfigured, sendApns, type ApnsEnv } from './apns';
+import { fcmConfigured, sendPushes, type FcmEnv, type PushMessage, type SendResult } from './fcm';
+
+type PushEnv = FcmEnv & ApnsEnv;
+
+/** Whether the relay can push to this token: APNs for iPhones, FCM otherwise. */
+function canPush(env: PushEnv, token: string | null): boolean {
+  if (!token) return false;
+  return token.startsWith(APNS_PREFIX) ? apnsConfigured(env) : fcmConfigured(env);
+}
 
 /** Invites are single use and short lived; the code also carries the family key. */
 const INVITE_TTL_MS = 15 * 60_000;
@@ -46,10 +55,10 @@ function error(code: string, status: number): Response {
  * new key wrapped for each remaining device (the relay cannot unwrap it), the old log is
  * dropped and the remover uploads a snapshot sealed with the new key.
  */
-export class Family extends DurableObject<FcmEnv> {
+export class Family extends DurableObject<PushEnv> {
   private sql = this.ctx.storage.sql;
 
-  constructor(ctx: DurableObjectState, env: FcmEnv) {
+  constructor(ctx: DurableObjectState, env: PushEnv) {
     super(ctx, env);
     this.sql.exec(`
       CREATE TABLE IF NOT EXISTS devices (
@@ -444,7 +453,7 @@ export class Family extends DurableObject<FcmEnv> {
     if (label !== undefined) {
       this.sql.exec('UPDATE devices SET label = ? WHERE id = ?', label, deviceId);
     }
-    return json({ ok: true, push: fcmConfigured(this.env) });
+    return json({ ok: true, push: token ? canPush(this.env, token) : fcmConfigured(this.env) });
   }
 
   /**
@@ -550,7 +559,6 @@ export class Family extends DurableObject<FcmEnv> {
   }
 
   private async nudge(sender: string, priority: 'HIGH' | 'NORMAL'): Promise<void> {
-    if (!fcmConfigured(this.env)) return;
     const tokens = this.pushTokens(sender, false);
     await this.send(
       tokens.map((t) => ({
@@ -563,17 +571,25 @@ export class Family extends DurableObject<FcmEnv> {
     );
   }
 
-  /** Sends pushes and forgets tokens FCM reports as dead. */
-  private async send(messages: PushMessage[]): Promise<void> {
-    if (messages.length === 0 || !fcmConfigured(this.env)) return;
-    const results = await sendPushes(this.env, messages).catch(() => messages.map(() => 'failed'));
-    results.forEach((result, i) => {
+  /** Sends pushes (FCM, or APNs for iPhones) and forgets tokens reported as dead. */
+  private async send(all: PushMessage[]): Promise<void> {
+    const messages = all.filter((m) => canPush(this.env, m.token));
+    if (messages.length === 0) return;
+    const failed = (list: PushMessage[]): SendResult[] => list.map(() => 'failed');
+    const apple = messages.filter((m) => m.token.startsWith(APNS_PREFIX));
+    const google = messages.filter((m) => !m.token.startsWith(APNS_PREFIX));
+    const [appleResults, googleResults] = await Promise.all([
+      sendApns(this.env, apple).catch(() => failed(apple)),
+      sendPushes(this.env, google).catch(() => failed(google)),
+    ]);
+    const results: [PushMessage, SendResult][] = [
+      ...apple.map((m, i): [PushMessage, SendResult] => [m, appleResults[i]]),
+      ...google.map((m, i): [PushMessage, SendResult] => [m, googleResults[i]]),
+    ];
+    for (const [m, result] of results) {
       if (result === 'invalid_token') {
-        this.sql.exec(
-          'UPDATE devices SET push_token = NULL WHERE push_token = ?',
-          messages[i].token,
-        );
+        this.sql.exec('UPDATE devices SET push_token = NULL WHERE push_token = ?', m.token);
       }
-    });
+    }
   }
 }

@@ -23,6 +23,16 @@ module.exports = ({ config }) => {
       android: { ...config.android, package: `${config.android.package}.acc` },
     };
   }
+  // The iOS notification service extension that decrypts pushed reminders (#6). CI turns it on
+  // when the App Store profile for the extension is available (README, App Store); without it
+  // the iPhone sends the relay no push token and schedules its reminders itself.
+  if (process.env.IOS_NOTIFICATION_SERVICE === '1') {
+    config = {
+      ...config,
+      plugins: [...(config.plugins ?? []), './plugins/with-notification-service'],
+      extra: { ...config.extra, iosNotificationService: true },
+    };
+  }
   const googleServices = path.join(__dirname, 'google-services.json');
   if (!fs.existsSync(googleServices)) return config;
   return {

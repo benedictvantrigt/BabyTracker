@@ -56,13 +56,14 @@ keeps technical request logs for a few days to keep the service running and secu
 
 <h2>Push notifications</h2>
 <p>To wake a partner's phone after a change and to deliver reminders, the relay sends push
-messages through Firebase Cloud Messaging (Google). Google receives the phone's push token
-and the encrypted message; the content stays encrypted.</p>
+messages through Firebase Cloud Messaging (Google) to Android phones and through the Apple Push
+Notification service (Apple) to iPhones. Google or Apple receives the phone's push token and the
+encrypted message; the content stays encrypted and is decrypted on the phone.</p>
 
 <h2>Who we share data with</h2>
 <p>We do not sell or share your data. The only services involved are the ones that run the
-relay and deliver push messages, acting on our behalf: Cloudflare, Inc. and Google LLC
-(Firebase). Data may be processed outside your country under their standard safeguards.</p>
+relay and deliver push messages, acting on our behalf: Cloudflare, Inc., Google LLC
+(Firebase) and Apple Inc. (push notifications to iPhones). Data may be processed outside your country under their standard safeguards.</p>
 
 <h2>How long data is kept, and deleting it</h2>
 <ul>

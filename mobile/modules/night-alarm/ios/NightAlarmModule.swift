@@ -15,7 +15,9 @@ struct NightAlarmRecord: Record {
 
 /// The App Group shared with the notification service extension (#6): it reads whether this
 /// phone rings night feeds as alarms, and then shows a pushed night feed reminder quietly.
-private func sharedDefaults() -> UserDefaults? { UserDefaults(suiteName: "group.com.napchime.app") }
+private func sharedDefaults() -> UserDefaults? {
+  UserDefaults(suiteName: "group." + (Bundle.main.bundleIdentifier ?? "com.napchime.app"))
+}
 private let alarmsHandleNightFeedsKey = "alarmKitNightFeeds"
 private let scheduledKey = "nightAlarmIds"
 
