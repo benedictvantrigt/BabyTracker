@@ -217,9 +217,15 @@ certificate's private key, the `.p12` password, the profiles and the API key are
 as well, like the Android keystore. A new capability means new profiles: regenerate them and
 replace the two profile secrets. The certificate expires after a year.
 
-Export compliance: the sync encrypts with standard algorithms (`@noble`), so the app declares
-`ITSAppUsesNonExemptEncryption` (mass-market exemption, no French declaration; France is left
-out of the App Store countries).
+Export compliance: the sync encrypts with standard algorithms (`@noble`), which falls under the
+mass-market exemption (no documentation to file; France, which wants its own declaration, is
+left out of the App Store countries). The app therefore sets `ITSAppUsesNonExemptEncryption`
+to `false` (`ios.config.usesNonExemptEncryption`), so builds need no compliance question per
+upload. `true` would make App Store Connect demand a compliance code from approved
+documentation and refuse the upload (error 90592).
+
+Xcode: the runner's Xcode builds with the iOS 26 SDK; from April 2027 Apple requires the iOS 27
+SDK (Xcode 27) for uploads.
 
 CI checks the `.ipa` before upload (`.github/scripts/verify-ipa.sh`): every bundle signed for
 distribution, production push, no debugging entitlement.
