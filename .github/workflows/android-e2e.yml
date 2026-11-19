@@ -348,3 +348,14 @@ jobs:
           package=$(node -p "require('./mobile/app.json').expo.android.package")
           bash .github/scripts/play-upload.sh mobile/napchime.aab "$package" "${{ vars.PLAY_TRACK }}" \
             "$TAG" "${{ vars.PLAY_RELEASE_STATUS || 'completed' }}"
+
+  # The same version for iPhone, to TestFlight (README, App Store). Skipped until the
+  # repository variable IOS_TEAM_ID is set. A failure here leaves the Android release as it is;
+  # run "Release to TestFlight" by hand with the tag to try again.
+  ios-release:
+    needs: [release-check, release]
+    if: needs.release-check.outputs.new == 'true' && vars.IOS_TEAM_ID != ''
+    uses: ./.github/workflows/ios-release.yml
+    with:
+      tag: ${{ needs.release-check.outputs.tag }}
+    secrets: inherit

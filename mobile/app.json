@@ -10,6 +10,9 @@
     "ios": {
       "icon": "./assets/expo.icon",
       "bundleIdentifier": "com.napchime.app",
+      "config": {
+        "usesNonExemptEncryption": true
+      },
       "entitlements": {
         "com.apple.developer.usernotifications.time-sensitive": true
       }

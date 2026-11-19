@@ -1,0 +1,144 @@
+name: Release to TestFlight
+
+# Builds the production iOS app (com.napchime.app) for the App Store, signs it with our
+# distribution certificate and uploads it to App Store Connect, where it lands in TestFlight.
+# Called by the Android workflow after a new version is released from main, or by hand
+# (Actions, from main) with a tag to build that release again (README, App Store).
+#
+# Secrets of the "production" environment (main only):
+#   IOS_DIST_CERT_P12_BASE64, IOS_DIST_CERT_PASSWORD   Apple Distribution certificate + key
+#   IOS_PROFILE_APP_BASE64                              App Store profile for com.napchime.app
+#   IOS_PROFILE_WIDGETS_BASE64                          App Store profile for the widget extension
+#   ASC_KEY_ID, ASC_ISSUER_ID, ASC_KEY_P8               App Store Connect API key (Developer role:
+#                                                       uploads builds, cannot submit for review)
+# Repository variables:
+#   IOS_TEAM_ID       Apple Developer team ID
+#   TESTFLIGHT_UPLOAD "true" to upload; otherwise the app is built and signed, not uploaded
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag (for example v0.10.0) or branch to build
+        required: true
+        default: main
+  workflow_call:
+    inputs:
+      tag:
+        type: string
+        required: true
+
+jobs:
+  testflight:
+    runs-on: macos-latest
+    timeout-minutes: 90
+    # Only this environment (main only) holds the signing certificate and the API key.
+    environment: production
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag }}
+      # The signing and check scripts come from this workflow's own commit, so an older tag
+      # can be built with the current pipeline.
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.workflow_sha }}
+          path: ci
+          sparse-checkout: .github/scripts
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: mobile/package-lock.json
+      - run: xcodebuild -version
+
+      - name: Install the signing certificate and profiles
+        env:
+          CERT_P12: ${{ secrets.IOS_DIST_CERT_P12_BASE64 }}
+          CERT_PASSWORD: ${{ secrets.IOS_DIST_CERT_PASSWORD }}
+          PROFILE_APP: ${{ secrets.IOS_PROFILE_APP_BASE64 }}
+          PROFILE_WIDGETS: ${{ secrets.IOS_PROFILE_WIDGETS_BASE64 }}
+          TEAM_ID: ${{ vars.IOS_TEAM_ID }}
+        run: |
+          if [ -z "$CERT_P12" ] || [ -z "$CERT_PASSWORD" ] || [ -z "$PROFILE_APP" ] || [ -z "$PROFILE_WIDGETS" ] || [ -z "$TEAM_ID" ]; then
+            echo "::error::iOS signing is not set up: see README, App Store (secrets IOS_DIST_CERT_P12_BASE64, IOS_DIST_CERT_PASSWORD, IOS_PROFILE_APP_BASE64, IOS_PROFILE_WIDGETS_BASE64; variable IOS_TEAM_ID)."
+            exit 1
+          fi
+          keychain="$RUNNER_TEMP/signing.keychain-db"
+          keychain_password=$(openssl rand -hex 24)
+          security create-keychain -p "$keychain_password" "$keychain"
+          security set-keychain-settings -lut 3600 "$keychain"
+          security unlock-keychain -p "$keychain_password" "$keychain"
+          printf '%s' "$CERT_P12" | base64 -d > "$RUNNER_TEMP/dist.p12"
+          security import "$RUNNER_TEMP/dist.p12" -k "$keychain" -P "$CERT_PASSWORD" -T /usr/bin/codesign -T /usr/bin/security
+          rm -f "$RUNNER_TEMP/dist.p12"
+          security set-key-partition-list -S apple-tool:,apple: -k "$keychain_password" "$keychain" > /dev/null
+          security list-keychains -d user -s "$keychain" $(security list-keychains -d user | tr -d '"')
+          mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles"
+          for p in "$PROFILE_APP" "$PROFILE_WIDGETS"; do
+            printf '%s' "$p" | base64 -d > "$RUNNER_TEMP/profile.mobileprovision"
+            security cms -D -i "$RUNNER_TEMP/profile.mobileprovision" > "$RUNNER_TEMP/profile.plist"
+            uuid=$(/usr/libexec/PlistBuddy -c 'Print :UUID' "$RUNNER_TEMP/profile.plist")
+            appid=$(/usr/libexec/PlistBuddy -c 'Print :Entitlements:application-identifier' "$RUNNER_TEMP/profile.plist")
+            cp "$RUNNER_TEMP/profile.mobileprovision" "$HOME/Library/MobileDevice/Provisioning Profiles/$uuid.mobileprovision"
+            # "TEAMID.com.napchime.app" -> "com.napchime.app=<uuid>"
+            echo "${appid#*.}=$uuid" >> "$RUNNER_TEMP/profiles.txt"
+          done
+          cat "$RUNNER_TEMP/profiles.txt"
+          security find-identity -v -p codesigning "$keychain"
+
+      - run: npm ci
+
+      - name: Generate the iOS project
+        env:
+          EXPO_PUBLIC_RELAY_URL: ${{ vars.RELAY_URL_PROD }}
+        run: npx expo prebuild --platform ios
+
+      - name: Use manual signing with our profiles
+        env:
+          TEAM_ID: ${{ vars.IOS_TEAM_ID }}
+        run: ruby ../ci/.github/scripts/ios-manual-signing.rb ios "$TEAM_ID" "$RUNNER_TEMP/profiles.txt" "$RUNNER_TEMP/ExportOptions.plist"
+
+      - name: Archive and export
+        env:
+          EXPO_PUBLIC_RELAY_URL: ${{ vars.RELAY_URL_PROD }}
+        run: |
+          set -o pipefail
+          workspace=$(ls -d ios/*.xcworkspace | head -n 1)
+          scheme=$(basename "$workspace" .xcworkspace)
+          xcodebuild -workspace "$workspace" -scheme "$scheme" -configuration Release \
+            -destination 'generic/platform=iOS' -archivePath "$RUNNER_TEMP/Napchime.xcarchive" \
+            archive | tail -n 200
+          xcodebuild -exportArchive -archivePath "$RUNNER_TEMP/Napchime.xcarchive" \
+            -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist" -exportPath "$RUNNER_TEMP/export" | tail -n 50
+          cp "$RUNNER_TEMP"/export/*.ipa napchime.ipa
+
+      - name: Check the app's signature and entitlements
+        run: bash ../ci/.github/scripts/verify-ipa.sh napchime.ipa
+
+      - name: Upload to App Store Connect (TestFlight)
+        if: vars.TESTFLIGHT_UPLOAD == 'true'
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+        run: |
+          if [ -z "$ASC_KEY_ID" ] || [ -z "$ASC_ISSUER_ID" ] || [ -z "$ASC_KEY_P8" ]; then
+            echo "::error::The App Store Connect API key is missing: set ASC_KEY_ID, ASC_ISSUER_ID and ASC_KEY_P8 in the production environment (README, App Store)."
+            exit 1
+          fi
+          # altool looks for the key as AuthKey_<id>.p8 in this folder.
+          mkdir -p "$HOME/.appstoreconnect/private_keys"
+          key="$HOME/.appstoreconnect/private_keys/AuthKey_$ASC_KEY_ID.p8"
+          printf '%s\n' "$ASC_KEY_P8" > "$key"
+          trap 'rm -f "$key"' EXIT
+          xcrun altool --upload-app --type ios --file napchime.ipa \
+            --apiKey "$ASC_KEY_ID" --apiIssuer "$ASC_ISSUER_ID" --output-format normal
+
+      - name: Remove the signing keychain
+        if: always()
+        run: security delete-keychain "$RUNNER_TEMP/signing.keychain-db" || true
