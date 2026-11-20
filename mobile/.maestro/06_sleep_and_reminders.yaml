@@ -19,6 +19,7 @@ name: Sleep timer, and leaves reminders scheduled for the alarm check
 - scrollUntilVisible:
     element:
       id: 'toggle-night-sleep'
+    centerElement: true
 - tapOn:
     id: 'toggle-night-sleep'
 - assertVisible: 'Only naps are timed.*'
