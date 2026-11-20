@@ -177,7 +177,9 @@ export function SyncProvider({ children }: { children: ReactNode }) {
   );
 
   // Register this phone for pushes (reminders and "partner changed something" nudges).
-  const remindersHere = settings.remindersOnThisPhone;
+  // The relay pushes reminders to this phone if it wants any kind; the push task drops the
+  // kinds switched off here.
+  const remindersHere = settings.napRemindersHere || settings.feedRemindersHere;
   useEffect(() => {
     if (!status.enabled) return;
     let cancelled = false;

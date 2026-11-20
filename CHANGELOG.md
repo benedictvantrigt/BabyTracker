@@ -5,6 +5,10 @@ before 1.0.0 a minor version marks a phase of the plan.
 
 ## [Unreleased]
 
+- Settings: nap and feed reminders now switch on or off per phone apart, under Sleep and
+  Feeding. The sleep timer and the awake timer on the lock screen each have a switch under
+  Sleep. The card that held them is now "On duty", with only the days of the week. A phone
+  that had all reminders off keeps both kinds off.
 - Home-screen widget: a tap shows its result right away instead of after the sync with the
   partner phones, a tapped diaper button shows a check mark, and a quick second tap on the
   same button is ignored, so a double tap no longer logs two diapers or stops a fresh sleep.

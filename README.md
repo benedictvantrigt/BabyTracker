@@ -67,7 +67,8 @@ See [docs/ROADMAP.md](docs/ROADMAP.md) for the plan and the feature backlog.
   notification. Normal priority, or high when a timer started or stopped (Android throttles
   high-priority pushes that show nothing).
 - **Shared rules, per-phone choice:** awake window, feed interval, daytime hours and the
-  reminder switches sync between phones; "Reminders on this phone" stays per phone.
+  reminder switches sync between phones; whether a phone shows nap or feed reminders stays
+  per phone.
 - **Fallback:** without push (no Firebase config, or offline registration) each phone
   schedules reminders itself, as in phase 1.
 

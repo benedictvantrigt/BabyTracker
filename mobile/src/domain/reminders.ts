@@ -6,6 +6,14 @@ import type { Child, Entry, Settings } from './types';
 
 export type ReminderId = 'nap' | 'wake' | 'bed' | 'feed';
 
+/** Whether this phone shows reminder `id`: nap, wake and bedtime, or feed, each switched here. */
+export function reminderWantedHere(
+  id: string,
+  settings: Pick<Settings, 'napRemindersHere' | 'feedRemindersHere'>,
+): boolean {
+  return id === 'feed' ? settings.feedRemindersHere : settings.napRemindersHere;
+}
+
 /** What reminders need to know about the child. */
 export type ReminderChild = Pick<Child, 'name' | 'birthDate' | 'dueDate'>;
 

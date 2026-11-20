@@ -220,6 +220,19 @@ describe('Repo', () => {
     expect((await repo.getSettings()).dashboardLayout.off).toEqual([]);
   });
 
+  it('splits the reminder switch of 0.11 and older per kind', async () => {
+    const { db, repo } = await setup();
+    await db.runAsync('INSERT INTO settings (key, value) VALUES (?, ?)', [
+      'remindersOnThisPhone',
+      'false',
+    ]);
+    const before = await repo.getSettings();
+    expect([before.napRemindersHere, before.feedRemindersHere]).toEqual([false, false]);
+    await repo.updateSettings({ feedRemindersHere: true });
+    const after = await repo.getSettings();
+    expect([after.napRemindersHere, after.feedRemindersHere]).toEqual([false, true]);
+  });
+
   it('keeps the duty days on this phone only', async () => {
     const { repo } = await setup();
     expect((await repo.getSettings()).dutyDays).toEqual([0, 1, 2, 3, 4, 5, 6]);

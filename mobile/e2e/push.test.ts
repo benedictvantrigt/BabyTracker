@@ -243,7 +243,7 @@ describe('push through the relay', () => {
   it('shares reminder rules between phones but keeps per-phone choices', async () => {
     const [a, b] = await family();
     await b.repo.updateSettings({
-      remindersOnThisPhone: false,
+      napRemindersHere: false,
       dashboardLayout: { order: DEFAULT_DASHBOARD.order, off: ['sleep'] },
     });
     await a.repo.updateSettings({
@@ -261,7 +261,8 @@ describe('push through the relay', () => {
     assert.equal(s.sleepSchedule, false);
     assert.equal(s.scheduleStage, 'm6');
     assert.equal(s.napLeadMinutes, 25);
-    assert.equal(s.remindersOnThisPhone, false);
+    assert.equal(s.napRemindersHere, false);
+    assert.equal(s.feedRemindersHere, true);
     assert.deepEqual(s.dashboardLayout.off, ['sleep']);
   });
 });
