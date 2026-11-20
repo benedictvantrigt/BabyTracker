@@ -85,13 +85,14 @@ jobs:
         id: sim
         run: |
           udid=$(xcrun simctl list devices available -j | python3 -c '
-          import json, sys
+          import json, re, sys
           devices = json.load(sys.stdin)["devices"]
-          for runtime in sorted(devices, reverse=True):
-              if "iOS" in runtime:
-                  for d in devices[runtime]:
-                      if d["name"].startswith("iPhone"):
-                          print(d["udid"]); sys.exit()
+          # Newest runtime; a plain "iPhone NN" first, since newer form factors (such as the
+          # iPhone Duo on Xcode 27) lay system bars over the app and break the flow taps.
+          phones = [d for r in sorted(devices, reverse=True) if "iOS" in r
+                    for d in devices[r] if d["name"].startswith("iPhone")]
+          plain = [d for d in phones if re.fullmatch(r"iPhone \d+", d["name"])]
+          print((plain or phones)[0]["udid"])
           ')
           xcrun simctl list devices | grep "$udid"
           xcrun simctl boot "$udid"
