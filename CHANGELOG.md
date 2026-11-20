@@ -3,6 +3,19 @@
 All notable changes to Napchime. Versions follow [Semantic Versioning](https://semver.org/);
 before 1.0.0 a minor version marks a phase of the plan.
 
+## [0.11.2] — 2026-11-20 — Push registration loop, QR join and totals
+
+- Fix: on iPhone, registering for pushes fired the push-token listener, which registered
+  again, in a loop: hundreds of requests a second to the relay while the app was open,
+  which used up the relay's daily write quota. A registration now goes out once per change.
+- Relay: writes only what changed. "Last synced" is stored at most every 5 minutes, the
+  sync position only when it moves, and a repeated push registration writes nothing.
+- Fix: joining by QR code showed "This invite has expired" although the phone did join:
+  the camera reported the code several times and the second join found the invite used.
+- Today's totals leave out feeds, diapers or sleep when that card is turned off on the
+  Today screen (the log keeps them). With all three off the totals card hides.
+- The welcome screen no longer says sharing comes in a later version.
+
 ## [0.11.1] — 2026-11-20 — Reminders per item, sleep timer end and quicker widget
 
 - Settings: nap and feed reminders now switch on or off per phone apart, under Sleep and

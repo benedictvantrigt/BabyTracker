@@ -9,7 +9,10 @@ export const DASHBOARD_CARDS: Record<DashboardCardId, { title: string; descripti
     title: 'More records',
     description: 'Tummy time timer; pumping, temperature and growth',
   },
-  today: { title: "Today's totals", description: 'Feeds, diapers and sleep so far today' },
+  today: {
+    title: "Today's totals",
+    description: 'Feeds, diapers and sleep so far today, for the cards that are on',
+  },
 };
 
 export const ALL_CARDS = Object.keys(DASHBOARD_CARDS) as DashboardCardId[];

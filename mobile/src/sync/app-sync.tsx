@@ -74,14 +74,18 @@ const SyncContext = createContext<SyncContextValue | null>(null);
  */
 async function devicePushToken(): Promise<string | null> {
   try {
-    const token = await Notifications.getDevicePushTokenAsync();
-    if (typeof token.data !== 'string') return null;
-    if (token.type === 'android') return token.data;
-    if (token.type === 'ios' && iosNotificationService()) return `apns:${token.data}`;
-    return null;
+    return relayPushToken(await Notifications.getDevicePushTokenAsync());
   } catch {
     return null;
   }
+}
+
+/** The token as the relay takes it, or null when this build cannot receive its pushes. */
+export function relayPushToken(token: Notifications.DevicePushToken): string | null {
+  if (typeof token.data !== 'string') return null;
+  if (token.type === 'android') return token.data;
+  if (token.type === 'ios' && iosNotificationService()) return `apns:${token.data}`;
+  return null;
 }
 
 function iosNotificationService(): boolean {
@@ -182,13 +186,26 @@ export function SyncProvider({ children }: { children: ReactNode }) {
   // checks again. A string, so the registration below reruns only when it changes.
   const remindersHere = settings.napRemindersHere || settings.feedRemindersHere;
   const filterKey = JSON.stringify(reminderFilterFor(settings, currentTimeZone()));
+  // What was last sent, so the same registration goes out once. On iOS, fetching the token
+  // fires the token listener again: without this the two kept triggering each other and
+  // sent hundreds of registrations a second while the app was open.
+  const registered = useRef<string | null>(null);
   useEffect(() => {
     if (!status.enabled) return;
     let cancelled = false;
-    const register = async () => {
+    const register = async (known?: string | null) => {
       const current = engine.current;
       if (!current) return;
-      const token = await devicePushToken();
+      const token = known !== undefined ? known : await devicePushToken();
+      const key = JSON.stringify([
+        current.client.familyId,
+        current.client.deviceId,
+        token,
+        remindersHere,
+        filterKey,
+      ]);
+      if (cancelled || registered.current === key) return;
+      registered.current = key;
       try {
         const { push } = await current.client.updateDevice(
           token,
@@ -201,10 +218,11 @@ export function SyncProvider({ children }: { children: ReactNode }) {
         if (!cancelled) setStatus((s) => ({ ...s, push: active }));
       } catch {
         // Offline: keep the previous state; the next start retries.
+        if (registered.current === key) registered.current = null;
       }
     };
     register();
-    const subscription = Notifications.addPushTokenListener(() => register());
+    const subscription = Notifications.addPushTokenListener((t) => register(relayPushToken(t)));
     return () => {
       cancelled = true;
       subscription.remove();

@@ -415,26 +415,46 @@ function RecordsCard({ child, entries, now, repo, run, logged }: DashboardCardPr
   );
 }
 
-function TodayCard({ entries, now }: DashboardCardProps) {
+/** Totals of the kinds whose cards are on: a card turned off drops out here too (log stays). */
+function TodayCard({ entries, now, settings }: DashboardCardProps) {
+  const off = settings.dashboardLayout.off;
   const today = summarizeDay(entries, now);
+  const stats = [
+    !off.includes('feeding') && (
+      <Stat
+        key="feeding"
+        testID="today-feeding"
+        label="Feeds"
+        value={String(today.feedings)}
+        sub={today.bottleMl ? `${today.bottleMl} ml` : undefined}
+      />
+    ),
+    !off.includes('diaper') && (
+      <Stat
+        key="diaper"
+        testID="today-diaper"
+        label="Diapers"
+        value={String(today.diapers)}
+        sub={`${today.wet} wet · ${today.solid} solid`}
+      />
+    ),
+    !off.includes('sleep') && (
+      <Stat
+        key="sleep"
+        testID="today-sleep"
+        label="Sleep"
+        value={formatDuration(today.sleepMs)}
+        sub={`${today.naps} naps`}
+      />
+    ),
+  ].filter(Boolean);
+  if (stats.length === 0) return null;
   return (
     <Card testID="card-today">
       <ThemedText type="smallBold" themeColor="textSecondary">
         TODAY
       </ThemedText>
-      <View style={styles.statsRow}>
-        <Stat
-          label="Feeds"
-          value={String(today.feedings)}
-          sub={today.bottleMl ? `${today.bottleMl} ml` : undefined}
-        />
-        <Stat
-          label="Diapers"
-          value={String(today.diapers)}
-          sub={`${today.wet} wet · ${today.solid} solid`}
-        />
-        <Stat label="Sleep" value={formatDuration(today.sleepMs)} sub={`${today.naps} naps`} />
-      </View>
+      <View style={styles.statsRow}>{stats}</View>
     </Card>
   );
 }
@@ -505,9 +525,19 @@ function RunningTimer({ entry, now, onStop }: { entry: Entry; now: number; onSto
   );
 }
 
-function Stat({ label, value, sub }: { label: string; value: string; sub?: string }) {
+function Stat({
+  label,
+  value,
+  sub,
+  testID,
+}: {
+  label: string;
+  value: string;
+  sub?: string;
+  testID?: string;
+}) {
   return (
-    <View style={styles.grow}>
+    <View style={styles.grow} testID={testID}>
       <ThemedText type="small" themeColor="textSecondary">
         {label}
       </ThemedText>
