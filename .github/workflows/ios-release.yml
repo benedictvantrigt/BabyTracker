@@ -35,7 +35,7 @@ on:
 
 jobs:
   testflight:
-    runs-on: macos-latest
+    runs-on: xcode-27  # Xcode 27 / iOS 27 SDK, required by App Store Connect from April 2027 (ITMS-90725)
     # Build and upload take about 30 minutes; waiting for Apple to process the build up to 60.
     timeout-minutes: 150
     # Only this environment (main only) holds the signing certificate and the API key.
