@@ -46,7 +46,8 @@ function AddChild() {
     <View style={styles.section}>
       <ThemedText type="subtitle">Welcome</ThemedText>
       <ThemedText themeColor="textSecondary">
-        Everything you log stays on this phone. Sharing with a partner comes in a later version.
+        Everything you log stays on this phone. To share it with a partner, turn on Partner sync in
+        Settings later, or join your partner below.
       </ThemedText>
       <Card>
         <Field label="Baby's name">

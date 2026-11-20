@@ -26,6 +26,14 @@ name: Turn off, reorder and reset dashboard cards
 - assertVisible:
     id: 'card-diaper'
 - takeScreenshot: 05-dashboard-newborn-layout
+# Today's totals leave out the kind whose card is off.
+- scrollUntilVisible:
+    element:
+      id: 'card-today'
+- assertVisible:
+    id: 'today-diaper'
+- assertNotVisible:
+    id: 'today-sleep'
 # The sleep settings are hidden while the Sleep card is off.
 - tapOn: 'Settings'
 - scrollUntilVisible:

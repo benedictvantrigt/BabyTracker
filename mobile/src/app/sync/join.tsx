@@ -1,6 +1,6 @@
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { router } from 'expo-router';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Alert, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
@@ -20,6 +20,10 @@ export default function JoinScreen() {
   const [joining, setJoining] = useState(false);
   const [permission, requestPermission] = useCameraPermissions();
 
+  // The camera reports the same code several times a second, before any state update lands:
+  // a second join then found the invite used ("expired") although the first had joined.
+  const busy = useRef(false);
+
   const join = async (value: string) => {
     if (joining) return;
     setJoining(true);
@@ -31,10 +35,14 @@ export default function JoinScreen() {
       Alert.alert('Could not join', e instanceof Error ? e.message : String(e));
     } finally {
       setJoining(false);
+      busy.current = false;
     }
   };
 
   const confirmAndJoin = (value: string) => {
+    if (busy.current) return;
+    busy.current = true;
+    setScanning(false);
     if (children.length === 0) {
       join(value);
       return;
@@ -43,9 +51,10 @@ export default function JoinScreen() {
       'Replace this phone’s log?',
       'Joining replaces everything logged on this phone with your family’s shared log.',
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: 'Cancel', style: 'cancel', onPress: () => (busy.current = false) },
         { text: 'Join', style: 'destructive', onPress: () => join(value) },
       ],
+      { cancelable: true, onDismiss: () => (busy.current = false) },
     );
   };
 
