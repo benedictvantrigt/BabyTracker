@@ -3,6 +3,11 @@
 All notable changes to Napchime. Versions follow [Semantic Versioning](https://semver.org/);
 before 1.0.0 a minor version marks a phase of the plan.
 
+## [Unreleased]
+
+- iOS builds use Xcode 27 and the iOS 27 SDK, which App Store Connect requires from April 2027
+  (ITMS-90725).
+
 ## [0.11.0] — 2026-11-19 — Night alarm, end-time timeline and relay retention
 
 - Timeline (#70): entries with a length sit at their end time, so a night shows above what

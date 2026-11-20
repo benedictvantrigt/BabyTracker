@@ -20,7 +20,7 @@ permissions:
 
 jobs:
   simulator:
-    runs-on: macos-latest
+    runs-on: xcode-27  # Xcode 27 / iOS 27 SDK, required by App Store Connect from April 2027 (ITMS-90725)
     timeout-minutes: 120
     defaults:
       run:
