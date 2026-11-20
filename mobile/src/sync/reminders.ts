@@ -1,8 +1,41 @@
 import type { Repo } from '@/db/repo';
-import { computeReminders } from '@/domain/reminders';
+import { computeReminders, reminderWantedHere, type ReminderId } from '@/domain/reminders';
+import type { Settings } from '@/domain/types';
 import { DAY } from '@/domain/time';
 
+import type { ReminderFilter } from './client';
 import type { SyncEngine } from './engine';
+
+const REMINDER_IDS: ReminderId[] = ['nap', 'wake', 'bed', 'feed'];
+
+/** The phone's IANA time zone, or null where the JS engine does not tell. */
+export function currentTimeZone(): string | null {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone || null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * What this phone tells the relay about the reminders it wants: the kinds switched on here
+ * and its duty days, so the relay does not push the rest (an iPhone shows a pushed alert
+ * without asking the app).
+ */
+export function reminderFilterFor(
+  settings: Pick<
+    Settings,
+    'napRemindersHere' | 'feedRemindersHere' | 'dutyDays' | 'dayStartMinute'
+  >,
+  timeZone: string | null,
+): ReminderFilter {
+  return {
+    ids: REMINDER_IDS.filter((id) => reminderWantedHere(id, settings)),
+    dutyDays: [...settings.dutyDays],
+    dayStartMinute: settings.dayStartMinute,
+    timeZone,
+  };
+}
 
 /** What the relay pushes when a reminder is due; sealed with the family key. */
 export interface ReminderPayload {

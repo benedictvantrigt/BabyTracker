@@ -8,6 +8,7 @@ import { createServer, type Server } from 'node:http';
 import type { AddressInfo } from 'node:net';
 import { after, before, describe, it } from 'node:test';
 
+import { dutyWeekdayIn } from '../../relay/src/reminder-filter';
 import { DEFAULT_DASHBOARD } from '../src/domain/dashboard';
 import { openReminder, publishReminders } from '../src/sync/reminders';
 import { createFamily, joinFamily, loadEngine } from '../src/sync/setup';
@@ -176,6 +177,42 @@ describe('push through the relay', () => {
     });
   });
 
+  it('leaves out reminders a phone does not want: kind and duty days', async () => {
+    const [a, b] = await family();
+    const ea = await engineOf(a);
+    const zone = 'Europe/Amsterdam';
+    const today = dutyWeekdayIn(Date.now(), zone, 0);
+    const every = [0, 1, 2, 3, 4, 5, 6];
+    // A: every kind, but not on duty today. B: on duty, feeds only.
+    await ea.client.updateDevice('token-a5', true, undefined, {
+      ids: ['nap', 'wake', 'bed', 'feed'],
+      dutyDays: every.filter((d) => d !== today),
+      dayStartMinute: 0,
+      timeZone: zone,
+    });
+    await (await engineOf(b)).client.updateDevice('token-b5', true, undefined, {
+      ids: ['feed'],
+      dutyDays: every,
+      dayStartMinute: 0,
+      timeZone: zone,
+    });
+
+    sent = [];
+    const basis = (await a.repo.getSyncState())!.lastSeq;
+    const body = ea.sealReminder(JSON.stringify({ title: 'Due', body: '', alarm: false }));
+    const fireAt = Date.now() + 1500;
+    await ea.client.setReminders(basis, [
+      { tag: 'nap-0', fireAt, body },
+      { tag: 'feed-0', fireAt, body },
+    ]);
+    await until(() => sent.some((m) => m.data.type === 'reminder'), 10_000);
+    await wait(500);
+    assert.deepEqual(
+      sent.filter((m) => m.data.type === 'reminder').map((m) => [m.token, m.data.tag]),
+      [['token-b5', 'feed-0']],
+    );
+  });
+
   it('replaces pending reminders when the log changes', async () => {
     const [a] = await family();
     const ea = await engineOf(a);
@@ -243,7 +280,7 @@ describe('push through the relay', () => {
   it('shares reminder rules between phones but keeps per-phone choices', async () => {
     const [a, b] = await family();
     await b.repo.updateSettings({
-      remindersOnThisPhone: false,
+      napRemindersHere: false,
       dashboardLayout: { order: DEFAULT_DASHBOARD.order, off: ['sleep'] },
     });
     await a.repo.updateSettings({
@@ -261,7 +298,8 @@ describe('push through the relay', () => {
     assert.equal(s.sleepSchedule, false);
     assert.equal(s.scheduleStage, 'm6');
     assert.equal(s.napLeadMinutes, 25);
-    assert.equal(s.remindersOnThisPhone, false);
+    assert.equal(s.napRemindersHere, false);
+    assert.equal(s.feedRemindersHere, true);
     assert.deepEqual(s.dashboardLayout.off, ['sleep']);
   });
 });

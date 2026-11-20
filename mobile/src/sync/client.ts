@@ -15,6 +15,17 @@ export class RelayError extends Error {
   }
 }
 
+/** Which due reminders the relay pushes to this phone (see the relay's reminder-filter.ts). */
+export interface ReminderFilter {
+  /** Reminder ids this phone shows: some of nap, wake, bed and feed. */
+  ids: string[];
+  /** Duty days, 0 is Sunday; a day runs from `dayStartMinute` to the next day start. */
+  dutyDays: number[];
+  dayStartMinute: number;
+  /** IANA time zone the duty days are in; null skips the duty-day check on the relay. */
+  timeZone: string | null;
+}
+
 export interface RelayDevice {
   id: string;
   createdAt: number;
@@ -73,15 +84,17 @@ export class RelayClient {
   }
 
   /**
-   * Registers this phone's FCM token (or clears it), whether it wants reminders, and its
-   * sealed name (left unchanged when undefined).
+   * Registers this phone's push token (or clears it), whether it wants reminders, and its
+   * sealed name (left unchanged when undefined). `reminderFilter` narrows which reminders
+   * the relay pushes here: an iPhone cannot drop a pushed alert itself.
    */
   updateDevice(
     pushToken: string | null,
     reminders: boolean,
     label?: string,
+    reminderFilter?: ReminderFilter,
   ): Promise<{ push: boolean }> {
-    return this.request('PUT', '/device', { pushToken, reminders, label });
+    return this.request('PUT', '/device', { pushToken, reminders, label, reminderFilter });
   }
 
   /** Replaces the family's pending reminders; `basis` is the last change seq applied. */

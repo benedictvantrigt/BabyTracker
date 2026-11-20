@@ -151,8 +151,10 @@ export interface Settings {
   feedAlarmNight: boolean;
   /** Today-screen cards: display order and which are turned off (per phone). */
   dashboardLayout: DashboardLayout;
-  /** Whether this phone shows nap and feed reminders (per phone, not synced). */
-  remindersOnThisPhone: boolean;
+  /** Whether this phone shows the nap, wake and bedtime reminders (per phone, not synced). */
+  napRemindersHere: boolean;
+  /** Whether this phone shows the feed reminders and night alarms (per phone, not synced). */
+  feedRemindersHere: boolean;
   /**
    * Left and Right on the Feeding card start a timer; when off they log the feed at one
    * moment, without a length (per phone, not synced).
@@ -165,6 +167,11 @@ export interface Settings {
   dutyDays: Weekday[];
   /** Whether this phone shows the awake timer outside the app (per phone, not synced). */
   awakeTimer: boolean;
+  /**
+   * Whether this phone shows a running sleep timer outside the app: notification, Live
+   * Activity or Live Update (per phone, not synced).
+   */
+  sleepTimer: boolean;
   /**
    * Whether this phone tracks night sleep (per phone, not synced). When off it tracks day
    * sleep only: no sleep timer starts at night, the morning counts from the day start, and
@@ -207,10 +214,12 @@ export const DEFAULT_SETTINGS: Settings = {
   feedRemindersDay: false,
   feedAlarmNight: true,
   dashboardLayout: DEFAULT_DASHBOARD,
-  remindersOnThisPhone: true,
+  napRemindersHere: true,
+  feedRemindersHere: true,
   feedTimer: true,
   dutyDays: [0, 1, 2, 3, 4, 5, 6],
   awakeTimer: true,
+  sleepTimer: true,
   nightSleep: true,
   nightFeedAlarmKit: true,
 };

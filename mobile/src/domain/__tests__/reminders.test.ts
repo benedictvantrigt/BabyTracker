@@ -1,11 +1,22 @@
 /// <reference types="jest" />
-import { computeReminders, nextFeedAt, nextNapAt } from '../reminders';
+import { computeReminders, nextFeedAt, nextNapAt, reminderWantedHere } from '../reminders';
 import { MINUTE } from '../time';
 
 import { at, entry, kid, settings } from './fixtures';
 
 const micky = kid('Micky');
 const m = kid('M');
+
+describe('reminderWantedHere', () => {
+  it('switches nap, wake and bedtime apart from feeds', () => {
+    const napsOnly = { napRemindersHere: true, feedRemindersHere: false };
+    expect(['nap', 'wake', 'bed', 'feed'].map((id) => reminderWantedHere(id, napsOnly))).toEqual(
+      [true, true, true, false],
+    );
+    const feedsOnly = { napRemindersHere: false, feedRemindersHere: true };
+    expect(['nap', 'feed'].map((id) => reminderWantedHere(id, feedsOnly))).toEqual([false, true]);
+  });
+});
 
 describe('computeReminders', () => {
   it('schedules a nap reminder one awake window after the last sleep ended', () => {

@@ -5,7 +5,7 @@ name: Sleep timer, and leaves reminders scheduled for the alarm check
 # Daytime feed reminders on, so a feed reminder is scheduled whatever the CI clock says.
 - tapOn: 'Settings'
 - scrollUntilVisible:
-    element: 'THIS PHONE'
+    element: 'ON DUTY'
 # My days: a day turns off and on again (all days on, so the reminders below still fire).
 - scrollUntilVisible:
     element:
@@ -19,12 +19,19 @@ name: Sleep timer, and leaves reminders scheduled for the alarm check
 - scrollUntilVisible:
     element:
       id: 'toggle-night-sleep'
+    centerElement: true
 - tapOn:
     id: 'toggle-night-sleep'
 - assertVisible: 'Only naps are timed.*'
 - tapOn:
     id: 'toggle-night-sleep'
 - assertVisible: 'Sleep is timed day and night.*'
+# Lock-screen timers switch per phone under Sleep.
+- scrollUntilVisible:
+    element:
+      id: 'toggle-awake-timer'
+- assertVisible:
+    id: 'toggle-sleep-timer'
 - scrollUntilVisible:
     element:
       id: 'toggle-feed-day'

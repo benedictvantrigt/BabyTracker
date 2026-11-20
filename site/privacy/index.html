@@ -19,7 +19,7 @@
 <body>
 <main>
 <h1>Napchime privacy policy</h1>
-<p class="meta">Last updated: 19 November 2026</p>
+<p class="meta">Last updated: 20 November 2026</p>
 
 <p>Napchime is a baby tracker for parents. It is built so that your baby's records stay on
 your phones: there is no account, no advertising, no analytics and no tracking. This policy
@@ -44,7 +44,9 @@ family's phones have. The relay, and we, cannot read them.</p>
 <p>To do its job, the relay stores:</p>
 <ul>
   <li>for each linked phone: a random public key that identifies it, when it joined, when it
-    last contacted the relay, and, if reminders by push are on, its push token;</li>
+    last contacted the relay, and, if reminders by push are on, its push token and which
+    reminders it wants: the kinds (nap or feed), its days of the week on duty, its day start
+    time and time zone;</li>
   <li>the encrypted changes, until every phone in the family has received them, after which
     they are deleted;</li>
   <li>encrypted reminder texts with the time they are due, until they have been sent;</li>

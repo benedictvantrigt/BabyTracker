@@ -19,7 +19,8 @@ import ReminderKey from '../../modules/reminder-key';
 import { useAppData } from '@/data/app-data';
 
 import type { FamilyDevice, SyncEngine } from './engine';
-import { publishReminders } from './reminders';
+import type { ReminderFilter } from './client';
+import { currentTimeZone, publishReminders, reminderFilterFor } from './reminders';
 import { secureStore } from './secure-store';
 import {
   createFamily,
@@ -177,7 +178,10 @@ export function SyncProvider({ children }: { children: ReactNode }) {
   );
 
   // Register this phone for pushes (reminders and "partner changed something" nudges).
-  const remindersHere = settings.remindersOnThisPhone;
+  // The relay pushes only the reminders this phone wants (kinds, duty days); the push task
+  // checks again. A string, so the registration below reruns only when it changes.
+  const remindersHere = settings.napRemindersHere || settings.feedRemindersHere;
+  const filterKey = JSON.stringify(reminderFilterFor(settings, currentTimeZone()));
   useEffect(() => {
     if (!status.enabled) return;
     let cancelled = false;
@@ -190,6 +194,7 @@ export function SyncProvider({ children }: { children: ReactNode }) {
           token,
           remindersHere,
           current.sealLabel(deviceName()),
+          JSON.parse(filterKey) as ReminderFilter,
         );
         const active = Boolean(token) && push;
         await repo.setPushActive(active);
@@ -204,7 +209,7 @@ export function SyncProvider({ children }: { children: ReactNode }) {
       cancelled = true;
       subscription.remove();
     };
-  }, [status.enabled, remindersHere, repo]);
+  }, [status.enabled, remindersHere, filterKey, repo]);
 
   useEffect(() => {
     loadEngine(deps).then(attach, () => attach(null));
