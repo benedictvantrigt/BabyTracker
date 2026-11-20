@@ -2,7 +2,7 @@
 import { formatClock } from '@/domain/time';
 import { at, entry, kid, settings } from '@/domain/__tests__/fixtures';
 
-import { awakeTimerFor, liveTimerFor } from '../live-timer-content';
+import { awakeTimerFor, liveTimerFor, sleepPlanText } from '../live-timer-content';
 
 describe('liveTimerFor', () => {
   it('names a running sleep after the child', () => {
@@ -96,5 +96,35 @@ describe('awakeTimerFor', () => {
     });
     expect(awakeTimerFor([], noKid, dayOnly, at(7, 30))?.start).toBe(at(7));
     expect(awakeTimerFor([evening], noKid, dayOnly, at(5))).toBeNull();
+  });
+});
+
+describe('sleepPlanText', () => {
+  const fourMonths = kid('Micky', '2026-06-20');
+  const plain = { ...settings, sleepSchedule: false };
+
+  it('says until when a nap is planned, from the schedule', () => {
+    const night = entry('sleep', at(19, 0, -1), at(7), { nap: false });
+    const nap = entry('sleep', at(9, 5), null, { nap: true });
+    const text = sleepPlanText([night, nap], fourMonths, settings, at(9, 30));
+    expect(text).toMatch(/^Nap 1 of 3 until \d\d:\d\d$/);
+    // The sleep timer then shows it, with the start.
+    expect(liveTimerFor(nap, 'Micky', text).text).toBe(
+      `${text} · since ${formatClock(at(9, 5))}`,
+    );
+  });
+
+  it('says a night lasts until the day starts, also without the schedule', () => {
+    const night = entry('sleep', at(20), null, { nap: false });
+    expect(sleepPlanText([night], kid('Micky'), plain, at(22))).toBe(
+      `Night until ${formatClock(at(7, 0, 1))}`,
+    );
+    expect(sleepPlanText([night], fourMonths, settings, at(22))).toMatch(/^Night until /);
+  });
+
+  it('is empty for a nap without the schedule, or while awake', () => {
+    const nap = entry('sleep', at(9, 5), null, { nap: true });
+    expect(sleepPlanText([nap], fourMonths, plain, at(9, 30))).toBeNull();
+    expect(sleepPlanText([], fourMonths, settings, at(9, 30))).toBeNull();
   });
 });

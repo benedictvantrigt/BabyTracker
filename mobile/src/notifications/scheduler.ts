@@ -99,11 +99,13 @@ export async function syncNotifications(
   running: Entry[],
   childName: string,
   awake: LiveTimer | null = null,
+  /** Until when the running sleep should last (`sleepPlanText`). */
+  sleepPlan: string | null = null,
 ): Promise<void> {
   // Tummy time stays in the app: the lock-screen styles exist for sleep and feeding only.
   const timers = running
     .filter((e) => LIVE_TIMER_KINDS.includes(e.kind))
-    .map((e) => liveTimerFor(e, childName));
+    .map((e) => liveTimerFor(e, childName, sleepPlan));
   if (awake) timers.push(awake);
   // Live Activities need no notification permission, so these go first.
   const live = await syncLiveTimers(timers, CHANNEL_TIMERS).catch(() => false);
