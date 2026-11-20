@@ -18,7 +18,7 @@ import { migrate } from '@/db/schema';
 import { isNapStart, runningEntries } from '@/domain/entries';
 import { sleepTimerAllowed } from '@/domain/night-sleep';
 import { DAY, startOfLocalDay } from '@/domain/time';
-import { widgetSummary } from '@/domain/widget';
+import { isRepeatTap, widgetSummary } from '@/domain/widget';
 import { widgetView, type WidgetLayout } from '@/domain/widget-layout';
 import { refreshNotifications } from '@/notifications/refresh';
 import { publishReminders } from '@/sync/reminders';
@@ -56,6 +56,8 @@ export async function renderSummary(
   info: Pick<WidgetInfo, 'widgetId' | 'width' | 'height'>,
   layout?: WidgetLayout,
   now = Date.now(),
+  /** Label of the button just tapped, drawn with a check mark as a quick confirmation. */
+  confirmed?: string,
 ): Promise<WidgetRepresentation> {
   const [settings, children, stored] = await Promise.all([
     repo.getSettings(),
@@ -69,36 +71,69 @@ export async function renderSummary(
   const summary = child ? widgetSummary(child, entries, settings, now) : null;
   const uri = feedingUri();
   return {
-    light: <SummaryWidget summary={summary} feedingUri={uri} dark={false} view={view} />,
-    dark: <SummaryWidget summary={summary} feedingUri={uri} dark view={view} />,
+    light: (
+      <SummaryWidget
+        summary={summary}
+        feedingUri={uri}
+        dark={false}
+        view={view}
+        confirmed={confirmed}
+      />
+    ),
+    dark: (
+      <SummaryWidget summary={summary} feedingUri={uri} dark view={view} confirmed={confirmed} />
+    ),
   };
 }
 
 // Clicks only come from the widget's own buttons: the library's receiver is not exported,
 // so other apps cannot send it WIDGET_CLICK (#42; CI checks the APK's manifest).
-async function handleClick(repo: Repo, action?: string, data?: Record<string, unknown>) {
+// A tap the widget already handled a moment ago (a double tap) changes nothing.
+// Returns whether it wrote, and the label of a button to confirm with a check mark.
+async function handleClick(
+  repo: Repo,
+  action?: string,
+  data?: Record<string, unknown>,
+): Promise<{ wrote: boolean; confirmed?: string }> {
   const [settings, children] = await Promise.all([repo.getSettings(), repo.listChildren()]);
   const child = children.find((c) => c.id === settings.activeChildId) ?? children[0];
-  if (!child) return false;
+  if (!child) return { wrote: false };
   const now = Date.now();
+  const entries = await repo.listEntries(child.id, now - DAY);
   if (action === WIDGET_ACTION.toggleSleep) {
-    const entries = await repo.listEntries(child.id, now - DAY);
+    if (isRepeatTap(entries, now)) return { wrote: false };
     const sleeping = runningEntries(entries).find((e) => e.kind === 'sleep');
     if (sleeping) await repo.stopEntry(sleeping.id);
     // Day sleep only on this phone: no sleep timer starts at night.
-    else if (!sleepTimerAllowed(settings, now)) return false;
+    else if (!sleepTimerAllowed(settings, now)) return { wrote: false };
     else await repo.startTimer(child.id, 'sleep', { nap: isNapStart(now, settings) });
-    return true;
+    // The button itself turns into Wake / Sleep: that is the confirmation.
+    return { wrote: true };
   }
   if (action === WIDGET_ACTION.logDiaper) {
     const wet = data?.wet === true;
     const solid = data?.solid === true;
-    if (!wet && !solid) return false;
+    if (!wet && !solid) return { wrote: false };
+    const label = typeof data?.label === 'string' ? data.label : undefined;
+    if (isRepeatTap(entries, now, { wet, solid })) return { wrote: false, confirmed: label };
     await repo.addEntry(child.id, { kind: 'diaper', start: now, end: now, data: { wet, solid } });
-    return true;
+    return { wrote: true, confirmed: label };
   }
-  return false;
+  return { wrote: false };
 }
+
+/** How long a tapped button keeps its check mark. */
+const CONFIRM_MS = 2_500;
+
+// Taps run one after another, so a second tap sees what the first one saved.
+let queue: Promise<unknown> = Promise.resolve();
+function serial<T>(task: () => Promise<T>): Promise<T> {
+  const run = queue.then(task, task);
+  queue = run.catch(() => {});
+  return run;
+}
+
+const pause = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /**
  * After a write with the app closed: reminders on this phone, then hand the change and the
@@ -123,9 +158,16 @@ async function widgetTaskHandler(props: WidgetTaskHandlerProps): Promise<void> {
     return;
   }
   if (props.widgetAction === 'WIDGET_CLICK') {
-    const wrote = await handleClick(repo, props.clickAction, props.clickActionData);
+    const { wrote, confirmed } = await serial(() =>
+      handleClick(repo, props.clickAction, props.clickActionData),
+    );
+    // Show the result first: reminders and the sync with the relay can take seconds.
+    const shownAt = Date.now();
+    props.renderWidget(await renderSummary(repo, props.widgetInfo, undefined, shownAt, confirmed));
     // In the app the write already triggers reminders, sync and a widget refresh.
     if (wrote && !inApp) await afterBackgroundWrite(repo);
+    if (!confirmed) return;
+    await pause(CONFIRM_MS - (Date.now() - shownAt));
   }
   props.renderWidget(await renderSummary(repo, props.widgetInfo));
 }

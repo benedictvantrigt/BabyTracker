@@ -95,3 +95,32 @@ function nextSleepDetail(
   const napAt = nextNapAt(entries, settings, now);
   return napAt ? `nap ${formatClock(napAt)}` : '';
 }
+
+/** A second tap on the same widget button within this time is taken as a double tap. */
+export const REPEAT_TAP_MS = 5_000;
+
+/**
+ * Whether a widget tap repeats one that was just handled: the widget redraws only after the
+ * tap is saved, so an impatient second tap would log the diaper twice or stop the sleep it
+ * just started. `diaper` is the diaper the tap logs; without it, the tap toggles sleep.
+ */
+export function isRepeatTap(
+  entries: Entry[],
+  now: number,
+  diaper?: { wet: boolean; solid: boolean },
+): boolean {
+  const recent = (t: number | null) => t !== null && t <= now && now - t < REPEAT_TAP_MS;
+  return entries.some((e) => {
+    if (e.deletedAt !== null) return false;
+    if (diaper) {
+      return (
+        e.kind === 'diaper' &&
+        recent(e.start) &&
+        e.data.wet === diaper.wet &&
+        e.data.solid === diaper.solid
+      );
+    }
+    // Just started (a second tap would stop it) or just stopped (it would start a new one).
+    return e.kind === 'sleep' && (e.end === null ? recent(e.start) : recent(e.end));
+  });
+}

@@ -1,5 +1,5 @@
 /// <reference types="jest" />
-import { widgetSummary } from '../widget';
+import { isRepeatTap, widgetSummary } from '../widget';
 
 import { at, entry, kid, settings } from './fixtures';
 
@@ -58,5 +58,30 @@ describe('widgetSummary', () => {
       'No sleep yet',
       'No diaper yet',
     ]);
+  });
+});
+
+describe('isRepeatTap', () => {
+  const wet = { wet: true, solid: false };
+
+  it('catches the same diaper button tapped twice', () => {
+    const entries = [entry('diaper', at(10), at(10), wet)];
+    expect(isRepeatTap(entries, at(10) + 2_000, wet)).toBe(true);
+    expect(isRepeatTap(entries, at(10) + 6_000, wet)).toBe(false);
+    // Wet, then Solid: two different changes.
+    expect(isRepeatTap(entries, at(10) + 2_000, { wet: false, solid: true })).toBe(false);
+  });
+
+  it('catches a second sleep tap right after starting or stopping', () => {
+    expect(isRepeatTap([entry('sleep', at(10), null, { nap: true })], at(10) + 1_000)).toBe(true);
+    expect(isRepeatTap([entry('sleep', at(9), at(10), { nap: true })], at(10) + 1_000)).toBe(true);
+    expect(isRepeatTap([entry('sleep', at(9), null, { nap: true })], at(10))).toBe(false);
+    // A diaper just logged does not block the sleep button.
+    expect(isRepeatTap([entry('diaper', at(10), at(10), wet)], at(10) + 1_000)).toBe(false);
+  });
+
+  it('ignores deleted entries', () => {
+    const undone = entry('diaper', at(10), at(10), wet, { deletedAt: at(10) + 500 });
+    expect(isRepeatTap([undone], at(10) + 1_000, wet)).toBe(false);
   });
 });
