@@ -3,6 +3,14 @@
 All notable changes to Napchime. Versions follow [Semantic Versioning](https://semver.org/);
 before 1.0.0 a minor version marks a phase of the plan.
 
+## [Unreleased]
+
+- Fix: on iPhone, registering for pushes fired the push-token listener, which registered
+  again, in a loop: hundreds of requests a second to the relay while the app was open,
+  which used up the relay's daily write quota. A registration now goes out once per change.
+- Relay: writes only what changed. "Last synced" is stored at most every 5 minutes, the
+  sync position only when it moves, and a repeated push registration writes nothing.
+
 ## [0.11.1] — 2026-11-20 — Reminders per item, sleep timer end and quicker widget
 
 - Settings: nap and feed reminders now switch on or off per phone apart, under Sleep and

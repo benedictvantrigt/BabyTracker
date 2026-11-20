@@ -30,6 +30,8 @@ const REMINDER_TTL_SECONDS = 30 * 60;
 const SYNC_NUDGE_TTL_SECONDS = 60 * 60;
 /** A family none of whose phones contacted the relay for this long is deleted (#59). */
 export const FAMILY_TTL_MS = 365 * 24 * 60 * 60_000;
+/** How stale "last synced" may get before a request writes it again. */
+const LAST_SEEN_STEP_MS = 5 * 60_000;
 /** A phone that did not contact the relay for this long loses its push token (#59). */
 export const PUSH_TOKEN_TTL_MS = 90 * 24 * 60 * 60_000;
 /** Sealed per-device data: device labels and wrapped family keys. */
@@ -138,7 +140,13 @@ export class Family extends DurableObject<PushEnv> {
     if (route === 'POST /join') return this.join(signed.deviceId, body, now);
 
     if (!this.isMember(signed.deviceId)) return error('not_a_member', 403);
-    this.sql.exec('UPDATE devices SET last_seen_at = ? WHERE id = ?', now, signed.deviceId);
+    // Rows written are the relay's scarcest quota: store "last synced" at most every few minutes.
+    this.sql.exec(
+      'UPDATE devices SET last_seen_at = ? WHERE id = ? AND (last_seen_at IS NULL OR last_seen_at <= ?)',
+      now,
+      signed.deviceId,
+      now - LAST_SEEN_STEP_MS,
+    );
     // Families from before #59 have no alarm yet; one is needed to clean up after them.
     if ((await this.ctx.storage.getAlarm()) === null) await this.scheduleAlarm();
     if (route === 'POST /invites') return this.createInvite(signed.deviceId, body, now);
@@ -251,9 +259,10 @@ export class Family extends DurableObject<PushEnv> {
     const after = Math.max(0, Number(url.searchParams.get('after') ?? 0) || 0);
     const limit = Math.min(MAX_PULL, Math.max(1, Number(url.searchParams.get('limit') ?? MAX_PULL) || MAX_PULL));
     this.sql.exec(
-      'UPDATE devices SET acked_seq = MAX(acked_seq, ?) WHERE id = ?',
+      'UPDATE devices SET acked_seq = ? WHERE id = ? AND acked_seq < ?',
       Math.min(after, this.maxSeq()),
       deviceId,
+      Math.min(after, this.maxSeq()),
     );
     this.compact(now);
     const rows = this.sql
@@ -449,13 +458,25 @@ export class Family extends DurableObject<PushEnv> {
     const reminders = body.reminders !== false;
     const filter = parseReminderFilter(body.reminderFilter);
     // A token belongs to one app install; drop it from any other device row.
-    if (token) this.sql.exec('UPDATE devices SET push_token = NULL WHERE push_token = ?', token);
+    if (token) {
+      this.sql.exec(
+        'UPDATE devices SET push_token = NULL WHERE push_token = ? AND id != ?',
+        token,
+        deviceId,
+      );
+    }
+    // Only when something changed: a registration repeats on every app start.
+    const filterJson = filter ? JSON.stringify(filter) : null;
     this.sql.exec(
-      'UPDATE devices SET push_token = ?, reminders = ?, reminder_filter = ? WHERE id = ?',
+      `UPDATE devices SET push_token = ?, reminders = ?, reminder_filter = ?
+       WHERE id = ? AND (push_token IS NOT ? OR reminders != ? OR reminder_filter IS NOT ?)`,
       token,
       reminders ? 1 : 0,
-      filter ? JSON.stringify(filter) : null,
+      filterJson,
       deviceId,
+      token,
+      reminders ? 1 : 0,
+      filterJson,
     );
     if (label !== undefined) {
       this.sql.exec('UPDATE devices SET label = ? WHERE id = ?', label, deviceId);
