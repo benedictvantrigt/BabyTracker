@@ -28,7 +28,8 @@ interface Action {
 const diaper = (label: string, wet: boolean, solid: boolean): Action => ({
   label,
   clickAction: WIDGET_ACTION.logDiaper,
-  clickActionData: { wet, solid },
+  // The label comes back with the tap, so the widget can confirm this very button.
+  clickActionData: { wet, solid, label },
 });
 
 /** The buttons of a row, its main action first. */
@@ -50,6 +51,7 @@ export function SummaryWidget({
   feedingUri,
   dark,
   view = FULL_VIEW,
+  confirmed,
 }: {
   summary: WidgetSummary | null;
   /** Deep link that opens the feeding entry screen. */
@@ -57,6 +59,8 @@ export function SummaryWidget({
   dark: boolean;
   /** What fits at the widget's size, from its layout (`widgetView`). */
   view?: WidgetView;
+  /** Label of the button just tapped: drawn with a check mark until the next redraw. */
+  confirmed?: string;
 }) {
   const c: Palette = dark ? Colors.dark : Colors.light;
   const small = view.kind === 'single';
@@ -101,7 +105,14 @@ export function SummaryWidget({
             key={line.map((b) => b.action.label).join('-')}
             style={{ flex: 1, width: 'match_parent', flexDirection: 'row', flexGap: 6 }}>
             {line.map(({ row, action }) => (
-              <WidgetButton key={action.label} {...action} c={c} color={c[row]} fill />
+              <WidgetButton
+                key={action.label}
+                {...action}
+                c={c}
+                color={c[row]}
+                fill
+                done={action.label === confirmed}
+              />
             ))}
           </FlexWidget>
         ))}
@@ -114,7 +125,13 @@ export function SummaryWidget({
       {view.rows.map((row) => (
         <Row key={row} line={summary[row]} color={c[row]} c={c}>
           {rowActions(row, summary, feedingUri).map((action) => (
-            <WidgetButton key={action.label} {...action} c={c} />
+            <WidgetButton
+              key={action.label}
+              {...action}
+              c={c}
+              color={c[row]}
+              done={action.label === confirmed}
+            />
           ))}
         </Row>
       ))}
@@ -169,7 +186,8 @@ function Row({
 /**
  * A button. In a row it is a small grey pill; without the latest entry (`fill`) it grows to
  * fill its line and takes the row's colour for its label, so feed, sleep and diaper stay
- * apart.
+ * apart. Just tapped (`done`) it fills with that colour and shows a check mark, at once,
+ * while the sync after the tap may still take seconds.
  */
 function WidgetButton({
   label,
@@ -178,14 +196,17 @@ function WidgetButton({
   clickActionData,
   color,
   fill = false,
-}: Action & { c: Palette; color?: string; fill?: boolean }) {
+  done = false,
+}: Action & { c: Palette; color?: string; fill?: boolean; done?: boolean }) {
+  const background = done && color ? color : fill ? c.backgroundElement : c.backgroundSelected;
+  const text = done && color ? c.background : fill && color ? color : c.text;
   return (
     <FlexWidget
       clickAction={clickAction}
       clickActionData={clickActionData}
       accessibilityLabel={label}
       style={{
-        backgroundColor: (fill ? c.backgroundElement : c.backgroundSelected) as ColorProp,
+        backgroundColor: background as ColorProp,
         borderRadius: 12,
         paddingHorizontal: fill ? 6 : 12,
         paddingVertical: 8,
@@ -199,12 +220,12 @@ function WidgetButton({
           : {}),
       }}>
       <TextWidget
-        text={label}
+        text={done ? `✓ ${label}` : label}
         maxLines={1}
         style={{
           fontSize: fill ? 15 : 13,
           fontWeight: '600',
-          color: (fill && color ? color : c.text) as ColorProp,
+          color: text as ColorProp,
         }}
       />
     </FlexWidget>

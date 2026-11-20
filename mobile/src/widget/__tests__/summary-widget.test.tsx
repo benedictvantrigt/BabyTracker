@@ -73,6 +73,17 @@ describe('SummaryWidget', () => {
     });
   });
 
+  it('marks the button just tapped with a check mark', () => {
+    const tree = buildWidgetTree(
+      <SummaryWidget summary={summary} feedingUri="x://" dark={false} confirmed="Wet" />,
+    );
+    const nodes = flatten(tree);
+    const texts = nodes.filter((n) => n.type === 'TextWidget').map((n) => n.props.text);
+    expect(texts).toEqual(expect.arrayContaining(['✓ Wet', 'Solid']));
+    const wet = nodes.find((n) => n.props.accessibilityLabel === 'Wet');
+    expect(wet?.props.clickActionData).toEqual({ wet: true, solid: false, label: 'Wet' });
+  });
+
   it('asks to open the app when there is no baby yet', () => {
     const tree = buildWidgetTree(<SummaryWidget summary={null} feedingUri="x://" dark={false} />);
     expect(tree.props.clickAction).toBe('OPEN_APP');
