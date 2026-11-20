@@ -1,7 +1,7 @@
 import { KIND_LABEL, entryTitle } from '@/domain/entries';
 import { MORNING_SLACK, lastWake } from '@/domain/night-sleep';
 import { scheduleStatus } from '@/domain/sleep-schedule';
-import { MINUTE, atMinuteOfDay, formatClock, isDaytime } from '@/domain/time';
+import { DAY, MINUTE, atMinuteOfDay, formatClock, isDaytime } from '@/domain/time';
 import type { Child, Entry, Settings } from '@/domain/types';
 
 /** What a running timer shows outside the app: notification, Live Activity or Live Update. */
@@ -22,14 +22,53 @@ export interface LiveTimer {
   until?: number;
 }
 
-export function liveTimerFor(entry: Entry, childName: string): LiveTimer {
+/**
+ * A running timer outside the app. For sleep, `sleepPlan` (from `sleepPlanText`) says until
+ * when the baby should sleep; without it the text says when the timer started.
+ */
+export function liveTimerFor(entry: Entry, childName: string, sleepPlan?: string | null): LiveTimer {
   return {
     id: entry.id,
     kind: entry.kind === 'sleep' ? 'sleep' : 'feeding',
     title: entry.kind === 'sleep' ? `${childName} is asleep` : entryTitle(entry),
-    text: `${KIND_LABEL[entry.kind]} timer running since ${formatClock(entry.start)}`,
+    text:
+      entry.kind === 'sleep' && sleepPlan
+        ? sleepPlan
+        : `${KIND_LABEL[entry.kind]} timer running since ${formatClock(entry.start)}`,
     start: entry.start,
   };
+}
+
+/**
+ * Until when the running sleep should last, as the Today screen says it: a nap until its
+ * planned end, a night until the day starts. A nap needs the age schedule for its end. Null
+ * while awake, or once a nap's planned end has passed (the timer then just counts on).
+ */
+export function sleepPlanText(
+  entries: Entry[],
+  child: Pick<Child, 'birthDate' | 'dueDate'>,
+  settings: Settings,
+  now: number,
+): string | null {
+  const live = entries.filter((e) => e.deletedAt === null);
+  const running = live.find((e) => e.kind === 'sleep' && e.end === null);
+  if (!running || running.kind !== 'sleep') return null;
+  const schedule = settings.sleepSchedule ? scheduleStatus(live, child, settings, now) : null;
+  if (!schedule) {
+    // Without the schedule a nap has no planned length; a night lasts until the day start.
+    if (running.data.nap) return null;
+    const today = atMinuteOfDay(now, settings.dayStartMinute);
+    return `Night until ${formatClock(now < today ? today : today + DAY)}`;
+  }
+  if (schedule.current) {
+    const { endAt } = schedule.current;
+    if (endAt <= now) return null;
+    return `Nap until ${formatClock(endAt)}`;
+  }
+  if (!running.data.nap) {
+    return `Night until ${formatClock(schedule.morningAt)}`;
+  }
+  return null;
 }
 
 /**

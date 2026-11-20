@@ -3,7 +3,7 @@
 All notable changes to Napchime. Versions follow [Semantic Versioning](https://semver.org/);
 before 1.0.0 a minor version marks a phase of the plan.
 
-## [Unreleased]
+## [0.11.1] — 2026-11-20 — Reminders per item, sleep timer end and quicker widget
 
 - Settings: nap and feed reminders now switch on or off per phone apart, under Sleep and
   Feeding. The sleep timer and the awake timer on the lock screen each have a switch under
@@ -12,6 +12,9 @@ before 1.0.0 a minor version marks a phase of the plan.
 - Reminders by push: each phone tells the relay which reminders it wants (kinds and days on
   duty, with its time zone), and the relay sends only those. An iPhone shows a pushed alert
   without asking the app, so it could not leave them out itself. The privacy policy says so.
+- Sleep timer on the lock screen: it now says until when the baby should sleep, like the
+  Today screen: a nap until its planned end (with the age schedule), a night until the day
+  starts ("Nap until 14:30", "Night until 07:00").
 - Home-screen widget: a tap shows its result right away instead of after the sync with the
   partner phones, a tapped diaper button shows a check mark, and a quick second tap on the
   same button is ignored, so a double tap no longer logs two diapers or stops a fresh sleep.

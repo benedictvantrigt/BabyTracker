@@ -5,7 +5,7 @@ import { computeReminders, reminderWantedHere } from '@/domain/reminders';
 import { DAY } from '@/domain/time';
 import type { Entry } from '@/domain/types';
 
-import { awakeTimerFor } from './live-timer-content';
+import { awakeTimerFor, sleepPlanText } from './live-timer-content';
 import { nightAlarmsReady, scheduleNightAlarms } from './night-alarms';
 import { syncNotifications } from './scheduler';
 
@@ -44,7 +44,8 @@ export async function refreshNotifications(repo: Repo, now = Date.now()): Promis
       )
     : [];
   const awake = onDuty ? awakeTimerFor(entries, child, settings, now) : null;
-  await syncNotifications(reminders, running, child.name, awake);
+  const sleepPlan = sleepPlanText(entries, child, settings, now);
+  await syncNotifications(reminders, running, child.name, awake, sleepPlan);
 }
 
 function isNightSleep(entry: Entry): boolean {

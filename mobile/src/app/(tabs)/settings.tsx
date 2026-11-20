@@ -327,7 +327,7 @@ function SleepCard({
       />
       <ToggleRow
         label="Sleep timer"
-        description="On the lock screen while the baby sleeps: time asleep (this phone)"
+        description="On the lock screen while the baby sleeps: until when the nap or night should last (this phone)"
         value={settings.sleepTimer}
         onChange={(v) => update({ sleepTimer: v })}
         testID="toggle-sleep-timer"
