@@ -61,10 +61,9 @@ export function sleepPlanText(
     return `Night until ${formatClock(now < today ? today : today + DAY)}`;
   }
   if (schedule.current) {
-    const { slot, endAt } = schedule.current;
+    const { endAt } = schedule.current;
     if (endAt <= now) return null;
-    const which = slot ? `Nap ${slot.index} of ${schedule.plan.naps.length}` : 'Nap';
-    return `${which} until ${formatClock(endAt)}`;
+    return `Nap until ${formatClock(endAt)}`;
   }
   if (!running.data.nap) {
     return `Night until ${formatClock(schedule.morningAt)}`;

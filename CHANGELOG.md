@@ -7,7 +7,7 @@ before 1.0.0 a minor version marks a phase of the plan.
 
 - Sleep timer on the lock screen: it now says until when the baby should sleep, like the
   Today screen: a nap until its planned end (with the age schedule), a night until the day
-  starts.
+  starts ("Nap until 14:30", "Night until 07:00").
 - Home-screen widget: a tap shows its result right away instead of after the sync with the
   partner phones, a tapped diaper button shows a check mark, and a quick second tap on the
   same button is ignored, so a double tap no longer logs two diapers or stops a fresh sleep.

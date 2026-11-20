@@ -107,7 +107,7 @@ describe('sleepPlanText', () => {
     const night = entry('sleep', at(19, 0, -1), at(7), { nap: false });
     const nap = entry('sleep', at(9, 5), null, { nap: true });
     const text = sleepPlanText([night, nap], fourMonths, settings, at(9, 30));
-    expect(text).toMatch(/^Nap 1 of 3 until \d\d:\d\d$/);
+    expect(text).toMatch(/^Nap until \d\d:\d\d$/);
     // The sleep timer then shows just that.
     expect(liveTimerFor(nap, 'Micky', text).text).toBe(text);
   });
