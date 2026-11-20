@@ -9,6 +9,9 @@ before 1.0.0 a minor version marks a phase of the plan.
   Feeding. The sleep timer and the awake timer on the lock screen each have a switch under
   Sleep. The card that held them is now "On duty", with only the days of the week. A phone
   that had all reminders off keeps both kinds off.
+- Reminders by push: each phone tells the relay which reminders it wants (kinds and days on
+  duty, with its time zone), and the relay sends only those. An iPhone shows a pushed alert
+  without asking the app, so it could not leave them out itself. The privacy policy says so.
 - Home-screen widget: a tap shows its result right away instead of after the sync with the
   partner phones, a tapped diaper button shows a check mark, and a quick second tap on the
   same button is ignored, so a double tap no longer logs two diapers or stops a fresh sleep.

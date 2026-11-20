@@ -3,6 +3,7 @@ import { DurableObject } from 'cloudflare:workers';
 import { sha256Hex, verifyRequest } from './auth';
 import { APNS_PREFIX, apnsConfigured, sendApns, type ApnsEnv } from './apns';
 import { fcmConfigured, sendPushes, type FcmEnv, type PushMessage, type SendResult } from './fcm';
+import { parseReminderFilter, wantsReminder } from './reminder-filter';
 
 type PushEnv = FcmEnv & ApnsEnv;
 
@@ -104,6 +105,10 @@ export class Family extends DurableObject<PushEnv> {
       this.sql.exec('ALTER TABLE devices ADD COLUMN last_seen_at INTEGER');
       this.sql.exec('ALTER TABLE devices ADD COLUMN label TEXT');
       this.sql.exec('ALTER TABLE changes ADD COLUMN epoch INTEGER NOT NULL DEFAULT 0');
+    }
+    if (!columns.includes('reminder_filter')) {
+      // Which reminders the phone wants (kinds, duty days); NULL: all of them.
+      this.sql.exec('ALTER TABLE devices ADD COLUMN reminder_filter TEXT');
     }
   }
 
@@ -442,12 +447,14 @@ export class Family extends DurableObject<PushEnv> {
       return error('bad_label', 400);
     }
     const reminders = body.reminders !== false;
+    const filter = parseReminderFilter(body.reminderFilter);
     // A token belongs to one app install; drop it from any other device row.
     if (token) this.sql.exec('UPDATE devices SET push_token = NULL WHERE push_token = ?', token);
     this.sql.exec(
-      'UPDATE devices SET push_token = ?, reminders = ? WHERE id = ?',
+      'UPDATE devices SET push_token = ?, reminders = ?, reminder_filter = ? WHERE id = ?',
       token,
       reminders ? 1 : 0,
+      filter ? JSON.stringify(filter) : null,
       deviceId,
     );
     if (label !== undefined) {
@@ -532,6 +539,7 @@ export class Family extends DurableObject<PushEnv> {
       const messages: PushMessage[] = [];
       for (const r of due) {
         for (const t of tokens) {
+          if (!wantsReminder(t.filter, r.tag as string, r.fire_at as number)) continue;
           messages.push({
             token: t.token,
             data: { type: 'reminder', tag: r.tag as string, payload: r.body as string },
@@ -549,13 +557,19 @@ export class Family extends DurableObject<PushEnv> {
   private pushTokens(exceptDevice: string | null, remindersOnly: boolean) {
     return this.sql
       .exec(
-        `SELECT id, push_token FROM devices
+        `SELECT id, push_token, reminder_filter FROM devices
          WHERE revoked_at IS NULL AND push_token IS NOT NULL AND id IS NOT ?
          ${remindersOnly ? 'AND reminders = 1' : ''}`,
         exceptDevice,
       )
       .toArray()
-      .map((r) => ({ device: r.id as string, token: r.push_token as string }));
+      .map((r) => ({
+        device: r.id as string,
+        token: r.push_token as string,
+        filter: r.reminder_filter
+          ? parseReminderFilter(JSON.parse(r.reminder_filter as string))
+          : null,
+      }));
   }
 
   private async nudge(sender: string, priority: 'HIGH' | 'NORMAL'): Promise<void> {
