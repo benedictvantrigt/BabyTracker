@@ -3,7 +3,7 @@
 All notable changes to Napchime. Versions follow [Semantic Versioning](https://semver.org/);
 before 1.0.0 a minor version marks a phase of the plan.
 
-## [Unreleased]
+## [0.11.2] — 2026-11-20 — Push registration loop, QR join and totals
 
 - Fix: on iPhone, registering for pushes fired the push-token listener, which registered
   again, in a loop: hundreds of requests a second to the relay while the app was open,
