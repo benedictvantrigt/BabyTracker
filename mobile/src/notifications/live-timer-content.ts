@@ -27,15 +27,14 @@ export interface LiveTimer {
  * when the baby should sleep; without it the text says when the timer started.
  */
 export function liveTimerFor(entry: Entry, childName: string, sleepPlan?: string | null): LiveTimer {
-  const since = formatClock(entry.start);
   return {
     id: entry.id,
     kind: entry.kind === 'sleep' ? 'sleep' : 'feeding',
     title: entry.kind === 'sleep' ? `${childName} is asleep` : entryTitle(entry),
     text:
       entry.kind === 'sleep' && sleepPlan
-        ? `${sleepPlan} · since ${since}`
-        : `${KIND_LABEL[entry.kind]} timer running since ${since}`,
+        ? sleepPlan
+        : `${KIND_LABEL[entry.kind]} timer running since ${formatClock(entry.start)}`,
     start: entry.start,
   };
 }

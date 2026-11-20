@@ -108,10 +108,8 @@ describe('sleepPlanText', () => {
     const nap = entry('sleep', at(9, 5), null, { nap: true });
     const text = sleepPlanText([night, nap], fourMonths, settings, at(9, 30));
     expect(text).toMatch(/^Nap 1 of 3 until \d\d:\d\d$/);
-    // The sleep timer then shows it, with the start.
-    expect(liveTimerFor(nap, 'Micky', text).text).toBe(
-      `${text} · since ${formatClock(at(9, 5))}`,
-    );
+    // The sleep timer then shows just that.
+    expect(liveTimerFor(nap, 'Micky', text).text).toBe(text);
   });
 
   it('says a night lasts until the day starts, also without the schedule', () => {
