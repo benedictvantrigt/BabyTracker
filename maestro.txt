@@ -1,0 +1,67 @@
+
+Waiting for flows to complete...
+[Passed] Onboarding shows the default dashboard and the sleep plan (51s)
+
+1/1 Flow Passed in 51s
+
+
+Waiting for flows to complete...
+[Passed] Breast feeding timers switch sides, bottle feed with amount (1m 27s)
+
+1/1 Flow Passed in 1m 27s
+
+
+Waiting for flows to complete...
+[Passed] One-tap diapers with undo (48s)
+
+1/1 Flow Passed in 48s
+
+
+Waiting for flows to complete...
+[Passed] Timeline lists entries; edit and delete (1m 15s)
+
+1/1 Flow Passed in 1m 15s
+
+
+Waiting for flows to complete...
+[Passed] Turn off, reorder and reset dashboard cards (1m 2s)
+
+1/1 Flow Passed in 1m 2s
+
+
+Waiting for flows to complete...
+[Passed] Tummy time timer, temperature and growth (1m 18s)
+
+1/1 Flow Passed in 1m 18s
+
+
+Waiting for flows to complete...
+[Passed] Sleep timer, and leaves reminders scheduled for the alarm check (1m 15s)
+
+1/1 Flow Passed in 1m 15s
+
+
+Waiting for flows to complete...
+[Passed] Join a partner's family and sync both ways (1m 25s)
+
+1/1 Flow Passed in 1m 25s
+
+Exception in thread "Thread-5" java.io.IOException: Command failed (host:transport:emulator-5554): device offline
+	at dadb.adbserver.AdbServer.send$dadb(AdbServer.kt:103)
+	at dadb.adbserver.AdbServerDadb.open(AdbServer.kt:148)
+	at dadb.Dadb$DefaultImpls.openShell(Dadb.kt:42)
+	at dadb.adbserver.AdbServerDadb.openShell(AdbServer.kt:122)
+	at dadb.Dadb$DefaultImpls.shell(Dadb.kt:35)
+	at dadb.adbserver.AdbServerDadb.shell(AdbServer.kt:122)
+	at maestro.android.AndroidDeviceConnection.shell(AndroidDeviceConnection.kt:153)
+	at maestro.drivers.AndroidDriver.shell(AndroidDriver.kt:1352)
+	at maestro.drivers.AndroidDriver.isPackageInstalled(AndroidDriver.kt:1335)
+	at maestro.drivers.AndroidDriver.bestEffortUninstall(AndroidDriver.kt:1310)
+	at maestro.drivers.AndroidDriver.uninstallMaestroDriverApp$lambda$89(AndroidDriver.kt:1296)
+	at maestro.utils.Metrics.measured(Metrics.kt:48)
+	at maestro.drivers.AndroidDriver.uninstallMaestroDriverApp(AndroidDriver.kt:1295)
+	at maestro.drivers.AndroidDriver.close(AndroidDriver.kt:182)
+	at maestro.Maestro.close(Maestro.kt:606)
+	at maestro.cli.session.MaestroSessionManager$MaestroSession.close(MaestroSessionManager.kt:471)
+	at maestro.cli.session.MaestroSessionManager.newSession$lambda$2(MaestroSessionManager.kt:129)
+	at kotlin.concurrent.ThreadsKt$thread$thread$1.run(Thread.kt:30)

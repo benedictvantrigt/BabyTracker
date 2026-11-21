@@ -1,0 +1,8 @@
+{
+  "devices": 2,
+  "entries": [
+    "diaper",
+    "feeding"
+  ],
+  "diaperFromApp": true
+}
