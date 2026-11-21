@@ -12,7 +12,7 @@ import {
   type WidgetTaskHandlerProps,
 } from 'react-native-android-widget';
 
-import { getAppRepo } from '@/data/app-repo';
+import { getAppRepo, getAppSync } from '@/data/app-repo';
 import { Repo } from '@/db/repo';
 import { migrate } from '@/db/schema';
 import { isNapStart, runningEntries } from '@/domain/entries';
@@ -151,6 +151,17 @@ async function afterBackgroundWrite(repo: Repo) {
   }
 }
 
+/**
+ * After a write through the app running in the background. The app refreshes the lock-screen
+ * timers and syncs shortly after each change, but on a timer, and Android runs no JS timers
+ * for an app in the background except while a widget task runs: the live timer still said
+ * "awake" until the app was opened. So the task does both itself and waits for them.
+ */
+async function afterInAppWrite(repo: Repo) {
+  await refreshNotifications(repo).catch(() => {});
+  await getAppSync()?.().catch(() => {});
+}
+
 async function widgetTaskHandler(props: WidgetTaskHandlerProps): Promise<void> {
   const { repo, inApp } = await widgetRepo();
   if (props.widgetAction === 'WIDGET_DELETED') {
@@ -164,8 +175,7 @@ async function widgetTaskHandler(props: WidgetTaskHandlerProps): Promise<void> {
     // Show the result first: reminders and the sync with the relay can take seconds.
     const shownAt = Date.now();
     props.renderWidget(await renderSummary(repo, props.widgetInfo, undefined, shownAt, confirmed));
-    // In the app the write already triggers reminders, sync and a widget refresh.
-    if (wrote && !inApp) await afterBackgroundWrite(repo);
+    if (wrote) await (inApp ? afterInAppWrite(repo) : afterBackgroundWrite(repo));
     if (!confirmed) return;
     await pause(CONFIRM_MS - (Date.now() - shownAt));
   }

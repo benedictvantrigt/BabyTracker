@@ -3,6 +3,12 @@
 All notable changes to Napchime. Versions follow [Semantic Versioning](https://semver.org/);
 before 1.0.0 a minor version marks a phase of the plan.
 
+## [Unreleased]
+
+- Android widget: Sleep / Wake with the app open in the background now updates the
+  lock-screen timer and syncs to the partner right away, instead of when the app was next
+  opened (the app's follow-ups ran on timers that Android pauses in the background).
+
 ## [0.11.3] — 2026-11-21 — iPhone date wheel, no Nap switch, relay guard
 
 - iPhone: date and time fields open a wheel below the field instead of the pop-up picker,

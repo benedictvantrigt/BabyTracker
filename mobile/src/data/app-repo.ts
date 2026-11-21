@@ -12,3 +12,16 @@ export function setAppRepo(repo: Repo | null): void {
 export function getAppRepo(): Repo | null {
   return appRepo;
 }
+
+// The running app's sync round, for the same background code: on Android the app's own
+// "sync shortly after a change" timer does not run while the app is in the background, so a
+// widget tap runs the round itself.
+let appSync: (() => Promise<void>) | null = null;
+
+export function setAppSync(sync: (() => Promise<void>) | null): void {
+  appSync = sync;
+}
+
+export function getAppSync(): (() => Promise<void>) | null {
+  return appSync;
+}

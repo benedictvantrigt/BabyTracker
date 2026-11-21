@@ -17,6 +17,7 @@ import { Alert, AppState, Platform } from 'react-native';
 import ReminderKey from '../../modules/reminder-key';
 
 import { useAppData } from '@/data/app-data';
+import { setAppSync } from '@/data/app-repo';
 
 import type { FamilyDevice, SyncEngine } from './engine';
 import type { ReminderFilter } from './client';
@@ -163,6 +164,12 @@ export function SyncProvider({ children }: { children: ReactNode }) {
       }));
     }
   }, [repo, deps]);
+
+  // For a widget tap while the app is in the background (see widget-task).
+  useEffect(() => {
+    setAppSync(runSync);
+    return () => setAppSync(null);
+  }, [runSync]);
 
   const attach = useCallback(
     (next: SyncEngine | null) => {
