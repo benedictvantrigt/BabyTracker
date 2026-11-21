@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="iPhone 17 - iOS 27.2 - 4AD2086B-7B8F-4608-A742-AA422A0B8D74" tests="1" failures="0" time="178.813" timestamp="2026-11-21T12:52:37">
+    <testcase id="Tummy time timer, temperature and growth" name="Tummy time timer, temperature and growth" classname="Tummy time timer, temperature and growth" file="/Users/runner/work/BabyTracker/BabyTracker/mobile/.maestro/08_more_records.yaml" time="178.553" timestamp="2026-11-21T12:52:37" status="SUCCESS"/>
+  </testsuite>
+</testsuites>

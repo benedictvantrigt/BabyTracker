@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="iPhone 17 - iOS 27.2 - 4AD2086B-7B8F-4608-A742-AA422A0B8D74" tests="1" failures="0" time="147.653" timestamp="2026-11-21T12:44:31">
+    <testcase id="Timeline lists entries; edit and delete" name="Timeline lists entries; edit and delete" classname="Timeline lists entries; edit and delete" file="/Users/runner/work/BabyTracker/BabyTracker/mobile/.maestro/04_timeline_edit.yaml" time="146.821" timestamp="2026-11-21T12:44:31" status="SUCCESS"/>
+  </testsuite>
+</testsuites>

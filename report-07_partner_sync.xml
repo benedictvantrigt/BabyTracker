@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="iPhone 17 - iOS 27.2 - 4AD2086B-7B8F-4608-A742-AA422A0B8D74" tests="1" failures="0" time="86.719" timestamp="2026-11-21T13:00:03">
+    <testcase id="Join a partner's family and sync both ways" name="Join a partner's family and sync both ways" classname="Join a partner's family and sync both ways" file="/Users/runner/work/BabyTracker/BabyTracker/mobile/.maestro/07_partner_sync.yaml" time="86.635" timestamp="2026-11-21T13:00:03" status="SUCCESS"/>
+  </testsuite>
+</testsuites>
