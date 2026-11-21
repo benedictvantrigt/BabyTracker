@@ -3,7 +3,7 @@
 All notable changes to Napchime. Versions follow [Semantic Versioning](https://semver.org/);
 before 1.0.0 a minor version marks a phase of the plan.
 
-## [Unreleased]
+## [0.11.3] — 2026-11-21 — iPhone date wheel, no Nap switch, relay guard
 
 - iPhone: date and time fields open a wheel below the field instead of the pop-up picker,
   which did not take a new start time when adding or editing a sleep.
