@@ -323,7 +323,11 @@ export default function EntryScreen() {
   );
 
   const save = async () => {
-    const input = toInput(kind, form);
+    // Nap or night follows from when the sleep starts (the day hours in Settings).
+    const input = toInput(
+      kind,
+      kind === 'sleep' ? { ...form, nap: isNapStart(form.start, settings) } : form,
+    );
     const ok = await run(() =>
       params.id ? repo.updateEntry(params.id, input) : repo.addEntry(activeChild.id, input),
     );
@@ -499,10 +503,6 @@ export default function EntryScreen() {
               </Field>
             )}
           </>
-        )}
-
-        {kind === 'sleep' && (
-          <ToggleRow label="Nap" value={form.nap} onChange={(nap) => set({ nap })} />
         )}
 
         <Field label="Notes">

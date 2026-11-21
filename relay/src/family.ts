@@ -467,7 +467,10 @@ export class Family extends DurableObject<PushEnv> {
     }
     // Only when something changed: a registration repeats on every app start.
     const filterJson = filter ? JSON.stringify(filter) : null;
-    this.sql.exec(
+    const current = this.sql
+      .exec('SELECT label FROM devices WHERE id = ?', deviceId)
+      .toArray()[0];
+    const changed = this.sql.exec(
       `UPDATE devices SET push_token = ?, reminders = ?, reminder_filter = ?
        WHERE id = ? AND (push_token IS NOT ? OR reminders != ? OR reminder_filter IS NOT ?)`,
       token,
@@ -477,8 +480,11 @@ export class Family extends DurableObject<PushEnv> {
       token,
       reminders ? 1 : 0,
       filterJson,
-    );
-    if (label !== undefined) {
+    ).rowsWritten > 0;
+    // A label is sealed afresh on every registration, so it always differs: store it along
+    // with a real change, or when the phone has none yet.
+    const hasLabel = current?.label !== null && current?.label !== undefined;
+    if (label !== undefined && (label === null ? hasLabel : changed || !hasLabel)) {
       this.sql.exec('UPDATE devices SET label = ? WHERE id = ?', label, deviceId);
     }
     return json({ ok: true, push: token ? canPush(this.env, token) : fcmConfigured(this.env) });

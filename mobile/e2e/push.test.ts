@@ -141,6 +141,18 @@ describe('push through the relay', () => {
     assert.deepEqual(sent, [{ token: 'token-b', data: { type: 'sync' }, priority: 'HIGH' }]);
   });
 
+  it('turns away the same registration repeated within seconds (loop of old versions)', async () => {
+    const [a] = await family();
+    const ea = await engineOf(a);
+    await ea.client.updateDevice('token-loop', true);
+    await assert.rejects(ea.client.updateDevice('token-loop', true), (e: { status?: number }) => {
+      assert.equal(e.status, 429);
+      return true;
+    });
+    // A changed registration goes through at once.
+    await ea.client.updateDevice('token-loop', false);
+  });
+
   it('pushes due reminders to phones that want them, encrypted', async () => {
     const [a, b] = await family();
     const ea = await engineOf(a);
