@@ -324,8 +324,8 @@ export function DateTimeField({
         value={new Date(value)}
         mode={dateOnly ? 'date' : 'datetime'}
         display="spinner"
-        // Up to the current minute: a picker capped at the last render would refuse "now".
-        maximumDate={allowFuture ? undefined : new Date(Date.now() + 60_000)}
+        // The clock ticks each minute: a minute ahead still allows "now", never more.
+        maximumDate={allowFuture ? undefined : new Date(now + 60_000)}
         testID={testID && `${testID}-picker`}
         onValueChange={(_, date) =>
           onChange(dateOnly ? startOfLocalDay(date.getTime()) : date.getTime())
