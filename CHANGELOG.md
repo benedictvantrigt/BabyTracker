@@ -3,6 +3,17 @@
 All notable changes to Napchime. Versions follow [Semantic Versioning](https://semver.org/);
 before 1.0.0 a minor version marks a phase of the plan.
 
+## [0.11.3] — 2026-11-21 — iPhone date wheel, no Nap switch, relay guard
+
+- iPhone: date and time fields open a wheel below the field instead of the pop-up picker,
+  which did not take a new start time when adding or editing a sleep.
+- Sleep: the Nap switch is gone. Whether a sleep is a nap or the night follows from when it
+  starts and the day hours in Settings.
+- Relay: a phone's label is stored with a real registration change only, and the same
+  registration repeated within 3 seconds is turned away before it reaches the family's
+  storage. Phones still on 0.11.1 or older, which re-register in a loop, then cost almost
+  nothing.
+
 ## [0.11.2] — 2026-11-20 — Push registration loop, QR join and totals
 
 - Fix: on iPhone, registering for pushes fired the push-token listener, which registered

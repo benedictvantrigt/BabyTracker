@@ -297,32 +297,42 @@ export function DateTimeField({
 }) {
   const theme = useTheme();
   const now = useNow(60_000);
-  if (Platform.OS === 'ios') {
-    return (
+  // iOS: the value as a button that opens a wheel below it. The compact picker's pop-up
+  // did not take a new time in the entry sheet (start of a sleep could not be changed).
+  const [open, setOpen] = useState(false);
+  const label = dateOnly
+    ? formatDate(value)
+    : `${formatDayLabel(startOfLocalDay(value), now)} · ${formatClock(value)}`;
+  const field = (
+    <Pressable
+      accessibilityRole="button"
+      onPress={() =>
+        Platform.OS === 'ios'
+          ? setOpen(!open)
+          : pickAndroidDateTime(value, dateOnly, allowFuture, onChange)
+      }
+      testID={testID}
+      style={[styles.input, { borderColor: open ? theme.text : theme.border }]}>
+      <ThemedText>{label}</ThemedText>
+    </Pressable>
+  );
+  if (Platform.OS !== 'ios' || !open) return field;
+  return (
+    <View>
+      {field}
       <DateTimePicker
         value={new Date(value)}
         mode={dateOnly ? 'date' : 'datetime'}
-        display="compact"
-        maximumDate={allowFuture ? undefined : new Date(now)}
-        testID={testID}
+        display="spinner"
+        // The clock ticks each minute: a minute ahead still allows "now", never more.
+        maximumDate={allowFuture ? undefined : new Date(now + 60_000)}
+        testID={testID && `${testID}-picker`}
         onValueChange={(_, date) =>
           onChange(dateOnly ? startOfLocalDay(date.getTime()) : date.getTime())
         }
       />
-    );
-  }
-  return (
-    <Pressable
-      accessibilityRole="button"
-      onPress={() => pickAndroidDateTime(value, dateOnly, allowFuture, onChange)}
-      testID={testID}
-      style={[styles.input, { borderColor: theme.border }]}>
-      <ThemedText>
-        {dateOnly
-          ? formatDate(value)
-          : `${formatDayLabel(startOfLocalDay(value), now)} · ${formatClock(value)}`}
-      </ThemedText>
-    </Pressable>
+      <Button label="Done" onPress={() => setOpen(false)} />
+    </View>
   );
 }
 
