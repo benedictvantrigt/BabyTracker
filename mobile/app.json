@@ -78,7 +78,8 @@
       [
         "expo-notifications",
         {
-          "color": "#6E56CF"
+          "color": "#6E56CF",
+          "enableBackgroundRemoteNotifications": true
         }
       ],
       "expo-secure-store",

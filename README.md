@@ -247,7 +247,8 @@ family key, which the app keeps in the App Group keychain. Two pieces turn it on
    `IOS_PROFILE_NSE_BASE64` in the `production` environment.
 
 Until both are there the iPhone sends the relay no push token and schedules its reminders
-itself. The simulator build always compiles the extension.
+itself. Both were set up on 2026-11-22 (key "Napchime relay", ID `Z4RYAXZ2V7`; profile
+"Napchime Notification Service App Store", expires 2027-11-19); the `.p8` is kept offline. The simulator build always compiles the extension.
 
 Xcode: the runner's Xcode builds with the iOS 26 SDK; from April 2027 Apple requires the iOS 27
 SDK (Xcode 27) for uploads.
