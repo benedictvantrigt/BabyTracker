@@ -3,7 +3,7 @@
 All notable changes to Napchime. Versions follow [Semantic Versioning](https://semver.org/);
 before 1.0.0 a minor version marks a phase of the plan.
 
-## [Unreleased]
+## [0.12.0] — 2026-11-22 — iPhone home-screen widget
 
 - iPhone home-screen widget (#16): feed, sleep and diaper with the latest entries and live
   timers, in small, medium and large; "Edit Widget" chooses the rows and buttons-only. Sleep /
