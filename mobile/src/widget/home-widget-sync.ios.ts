@@ -8,7 +8,7 @@ import type { Repo } from '@/db/repo';
 import { DAY, MINUTE, startOfLocalDay } from '@/domain/time';
 
 import WidgetWake from '../../modules/widget-wake';
-import HomeWidget from './home-widget';
+import HomeWidget from './home-widget.ios';
 import { HOME_WIDGET, homeWidgetProps, pendingTaps, tapAction } from './home-widget-props';
 import { afterWidgetWrite, feedingUri, handleClick, serial, widgetRepo } from './widget-actions';
 
