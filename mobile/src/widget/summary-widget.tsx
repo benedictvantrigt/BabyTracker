@@ -6,13 +6,11 @@ import { Colors } from '@/constants/theme';
 import type { WidgetLine, WidgetSummary } from '@/domain/widget';
 import { WIDGET_ROWS, type WidgetRow, type WidgetView } from '@/domain/widget-layout';
 
+import { WIDGET_ACTION } from './widget-action';
+
 export const SUMMARY_WIDGET = 'Summary';
 
-/** Click actions handled by the widget task (besides the library's OPEN_APP / OPEN_URI). */
-export const WIDGET_ACTION = {
-  toggleSleep: 'TOGGLE_SLEEP',
-  logDiaper: 'LOG_DIAPER',
-} as const;
+export { WIDGET_ACTION };
 
 type Palette = (typeof Colors)['light' | 'dark'];
 

@@ -314,6 +314,10 @@ from the relay only reach Android so far (#6). Night feeds use a time-sensitive 
 which can break through a Focus when allowed in the iPhone settings. Running timers show as a
 Live Activity (`expo-widgets`); if Live Activities are switched off for the app, as a plain
 notification. A partner's timer appears when the app is opened, not by push (#6).
+The home-screen widget (#16, small, medium and large; "Edit Widget" picks its rows) shows the
+latest entries with live timers. Sleep, Wet and Solid work with the app closed: the tap runs
+in the app's process and wakes it briefly to save and sync (`mobile/scripts/patch-expo-widgets.js`
+patches `expo-widgets` for that after `npm install`); Feed opens the feeding screen.
 
 - **Simulator:** `npx eas-cli@latest build -p ios --profile simulator` (free Expo account), or
   the "iOS build" workflow (runs on every push that changes the app, or by hand from the

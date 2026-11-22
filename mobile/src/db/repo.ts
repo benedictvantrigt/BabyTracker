@@ -318,8 +318,11 @@ export class Repo {
     childId: string,
     kind: K,
     data: EntryInput<K>['data'],
+    /** When it started, if not now (a widget tap carried out later); never in the future. */
+    start?: number,
   ): Promise<Entry> {
     const now = this.deps.now();
+    const startAt = Math.min(start ?? now, now);
     const running = await this.db.getAllAsync<{ id: string; start: number }>(
       'SELECT id, start FROM entries WHERE child_id = ? AND kind = ? AND "end" IS NULL AND deleted_at IS NULL',
       [childId, kind],
@@ -327,14 +330,14 @@ export class Repo {
     for (const r of running) {
       await this.db.withTransactionAsync(async () => {
         await this.db.runAsync('UPDATE entries SET "end" = ?, updated_at = ? WHERE id = ?', [
-          Math.max(now, r.start),
+          Math.max(startAt, r.start),
           now,
           r.id,
         ]);
         await this.enqueueEntry(r.id);
       });
     }
-    return this.addEntry(childId, { kind, start: now, end: null, data } as EntryInput);
+    return this.addEntry(childId, { kind, start: startAt, end: null, data } as EntryInput);
   }
 
   /** Stops a running timer. Returns false if it was not running (e.g. already stopped). */
