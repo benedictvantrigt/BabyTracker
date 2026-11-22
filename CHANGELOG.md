@@ -3,6 +3,14 @@
 All notable changes to Napchime. Versions follow [Semantic Versioning](https://semver.org/);
 before 1.0.0 a minor version marks a phase of the plan.
 
+## [Unreleased]
+
+- iPhone home-screen widget (#16): feed, sleep and diaper with the latest entries and live
+  timers, in small, medium and large; "Edit Widget" chooses the rows and buttons-only. Sleep /
+  Wake, Wet and Solid work with the app closed: the tap wakes the app in the background to
+  save the entry, update the lock-screen timer and sync to the partner. Feed opens the
+  feeding screen.
+
 ## [0.11.4] — 2026-11-22 — Live timers follow widget taps and partner changes
 
 - Android widget: Sleep / Wake with the app open in the background now updates the

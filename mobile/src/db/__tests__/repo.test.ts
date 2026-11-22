@@ -139,6 +139,17 @@ describe('Repo', () => {
     expect((await repo.getEntry(right.id))?.end).toBe(now());
   });
 
+  it('starts a timer at a given earlier time, never a later one', async () => {
+    const { repo, child, advance, now } = await setup();
+    const tapped = now();
+    advance(20_000);
+    const sleep = await repo.startTimer(child.id, 'sleep', { nap: true }, tapped);
+    expect(sleep.start).toBe(tapped);
+    const later = await repo.startTimer(child.id, 'sleep', { nap: true }, now() + 60_000);
+    expect(later.start).toBe(now());
+    expect((await repo.getEntry(sleep.id))?.end).toBe(now());
+  });
+
   it('soft-deletes and restores, notifying subscribers', async () => {
     const { repo, child, now } = await setup();
     const listener = jest.fn();

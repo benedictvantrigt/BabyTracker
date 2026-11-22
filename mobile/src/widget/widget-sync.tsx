@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { AppState, Platform } from 'react-native';
+import { AppState } from 'react-native';
 
 import { useAppData } from '@/data/app-data';
 
@@ -10,7 +10,6 @@ export function WidgetSync() {
   const { repo } = useAppData();
 
   useEffect(() => {
-    if (Platform.OS !== 'android') return;
     let queued: ReturnType<typeof setTimeout> | null = null;
     // Coalesce bursts of writes, like the notification refresh does.
     const schedule = () => {

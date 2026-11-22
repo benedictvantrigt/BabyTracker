@@ -115,7 +115,32 @@
           ]
         }
       ],
-      "expo-widgets"
+      [
+        "expo-widgets",
+        {
+          "widgets": [
+            {
+              "name": "Summary",
+              "displayName": "Napchime",
+              "description": "Feed, sleep and diaper: latest entries and quick buttons",
+              "ios": {
+                "supportedFamilies": ["systemSmall", "systemMedium", "systemLarge"],
+                "initialLayout": "./src/widget/home-widget.ios.tsx",
+                "configuration": {
+                  "title": "Napchime",
+                  "description": "Choose the rows the widget shows",
+                  "parameters": {
+                    "feeding": { "title": "Feeding", "type": "boolean", "default": true },
+                    "sleep": { "title": "Sleep", "type": "boolean", "default": true },
+                    "diaper": { "title": "Diaper", "type": "boolean", "default": true },
+                    "showInfo": { "title": "Latest entries", "type": "boolean", "default": true }
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
