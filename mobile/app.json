@@ -2,7 +2,7 @@
   "expo": {
     "name": "Napchime",
     "slug": "napchime",
-    "version": "0.11.3",
+    "version": "0.11.4",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "napchime",
@@ -29,7 +29,7 @@
       },
       "predictiveBackGestureEnabled": false,
       "package": "com.napchime.app",
-      "versionCode": 15,
+      "versionCode": 16,
       "permissions": [
         "android.permission.SCHEDULE_EXACT_ALARM",
         "android.permission.POST_NOTIFICATIONS"
@@ -78,7 +78,8 @@
       [
         "expo-notifications",
         {
-          "color": "#6E56CF"
+          "color": "#6E56CF",
+          "enableBackgroundRemoteNotifications": true
         }
       ],
       "expo-secure-store",

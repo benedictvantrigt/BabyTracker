@@ -3,6 +3,19 @@
 All notable changes to Napchime. Versions follow [Semantic Versioning](https://semver.org/);
 before 1.0.0 a minor version marks a phase of the plan.
 
+## [0.11.4] — 2026-11-22 — Live timers follow widget taps and partner changes
+
+- Android widget: Sleep / Wake with the app open in the background now updates the
+  lock-screen timer and syncs to the partner right away, instead of when the app was next
+  opened (the app's follow-ups ran on timers that Android pauses in the background).
+- iPhone pushes are on (#6): the relays have an APNs key and the App Store build includes
+  the notification service extension, so the iPhone gets reminders and "partner changed
+  something" pushes from the relay like Android does.
+- iPhone: the app may now run briefly for a silent push (background mode
+  `remote-notification`), so a partner's start or stop also updates the lock-screen timer
+  without opening the app. A new timer can't be started from the background on iOS: an
+  existing one (such as the awake timer) changes over instead.
+
 ## [0.11.3] — 2026-11-21 — iPhone date wheel, no Nap switch, relay guard
 
 - iPhone: date and time fields open a wheel below the field instead of the pop-up picker,
