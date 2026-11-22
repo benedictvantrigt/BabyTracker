@@ -3,7 +3,7 @@
 All notable changes to Napchime. Versions follow [Semantic Versioning](https://semver.org/);
 before 1.0.0 a minor version marks a phase of the plan.
 
-## [Unreleased]
+## [0.11.4] — 2026-11-22 — Live timers follow widget taps and partner changes
 
 - Android widget: Sleep / Wake with the app open in the background now updates the
   lock-screen timer and syncs to the partner right away, instead of when the app was next
