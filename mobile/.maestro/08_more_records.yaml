@@ -40,6 +40,9 @@ name: Tummy time timer, temperature and growth
     env:
       # A label in view: the field's own label scrolls under the header with the keyboard up.
       LABEL: 'Measured'
+# The form starts below the header (iOS), so Save can sit just off screen.
+- scrollUntilVisible:
+    element: 'Save'
 - tapOn: 'Save'
 - scrollUntilVisible:
     element: 'Temperature 37.4 °C · .*'
@@ -62,6 +65,9 @@ name: Tummy time timer, temperature and growth
     file: subflows/dismiss-keyboard.yaml
     env:
       LABEL: 'Length \(cm\)'
+# The form starts below the header (iOS), so Save can sit just off screen.
+- scrollUntilVisible:
+    element: 'Save'
 - tapOn: 'Save'
 - scrollUntilVisible:
     element: 'Growth 4.25 kg · .*'

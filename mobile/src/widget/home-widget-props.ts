@@ -109,6 +109,24 @@ export function homeWidgetProps(
   };
 }
 
+/**
+ * A copy without null and undefined values, at any depth. The widget's timeline is kept in
+ * UserDefaults, which takes property-list values only: one null anywhere and iOS drops the
+ * whole timeline without an error, and the widget stays empty. The widget reads a dropped
+ * value as undefined, which it treats like null.
+ */
+export function withoutNulls<T>(value: T): T {
+  if (Array.isArray(value)) {
+    return value.filter((v) => v != null).map((v) => withoutNulls(v)) as T;
+  }
+  if (value && typeof value === 'object') {
+    const out: Record<string, unknown> = {};
+    for (const [key, v] of Object.entries(value)) if (v != null) out[key] = withoutNulls(v);
+    return out as T;
+  }
+  return value;
+}
+
 /** What a tap asks for, in the terms of the shared tap handling (widget-actions). */
 export function tapAction(target: HomeWidgetTarget): {
   action: string;

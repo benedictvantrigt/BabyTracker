@@ -26,7 +26,9 @@ export default function CustomizeDashboardScreen() {
 
   return (
     <ThemedView style={styles.fill}>
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView
+        contentInsetAdjustmentBehavior="automatic"
+        contentContainerStyle={styles.content}>
         <ThemedText type="small" themeColor="textSecondary">
           Choose which cards the Today screen shows and in what order. A card that is turned off
           keeps its place and its data, and its settings are hidden from the Settings tab; reminders

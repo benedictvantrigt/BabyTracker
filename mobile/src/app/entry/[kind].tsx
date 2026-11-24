@@ -351,7 +351,10 @@ export default function EntryScreen() {
       <Stack.Screen
         options={{ title: `${editing ? 'Edit' : 'Add'} ${KIND_LABEL[kind].toLowerCase()}` }}
       />
-      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+      <ScrollView
+        contentInsetAdjustmentBehavior="automatic"
+        contentContainerStyle={styles.content}
+        keyboardShouldPersistTaps="handled">
         {kind === 'feeding' && (
           <>
             <Field label="Type">
