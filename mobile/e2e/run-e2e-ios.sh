@@ -84,6 +84,22 @@ fi
 # layout and timeline in the app group.
 GROUP_DIR=$(xcrun simctl get_app_container "$UDID" "$BUNDLE" "group.$BUNDLE" 2>/dev/null || true)
 {
+  # The layout built into the widget extension: the widget gallery draws with it.
+  echo "== widget extension in $APP =="
+  find "$APP/PlugIns" -maxdepth 2 2>/dev/null | head -20
+  for registry in "$APP"/PlugIns/*.appex/ExpoWidgets.bundle/ExpoWidgetsLayoutRegistry.json \
+    "$APP"/ExpoWidgets.bundle/ExpoWidgetsLayoutRegistry.json; do
+    [ -f "$registry" ] || { echo "missing: $registry"; continue; }
+    python3 -c '
+import json, sys
+widgets = json.load(open(sys.argv[1])).get("widgets", {})
+print(sys.argv[1], {name: len(w.get("layout", "")) for name, w in widgets.items()})
+' "$registry"
+  done
+  for plist in "$APP"/PlugIns/*.appex/Info.plist; do
+    echo "$plist group: $(plutil -extract ExpoWidgetsAppGroupIdentifier raw "$plist" 2>&1)"
+  done
+  echo "app group: $(plutil -extract ExpoWidgetsAppGroupIdentifier raw "$APP/Info.plist" 2>&1)"
   echo "== app group: ${GROUP_DIR:-not found} =="
   if [ -n "$GROUP_DIR" ]; then
     find "$GROUP_DIR" -name '*.plist' -print
