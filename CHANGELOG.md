@@ -3,6 +3,14 @@
 All notable changes to Napchime. Versions follow [Semantic Versioning](https://semver.org/);
 before 1.0.0 a minor version marks a phase of the plan.
 
+## [0.12.1] — 2026-11-24 — iPhone widget shows its data
+
+- iPhone home-screen widget (#16): it stayed white. Empty values in what the app gives the
+  widget made iOS drop the whole timeline without a word; the app now leaves them out. Until
+  the app has run once, the widget asks to open Napchime instead of staying blank.
+- iPhone: Customize Today, the entry forms and the partner screens start below their
+  see-through header instead of under the title (#94).
+
 ## [0.12.0] — 2026-11-22 — iPhone home-screen widget
 
 - iPhone home-screen widget (#16): feed, sleep and diaper with the latest entries and live

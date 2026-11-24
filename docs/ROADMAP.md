@@ -100,7 +100,7 @@ Records:
 Other extras:
 - #14 NFC tags that log an entry
 - #15 Live timer on the lock screen (0.7.0: Android Live Updates, iOS Live Activities; iPhone test in #49; dismissal respected, #51, 0.11.0)
-- #16 Home-screen widgets (Android done, with settings per widget since 0.9.0; iOS in 0.12.0, buttons wake the app in the background; not yet tested on an iPhone)
+- #16 Home-screen widgets (Android done, with settings per widget since 0.9.0; iOS in 0.12.0, buttons wake the app in the background; 0.12.1 fixes the blank iPhone widget)
 - #17 Weekly charts
 - #18 Growth curves
 - #19 PDF / CSV export
