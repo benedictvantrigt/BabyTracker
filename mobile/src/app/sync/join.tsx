@@ -65,7 +65,10 @@ export default function JoinScreen() {
 
   return (
     <ThemedView style={styles.fill}>
-      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+      <ScrollView
+        contentInsetAdjustmentBehavior="automatic"
+        contentContainerStyle={styles.content}
+        keyboardShouldPersistTaps="handled">
         <ThemedText themeColor="textSecondary">
           On your partner’s phone open Settings → Partner sync → Invite. Scan the QR code shown
           there, or paste the code they sent you.
