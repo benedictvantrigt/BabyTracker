@@ -33,7 +33,11 @@ name: Timeline lists entries; edit and delete
 - runFlow:
     file: subflows/dismiss-keyboard.yaml
     env:
-      LABEL: 'Tags'
+      # A label above the keyboard: a tap on one under it types letters instead.
+      LABEL: 'Notes'
+# The form starts below the header (iOS), so Save can sit just off screen.
+- scrollUntilVisible:
+    element: 'Save'
 - tapOn: 'Save'
 - assertVisible: '(Edit )?Diaper · Wet \+ solid( at .*)?'
 - assertVisible: '.*#teething.*'

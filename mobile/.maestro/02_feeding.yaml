@@ -39,6 +39,9 @@ name: Breast feeding timers switch sides, bottle feed with amount
     file: subflows/dismiss-keyboard.yaml
     env:
       LABEL: 'Amount \(ml\)'
+# The form starts below the header (iOS), so Save can sit just off screen.
+- scrollUntilVisible:
+    element: 'Save'
 - tapOn: 'Save'
 # A form entry starts 15 minutes back by default, so "Last" still shows the breast feed.
 - assertVisible: 'Last: Right, .* ago'
