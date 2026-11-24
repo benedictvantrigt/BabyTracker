@@ -80,6 +80,28 @@ else
   maestro_status=1
 fi
 
+# What the app shares with the home-screen widget (#16): the widget draws nothing without its
+# layout and timeline in the app group.
+GROUP_DIR=$(xcrun simctl get_app_container "$UDID" "$BUNDLE" "group.$BUNDLE" 2>/dev/null || true)
+{
+  echo "== app group: ${GROUP_DIR:-not found} =="
+  if [ -n "$GROUP_DIR" ]; then
+    find "$GROUP_DIR" -name '*.plist' -print
+    for plist in "$GROUP_DIR"/Library/Preferences/*.plist; do
+      [ -f "$plist" ] || continue
+      plutil -convert json -o - "$plist" | python3 -c '
+import json, sys
+for key, value in sorted(json.load(sys.stdin).items()):
+    if key.startswith("__expo_widgets"):
+        size = len(value) if isinstance(value, (str, list, dict)) else value
+        print(f"{key}: {type(value).__name__} {size}")
+        if key.endswith("_timeline") and value:
+            print("  first entry:", json.dumps(value[0])[:600])
+'
+    done
+  fi
+} 2>&1 | tee "$OUT/widget-storage.txt"
+
 kill "$LOG_PID" "$RELAY_PID" 2>/dev/null || true
 pkill -f workerd 2>/dev/null || true
 rm -rf "$OUT/relay-state"
