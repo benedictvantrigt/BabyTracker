@@ -28,6 +28,20 @@ type Row = 'feeding' | 'sleep' | 'diaper';
 
 const HomeWidget = (props: HomeWidgetProps, environment: WidgetEnvironment<HomeWidgetConfig>) => {
   'widget';
+  // No timeline yet (the widget gallery, or the app has not run since it was installed).
+  if (!props || !props.light || !props.dark) {
+    const dark = environment.colorScheme === 'dark';
+    return (
+      <Text
+        modifiers={[
+          font({ size: 14 }),
+          foregroundStyle(dark ? '#B8B8C0' : '#5C5C66'),
+          containerBackground(dark ? '#1C1B22' : '#FFFFFF', 'widget'),
+        ]}>
+        Open Napchime to set up the widget
+      </Text>
+    );
+  }
   const c = environment.colorScheme === 'dark' ? props.dark : props.light;
   const background = containerBackground(c.background, 'widget');
 
@@ -53,7 +67,8 @@ const HomeWidget = (props: HomeWidgetProps, environment: WidgetEnvironment<HomeW
       { id: `${Date.now()}-${Math.random().toString(36).slice(2)}`, target, at: Date.now() },
     ],
     sleeping: target === 'sleep' ? !props.sleeping : props.sleeping,
-    confirmed: target === 'sleep' ? null : label,
+    // Not null: the props go back into UserDefaults, which drops anything with a null.
+    confirmed: target === 'sleep' ? '' : label,
   });
 
   const label = (text: string, fill: boolean) => (

@@ -117,6 +117,11 @@ for key, value in sorted(json.load(sys.stdin).items()):
     done
   fi
 } 2>&1 | tee "$OUT/widget-storage.txt"
+# One null in the props and iOS drops the whole timeline silently: the widget stays empty.
+if ! grep -q '__expo_widgets_Summary_timeline: list [1-9]' "$OUT/widget-storage.txt"; then
+  echo "== FAIL: the app wrote no timeline for the home-screen widget ==" | tee -a "$OUT/maestro.txt"
+  maestro_status=1
+fi
 
 kill "$LOG_PID" "$RELAY_PID" 2>/dev/null || true
 pkill -f workerd 2>/dev/null || true

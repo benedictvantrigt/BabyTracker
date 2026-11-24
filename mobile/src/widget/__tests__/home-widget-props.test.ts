@@ -1,7 +1,7 @@
 /// <reference types="jest" />
 import { at, entry, kid, settings } from '@/domain/__tests__/fixtures';
 
-import { homeWidgetProps, pendingTaps, tapAction } from '../home-widget-props';
+import { homeWidgetProps, pendingTaps, tapAction, withoutNulls } from '../home-widget-props';
 import { WIDGET_ACTION } from '../widget-action';
 
 const URI = 'napchime://entry/feeding';
@@ -29,6 +29,19 @@ describe('homeWidgetProps', () => {
     expect(p.sleeping).toBe(true);
     expect(p.confirmed).toBe('Wet');
     expect(p.light.sleep).not.toBe(p.dark.sleep);
+  });
+});
+
+describe('withoutNulls', () => {
+  it('drops null values at any depth, so UserDefaults keeps the timeline', () => {
+    const p = withoutNulls(homeWidgetProps(null, [], settings, at(11), URI));
+    expect(JSON.stringify(p)).not.toContain('null');
+    expect(p.childName).toBeUndefined();
+    expect(p.feeding).toEqual({ title: '', detail: '' });
+    expect(withoutNulls({ a: [1, null, { b: null, c: 0, d: '' }], e: false })).toEqual({
+      a: [1, { c: 0, d: '' }],
+      e: false,
+    });
   });
 });
 

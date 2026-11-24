@@ -9,7 +9,13 @@ import { DAY, MINUTE, startOfLocalDay } from '@/domain/time';
 
 import WidgetWake from '../../modules/widget-wake';
 import HomeWidget from './home-widget.ios';
-import { HOME_WIDGET, homeWidgetProps, pendingTaps, tapAction } from './home-widget-props';
+import {
+  HOME_WIDGET,
+  homeWidgetProps,
+  pendingTaps,
+  tapAction,
+  withoutNulls,
+} from './home-widget-props';
 import { afterWidgetWrite, feedingUri, handleClick, serial, widgetRepo } from './widget-actions';
 
 /** How long a tapped button keeps its check mark. */
@@ -38,7 +44,10 @@ async function render(repo: Repo, confirmed: string | null = null): Promise<void
   );
   const at = (time: number, shown: string | null) => ({
     date: new Date(time),
-    props: { ...homeWidgetProps(child, entries, settings, time, uri, shown), taps: waiting },
+    props: withoutNulls({
+      ...homeWidgetProps(child, entries, settings, time, uri, shown),
+      taps: waiting,
+    }),
   });
   const timeline = [at(now, confirmed)];
   if (confirmed) timeline.push(at(now + CONFIRM_MS, null));
