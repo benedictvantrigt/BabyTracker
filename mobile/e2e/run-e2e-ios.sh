@@ -35,8 +35,11 @@ maestro_status=0
 # Simulator faults rather than test failures: no report (Maestro hung before the flow ran)
 # or Maestro lost its driver on the Simulator. A flow that hit one is run once more, as on
 # Android (run-e2e.sh).
-infra_failure() { # report file
-  [ ! -s "$1" ] || grep -qE 'DeviceUnreachableException|XCTestDriverUnreachable' "$1"
+# The report can say only "Unknown error": the cause is then in the flow's own maestro.log.
+infra_failure() { # flow name
+  local pattern='DeviceUnreachableException|XCTestDriverUnreachable'
+  [ ! -s "$OUT/report-$1.xml" ] || grep -qE "$pattern" "$OUT/report-$1.xml" ||
+    grep -rqE "$pattern" --include=maestro.log "$OUT/maestro-output/$1" 2>/dev/null
 }
 
 run_maestro() { # name, flow file, extra maestro args...
@@ -58,7 +61,7 @@ run_flow() { # flow file, extra maestro args...
   name="$(basename "$flow" .yaml)"
   echo "== $name =="
   run_maestro "$name" "$flow" "$@" && return 0
-  if infra_failure "$OUT/report-$name.xml"; then
+  if infra_failure "$name"; then
     echo "== $name: Simulator fault, running it once more ==" | tee -a "$OUT/maestro.txt"
     mv "$OUT/report-$name.xml" "$OUT/report-$name-attempt1.xml.txt" 2>/dev/null
     run_maestro "$name" "$flow" "$@" && return 0
