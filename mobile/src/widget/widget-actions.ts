@@ -1,12 +1,11 @@
 // What the home-screen widget's buttons do, on Android (the widget task) and on iOS (taps the
 // widget queued for the app). Both can run while the app is closed or in the background.
 import Constants from 'expo-constants';
-import { getRandomBytes, randomUUID } from 'expo-crypto';
-import { openDatabaseAsync } from 'expo-sqlite';
+import { getRandomBytes } from 'expo-crypto';
 
-import { getAppRepo, getAppSync } from '@/data/app-repo';
-import { Repo } from '@/db/repo';
-import { migrate } from '@/db/schema';
+import { getAppSync } from '@/data/app-repo';
+import { sharedRepo } from '@/data/shared-repo';
+import type { Repo } from '@/db/repo';
 import { isNapStart, runningEntries } from '@/domain/entries';
 import { sleepTimerAllowed, withoutForgottenSleeps } from '@/domain/night-sleep';
 import { DAY } from '@/domain/time';
@@ -18,19 +17,8 @@ import { loadEngine } from '@/sync/setup';
 
 import { WIDGET_ACTION } from './widget-action';
 
-let ownRepo: Promise<Repo> | null = null;
-
 /** The app's repository when the app is running, else one opened for this task. */
-export async function widgetRepo(): Promise<{ repo: Repo; inApp: boolean }> {
-  const app = getAppRepo();
-  if (app) return { repo: app, inApp: true };
-  ownRepo ??= (async () => {
-    const db = await openDatabaseAsync('babytracker.db');
-    await migrate(db);
-    return new Repo(db, { uuid: randomUUID, now: Date.now });
-  })();
-  return { repo: await ownRepo, inApp: false };
-}
+export const widgetRepo = sharedRepo;
 
 /** Deep link that opens the feeding entry screen. */
 export function feedingUri(): string {

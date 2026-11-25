@@ -3,6 +3,13 @@
 All notable changes to Napchime. Versions follow [Semantic Versioning](https://semver.org/);
 before 1.0.0 a minor version marks a phase of the plan.
 
+## [Unreleased]
+
+- A partner's change now shows straight away with the app open or in the background. The
+  sync push saved it through a second copy of the database that the screens don't listen
+  to, so the Today screen kept showing it as missing until something else redrew it (such
+  as turning a card off and on).
+
 ## [0.12.2] — 2026-11-25 — Small and large iPhone widget, forgotten sleep
 
 - Day sleep only ("Track night sleep" off): a sleep started during the day and still running
