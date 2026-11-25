@@ -81,7 +81,7 @@ export function widgetSummary(
 }
 
 /** "nap 14:00" or "bed 19:00" from the schedule, or the awake-window nap time without it. */
-function nextSleepDetail(
+export function nextSleepDetail(
   child: WidgetChild,
   entries: Entry[],
   settings: Settings,
