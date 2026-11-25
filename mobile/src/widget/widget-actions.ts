@@ -8,7 +8,7 @@ import { getAppRepo, getAppSync } from '@/data/app-repo';
 import { Repo } from '@/db/repo';
 import { migrate } from '@/db/schema';
 import { isNapStart, runningEntries } from '@/domain/entries';
-import { sleepTimerAllowed } from '@/domain/night-sleep';
+import { sleepTimerAllowed, withoutForgottenSleeps } from '@/domain/night-sleep';
 import { DAY } from '@/domain/time';
 import { isRepeatTap } from '@/domain/widget';
 import { refreshNotifications } from '@/notifications/refresh';
@@ -56,7 +56,8 @@ export async function handleClick(
   const entries = await repo.listEntries(child.id, now - DAY);
   if (action === WIDGET_ACTION.toggleSleep) {
     if (isRepeatTap(entries, now)) return { wrote: false };
-    const sleeping = runningEntries(entries).find((e) => e.kind === 'sleep');
+    // A sleep left running past the day end does not count: refreshing removes it.
+    const sleeping = runningEntries(withoutForgottenSleeps(entries, settings, now)).find((e) => e.kind === 'sleep');
     if (sleeping) await repo.stopEntry(sleeping.id, now);
     // Day sleep only on this phone: no sleep timer starts at night.
     else if (!sleepTimerAllowed(settings, now)) return { wrote: false };

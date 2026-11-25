@@ -2,6 +2,7 @@
 // itself (home-widget.ios.tsx) runs in the widget extension and only sees these props.
 import { Colors } from '@/constants/theme';
 import { runningEntries } from '@/domain/entries';
+import { withoutForgottenSleeps } from '@/domain/night-sleep';
 import type { Child, Entry, Settings } from '@/domain/types';
 import { widgetSummary, type WidgetLine } from '@/domain/widget';
 
@@ -97,7 +98,7 @@ export function homeWidgetProps(
     };
   }
   const summary = widgetSummary(child, entries, settings, now);
-  const running = runningEntries(entries);
+  const running = runningEntries(withoutForgottenSleeps(entries, settings, now));
   const since = (kind: Entry['kind']) => running.find((e) => e.kind === kind)?.start ?? null;
   return {
     ...base,

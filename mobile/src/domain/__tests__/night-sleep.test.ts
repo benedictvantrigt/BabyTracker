@@ -1,10 +1,12 @@
 /// <reference types="jest" />
 import {
   awakeWindowFrom,
+  forgottenSleeps,
   isUntrackedNight,
   lastWake,
   nextDayStart,
   sleepTimerAllowed,
+  withoutForgottenSleeps,
 } from '../night-sleep';
 
 import { at, entry, settings } from './fixtures';
@@ -57,5 +59,23 @@ describe('awakeWindowFrom', () => {
     const evening = entry('sleep', at(16, 15), at(17), { nap: true });
     expect(awakeWindowFrom([evening], dayOnly, at(21))).toBe(at(7, 0, 1));
     expect(awakeWindowFrom([evening], settings, at(21))).toBe(at(17));
+  });
+});
+
+describe('forgottenSleeps', () => {
+  const nap = entry('sleep', at(17), null, { nap: true });
+
+  it('removes a sleep still running at the day end when tracking day sleep only', () => {
+    expect(forgottenSleeps([nap], dayOnly, at(19, 29))).toEqual([]);
+    expect(forgottenSleeps([nap], dayOnly, at(19, 30))).toEqual([nap]);
+    expect(forgottenSleeps([nap], dayOnly, at(6, 0, 1))).toEqual([nap]);
+    expect(withoutForgottenSleeps([nap], dayOnly, at(22))).toEqual([]);
+  });
+
+  it('keeps stopped sleeps, tracked nights and night sleeps from a partner', () => {
+    const stopped = entry('sleep', at(17), at(18), { nap: true });
+    const night = entry('sleep', at(20), null, { nap: false });
+    expect(forgottenSleeps([stopped, night], dayOnly, at(23))).toEqual([]);
+    expect(forgottenSleeps([nap], settings, at(23))).toEqual([]);
   });
 });

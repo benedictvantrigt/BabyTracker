@@ -2,6 +2,7 @@ import type { Repo } from '@/db/repo';
 import { isOnDuty } from '@/domain/duty-days';
 import { runningEntries } from '@/domain/entries';
 import { computeReminders, reminderWantedHere } from '@/domain/reminders';
+import { forgottenSleeps, napCutoff } from '@/domain/night-sleep';
 import { DAY } from '@/domain/time';
 import type { Entry } from '@/domain/types';
 
@@ -16,7 +17,8 @@ import { syncNotifications } from './scheduler';
  * this phone's duty days: a reminder that falls on another day is left out, and so are the
  * timers while today isn't one. Nap and feed reminders, the sleep timer and the awake timer
  * each switch off per phone. A phone that tracks day sleep only shows no timer for a night
- * sleep (one logged on a partner's phone). Works without the UI (background push).
+ * sleep (one logged on a partner's phone), and removes a sleep timer left running past the
+ * day end there (`forgottenSleeps`). Works without the UI (background push).
  */
 export async function refreshNotifications(repo: Repo, now = Date.now()): Promise<void> {
   const [settings, children, sync] = await Promise.all([
@@ -26,7 +28,11 @@ export async function refreshNotifications(repo: Repo, now = Date.now()): Promis
   ]);
   const child = children.find((c) => c.id === settings.activeChildId) ?? children[0];
   if (!child) return;
-  const entries = await repo.listEntries(child.id, now - 2 * DAY);
+  let entries = await repo.listEntries(child.id, now - 2 * DAY);
+  // Day sleep only: a sleep still running at the day end was never stopped. Remove it.
+  const forgotten = forgottenSleeps(entries, settings, now);
+  for (const e of forgotten) await repo.deleteEntry(e.id);
+  if (forgotten.length) entries = entries.filter((e) => !forgotten.includes(e));
   const planned = computeReminders(entries, settings, child, now).filter(
     (r) => reminderWantedHere(r.id, settings) && isOnDuty(settings, r.fireAt),
   );
@@ -45,7 +51,10 @@ export async function refreshNotifications(repo: Repo, now = Date.now()): Promis
     : [];
   const awake = onDuty ? awakeTimerFor(entries, child, settings, now) : null;
   const sleepPlan = sleepPlanText(entries, child, settings, now);
-  await syncNotifications(reminders, running, child.name, awake, sleepPlan);
+  // The lock-screen sleep timer goes at the day end even if the app does not run then.
+  const runningSleep = running.find((e) => e.kind === 'sleep');
+  const sleepUntil = runningSleep ? napCutoff(settings, runningSleep.start) : null;
+  await syncNotifications(reminders, running, child.name, awake, sleepPlan, sleepUntil);
 }
 
 function isNightSleep(entry: Entry): boolean {
