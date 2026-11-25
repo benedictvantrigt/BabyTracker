@@ -6,7 +6,7 @@
 // runs in the app's process (patched in scripts/patch-expo-widgets.js), which wakes the app in
 // the background to write the entry and sync it: see home-widget-sync.ios.ts. Feed opens the
 // feeding screen, like on Android.
-import { Button, HStack, Link, Spacer, Text, VStack } from '@expo/ui/swift-ui';
+import { Button, Divider, HStack, Label, Link, Spacer, Text, VStack } from '@expo/ui/swift-ui';
 import {
   buttonStyle,
   containerBackground,
@@ -18,11 +18,15 @@ import {
   monospacedDigit,
   padding,
   tint,
-  widgetURL,
 } from '@expo/ui/swift-ui/modifiers';
 import { createWidget, type WidgetEnvironment } from 'expo-widgets';
 
-import type { HomeWidgetConfig, HomeWidgetProps, HomeWidgetTarget } from './home-widget-props';
+import type {
+  HomeWidgetConfig,
+  HomeWidgetProps,
+  HomeWidgetTarget,
+  SmallButton,
+} from './home-widget-props';
 
 type Row = 'feeding' | 'sleep' | 'diaper';
 
@@ -114,29 +118,86 @@ const HomeWidget = (props: HomeWidgetProps, environment: WidgetEnvironment<HomeW
     }
   };
 
-  // Small: buttons only. Links don't work in a small widget, so Feed is left out there,
-  // unless it is the only row: then the whole widget opens the feeding screen.
+  // Small: one or two wide buttons chosen in "Edit Widget" (not Feed: links don't work in a
+  // small widget), under a line that says how long the baby has been awake or asleep.
   if (small) {
-    const smallRows = rows.filter((r) => r !== 'feeding');
-    if (!smallRows.length) {
+    const choices: SmallButton[] = [config.smallFirst ?? 'sleep'];
+    const second = config.smallSecond ?? 'wet';
+    if (second !== 'off' && second !== choices[0]) choices.push(second);
+    const wide = (choice: SmallButton) => {
+      const sleep = choice === 'sleep';
+      const text = sleep
+        ? props.sleeping
+          ? 'Wake'
+          : 'Sleep'
+        : choice === 'wet'
+          ? 'Wet'
+          : choice === 'solid'
+            ? 'Solid'
+            : 'Wet + solid';
+      const icon = sleep
+        ? props.sleeping
+          ? 'sun.max.fill'
+          : 'moon.fill'
+        : choice === 'wet'
+          ? 'drop.fill'
+          : choice === 'solid'
+            ? 'circle.fill'
+            : 'plus.circle.fill';
+      const done = props.confirmed === text;
       return (
-        <VStack modifiers={[widgetURL(props.feedingUri), background]}>
-          <Text modifiers={[font({ size: 22, weight: 'semibold' }), foregroundStyle(c.feeding)]}>
-            Feed
-          </Text>
-          <Text modifiers={[font({ size: 12 }), foregroundStyle(c.secondary), lineLimit(2)]}>
-            {props.feeding.title}
-          </Text>
-        </VStack>
+        <Button
+          key={choice}
+          target={choice}
+          onPress={press(choice, text)}
+          modifiers={[
+            buttonStyle(done ? 'borderedProminent' : 'bordered'),
+            tint(c[sleep ? 'sleep' : 'diaper']),
+            controlSize('large'),
+          ]}>
+          <Label
+            title={done ? `✓ ${text}` : text}
+            systemImage={icon}
+            modifiers={[
+              font({ size: text.length > 6 ? 14 : 16, weight: 'semibold' }),
+              lineLimit(1),
+              frame({ maxWidth: 1000, maxHeight: 1000 }),
+            ]}
+          />
+        </Button>
       );
-    }
+    };
+    const since = props.sleep.since ?? props.awakeSince;
+    const status =
+      since != null ? (
+        <HStack spacing={4}>
+          <Text modifiers={[font({ size: 13, weight: 'semibold' }), foregroundStyle(c.sleep)]}>
+            {props.sleep.since != null ? 'Asleep' : 'Awake'}
+          </Text>
+          <Text
+            date={new Date(since)}
+            dateStyle="timer"
+            modifiers={[
+              font({ size: 13, weight: 'semibold' }),
+              monospacedDigit(),
+              foregroundStyle(c.sleep),
+            ]}
+          />
+        </HStack>
+      ) : (
+        <Text
+          modifiers={[
+            font({ size: 13, weight: 'semibold' }),
+            foregroundStyle(c.sleep),
+            lineLimit(1),
+          ]}>
+          {props.sleep.title}
+        </Text>
+      );
     return (
-      <VStack spacing={6} modifiers={[background]}>
-        {smallRows.map((row) => (
-          <HStack key={row} spacing={6}>
-            {buttons(row, true)}
-          </HStack>
-        ))}
+      <VStack alignment="leading" spacing={8} modifiers={[background]}>
+        {status}
+        {choices.map(wide)}
       </VStack>
     );
   }
@@ -206,15 +267,45 @@ const HomeWidget = (props: HomeWidgetProps, environment: WidgetEnvironment<HomeW
       {buttons(row, false)}
     </HStack>
   ));
+  // Large: today's totals under the name, then what comes next and the latest entries.
   if (large) {
     content.unshift(
-      <Text key="name" modifiers={[font({ size: 17, weight: 'bold' }), padding({ bottom: 4 })]}>
-        {props.childName}
-      </Text>,
+      <VStack key="name" alignment="leading" spacing={1} modifiers={[padding({ bottom: 2 })]}>
+        <Text modifiers={[font({ size: 17, weight: 'bold' })]}>{props.childName}</Text>
+        <Text modifiers={[font({ size: 12 }), foregroundStyle(c.secondary), lineLimit(1)]}>
+          {`Today: ${props.totals ?? ''}`}
+        </Text>
+      </VStack>,
     );
+    content.push(<Divider key="divider" />);
+    if (props.next) {
+      content.push(
+        <Text
+          key="next"
+          modifiers={[font({ size: 12 }), foregroundStyle(c.secondary), lineLimit(1)]}>
+          {`Next: ${props.next}`}
+        </Text>,
+      );
+    }
+    for (const item of props.recent ?? []) {
+      content.push(
+        <HStack key={`recent-${item.at}-${item.text}`} spacing={8}>
+          <Text
+            modifiers={[
+              font({ size: 12 }),
+              monospacedDigit(),
+              foregroundStyle(c.secondary),
+              frame({ width: 40, alignment: 'leading' }),
+            ]}>
+            {item.at}
+          </Text>
+          <Text modifiers={[font({ size: 12 }), lineLimit(1)]}>{item.text}</Text>
+        </HStack>,
+      );
+    }
   }
   return (
-    <VStack alignment="leading" spacing={large ? 14 : 8} modifiers={[background]}>
+    <VStack alignment="leading" spacing={large ? 9 : 8} modifiers={[background]}>
       {content}
     </VStack>
   );

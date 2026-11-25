@@ -3,6 +3,19 @@
 All notable changes to Napchime. Versions follow [Semantic Versioning](https://semver.org/);
 before 1.0.0 a minor version marks a phase of the plan.
 
+## [0.12.2] — 2026-11-25 — Small and large iPhone widget, forgotten sleep
+
+- Day sleep only ("Track night sleep" off): a sleep started during the day and still running
+  at the day end is removed, as if it was never logged. The lock-screen timer and the widgets
+  drop it at the day end even if the app does not run then.
+- iPhone widget, small: one or two wide buttons with an icon, chosen in "Edit Widget" (Sleep /
+  Wake, Wet, Solid or Wet + solid), under a line that counts how long the baby is awake or
+  asleep. Feed is no longer in the small size.
+- iPhone widget, large: today's totals, what comes next (nap or bedtime, feed) and the latest
+  four entries under the rows, so the space is used.
+- iOS tests: a flow that lost the Simulator is run once more also when Maestro reports only
+  "Unknown error".
+
 ## [0.12.1] — 2026-11-24 — iPhone widget shows its data
 
 - iPhone home-screen widget (#16): it stayed white. Empty values in what the app gives the

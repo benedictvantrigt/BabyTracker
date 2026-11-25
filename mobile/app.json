@@ -2,7 +2,7 @@
   "expo": {
     "name": "Napchime",
     "slug": "napchime",
-    "version": "0.12.1",
+    "version": "0.12.2",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "napchime",
@@ -29,7 +29,7 @@
       },
       "predictiveBackGestureEnabled": false,
       "package": "com.napchime.app",
-      "versionCode": 18,
+      "versionCode": 19,
       "permissions": [
         "android.permission.SCHEDULE_EXACT_ALARM",
         "android.permission.POST_NOTIFICATIONS"
@@ -128,12 +128,35 @@
                 "initialLayout": "./src/widget/home-widget.ios.tsx",
                 "configuration": {
                   "title": "Napchime",
-                  "description": "Choose the rows the widget shows",
+                  "description": "Choose the rows the widget shows, and the buttons of the small widget",
                   "parameters": {
                     "feeding": { "title": "Feeding", "type": "boolean", "default": true },
                     "sleep": { "title": "Sleep", "type": "boolean", "default": true },
                     "diaper": { "title": "Diaper", "type": "boolean", "default": true },
-                    "showInfo": { "title": "Latest entries", "type": "boolean", "default": true }
+                    "showInfo": { "title": "Latest entries", "type": "boolean", "default": true },
+                    "smallFirst": {
+                      "title": "Small: first button",
+                      "type": "enum",
+                      "default": "sleep",
+                      "values": [
+                        { "name": "Sleep / Wake", "value": "sleep" },
+                        { "name": "Wet", "value": "wet" },
+                        { "name": "Solid", "value": "solid" },
+                        { "name": "Wet + solid", "value": "both" }
+                      ]
+                    },
+                    "smallSecond": {
+                      "title": "Small: second button",
+                      "type": "enum",
+                      "default": "wet",
+                      "values": [
+                        { "name": "None", "value": "off" },
+                        { "name": "Sleep / Wake", "value": "sleep" },
+                        { "name": "Wet", "value": "wet" },
+                        { "name": "Solid", "value": "solid" },
+                        { "name": "Wet + solid", "value": "both" }
+                      ]
+                    }
                   }
                 }
               }

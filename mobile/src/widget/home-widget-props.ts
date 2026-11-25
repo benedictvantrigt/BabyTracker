@@ -1,9 +1,12 @@
 // What the iPhone home-screen widget shows, and the taps it queues for the app. The widget
 // itself (home-widget.ios.tsx) runs in the widget extension and only sees these props.
 import { Colors } from '@/constants/theme';
-import { runningEntries } from '@/domain/entries';
+import { entryDurationLabel, entryTitle, runningEntries, summarizeDay } from '@/domain/entries';
+import { isUntrackedNight, lastWake, withoutForgottenSleeps } from '@/domain/night-sleep';
+import { nextFeedAt } from '@/domain/reminders';
+import { formatClock, formatDuration } from '@/domain/time';
 import type { Child, Entry, Settings } from '@/domain/types';
-import { widgetSummary, type WidgetLine } from '@/domain/widget';
+import { nextSleepDetail, widgetSummary, type WidgetLine } from '@/domain/widget';
 
 import { WIDGET_ACTION } from './widget-action';
 
@@ -11,7 +14,7 @@ import { WIDGET_ACTION } from './widget-action';
 export const HOME_WIDGET = 'Summary';
 
 /** The widget's buttons that change the log (Feed opens the app instead). */
-export type HomeWidgetTarget = 'sleep' | 'wet' | 'solid';
+export type HomeWidgetTarget = 'sleep' | 'wet' | 'solid' | 'both';
 
 /** A tap on the widget, kept in its props until the app has carried it out. */
 export interface WidgetTap {
@@ -49,7 +52,18 @@ export interface HomeWidgetProps {
   taps: WidgetTap[];
   /** Label of the button just tapped, drawn with a check mark. */
   confirmed: string | null;
+  /** End of the last sleep while awake during the day: the small widget counts it up. */
+  awakeSince: number | null;
+  /** Large widget: today so far, e.g. "6 feeds · 3h 10m sleep · 5 diapers". */
+  totals: string;
+  /** Large widget: what comes next, e.g. "nap 14:00 · feed 15:30". Empty when nothing. */
+  next: string;
+  /** Large widget: the latest finished entries, newest first. */
+  recent: { at: string; text: string }[];
 }
+
+/** A button of the small widget, chosen in "Edit Widget". */
+export type SmallButton = 'sleep' | 'wet' | 'solid' | 'both';
 
 /** The widget's settings ("Edit Widget"), as in the expo-widgets entry of app.json. */
 export interface HomeWidgetConfig {
@@ -57,6 +71,8 @@ export interface HomeWidgetConfig {
   sleep?: boolean;
   diaper?: boolean;
   showInfo?: boolean;
+  smallFirst?: SmallButton;
+  smallSecond?: SmallButton | 'off';
 }
 
 function tints(c: (typeof Colors)['light' | 'dark']): HomeWidgetTints {
@@ -94,10 +110,15 @@ export function homeWidgetProps(
       sleep: EMPTY_LINE,
       diaper: EMPTY_LINE,
       sleeping: false,
+      awakeSince: null,
+      totals: '',
+      next: '',
+      recent: [],
     };
   }
   const summary = widgetSummary(child, entries, settings, now);
-  const running = runningEntries(entries);
+  const shown = withoutForgottenSleeps(entries, settings, now).filter((e) => e.deletedAt === null);
+  const running = runningEntries(shown);
   const since = (kind: Entry['kind']) => running.find((e) => e.kind === kind)?.start ?? null;
   return {
     ...base,
@@ -106,7 +127,51 @@ export function homeWidgetProps(
     sleep: { ...summary.sleep, since: since('sleep') },
     diaper: { ...summary.diaper, since: null },
     sleeping: summary.sleeping,
+    awakeSince:
+      summary.sleeping || isUntrackedNight(settings, now) ? null : lastWake(shown, settings, now),
+    totals: dayTotals(shown, now),
+    next: nextUp(child, shown, settings, now),
+    recent: shown
+      .filter((e) => e.end !== null && e.start <= now)
+      .sort((a, b) => b.start - a.start)
+      .slice(0, RECENT)
+      .map((e) => ({
+        at: formatClock(e.start),
+        text: [entryTitle(e), entryDurationLabel(e, now)].filter(Boolean).join(' · '),
+      })),
   };
+}
+
+/** How many of the latest entries the large widget lists. */
+const RECENT = 4;
+
+function count(n: number, one: string, many: string): string {
+  return `${n} ${n === 1 ? one : many}`;
+}
+
+function dayTotals(entries: Entry[], now: number): string {
+  const day = summarizeDay(entries, now);
+  return [
+    count(day.feedings, 'feed', 'feeds'),
+    `${formatDuration(day.sleepMs)} sleep`,
+    count(day.diapers, 'diaper', 'diapers'),
+  ].join(' · ');
+}
+
+function nextUp(
+  child: Pick<Child, 'name' | 'birthDate' | 'dueDate'>,
+  entries: Entry[],
+  settings: Settings,
+  now: number,
+): string {
+  const sleeping = runningEntries(entries).some((e) => e.kind === 'sleep');
+  const sleep =
+    sleeping || isUntrackedNight(settings, now)
+      ? ''
+      : nextSleepDetail(child, entries, settings, now);
+  const feedAt = nextFeedAt(entries, settings);
+  const feed = feedAt !== null && feedAt > now ? `feed ${formatClock(feedAt)}` : '';
+  return [sleep, feed].filter(Boolean).join(' · ');
 }
 
 /**
@@ -139,10 +204,15 @@ export function tapAction(target: HomeWidgetTarget): {
       return { action: WIDGET_ACTION.logDiaper, data: { wet: true, solid: false, label: 'Wet' } };
     case 'solid':
       return { action: WIDGET_ACTION.logDiaper, data: { wet: false, solid: true, label: 'Solid' } };
+    case 'both':
+      return {
+        action: WIDGET_ACTION.logDiaper,
+        data: { wet: true, solid: true, label: 'Wet + solid' },
+      };
   }
 }
 
-const TARGETS: readonly string[] = ['sleep', 'wet', 'solid'];
+const TARGETS: readonly string[] = ['sleep', 'wet', 'solid', 'both'];
 
 function isTap(value: unknown): value is WidgetTap {
   if (!value || typeof value !== 'object') return false;

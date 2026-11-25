@@ -1,5 +1,5 @@
 import { diaperLabel, feedingLabel, latest, runningEntries } from './entries';
-import { isUntrackedNight, lastWake, nextDayStart } from './night-sleep';
+import { isUntrackedNight, lastWake, nextDayStart, withoutForgottenSleeps } from './night-sleep';
 import { nextFeedAt, nextNapAt } from './reminders';
 import { scheduleStatus } from './sleep-schedule';
 import { formatClock } from './time';
@@ -28,10 +28,13 @@ type WidgetChild = Pick<Child, 'name' | 'birthDate' | 'dueDate'>;
 
 export function widgetSummary(
   child: WidgetChild,
-  entries: Entry[],
+  all: Entry[],
   settings: Settings,
   now: number,
 ): WidgetSummary {
+  // A sleep left running past the day end (day sleep only) is gone by then, also before the
+  // app removes it: the iPhone widget shows what comes next without the app.
+  const entries = withoutForgottenSleeps(all, settings, now);
   const running = runningEntries(entries);
   const runningFeed = running.find((e) => e.kind === 'feeding');
   const runningSleep = running.find((e) => e.kind === 'sleep');
@@ -78,7 +81,7 @@ export function widgetSummary(
 }
 
 /** "nap 14:00" or "bed 19:00" from the schedule, or the awake-window nap time without it. */
-function nextSleepDetail(
+export function nextSleepDetail(
   child: WidgetChild,
   entries: Entry[],
   settings: Settings,

@@ -29,6 +29,20 @@ describe('homeWidgetProps', () => {
     expect(p.sleeping).toBe(true);
     expect(p.confirmed).toBe('Wet');
     expect(p.light.sleep).not.toBe(p.dark.sleep);
+    expect(p.awakeSince).toBeNull();
+  });
+
+  it('gives the totals, the latest entries and the awake time', () => {
+    const entries = [
+      entry('feeding', at(9), at(9, 20), { type: 'breast_milk', method: 'left' }),
+      entry('sleep', at(10), at(11, 30), { nap: true }),
+      entry('diaper', at(12), at(12), { wet: true, solid: true }),
+    ];
+    const p = homeWidgetProps(kid('Micky', '2026-06-20'), entries, settings, at(12, 30), URI);
+    expect(p.totals).toBe('1 feed · 1h 30m sleep · 1 diaper');
+    expect(p.recent.map((r) => r.at)).toEqual(['12:00', '10:00', '09:00']);
+    expect(p.recent[1].text).toBe('Nap · 1h 30m');
+    expect(p.awakeSince).toBe(at(11, 30));
   });
 });
 
@@ -63,5 +77,6 @@ describe('tapAction', () => {
     expect(tapAction('sleep')).toEqual({ action: WIDGET_ACTION.toggleSleep });
     expect(tapAction('wet').data).toEqual({ wet: true, solid: false, label: 'Wet' });
     expect(tapAction('solid').data).toEqual({ wet: false, solid: true, label: 'Solid' });
+    expect(tapAction('both').data).toEqual({ wet: true, solid: true, label: 'Wet + solid' });
   });
 });
