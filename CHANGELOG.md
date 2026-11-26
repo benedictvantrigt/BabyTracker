@@ -3,6 +3,26 @@
 All notable changes to Napchime. Versions follow [Semantic Versioning](https://semver.org/);
 before 1.0.0 a minor version marks a phase of the plan.
 
+## [0.12.3] — 2026-11-26 — Widgets keep up, sync shows at once
+
+- Widgets switch at midnight, the day start and the day end without the app being opened: they
+  kept showing the night in the morning. Android sets an alarm that redraws the widget (also
+  in Doze) and then removes a forgotten sleep timer; the iPhone widget gets its pictures for
+  those moments in advance.
+- iPhone widget, "Edit Widget": the button settings are called "Small widget: first / second
+  button", and the description says Feeding, Sleep, Diaper and Latest entries are for the
+  medium and large widget. Those switches did nothing on the small widget without saying so.
+- Sync: what a partner logged now shows on an open app without restarting it. A push from
+  the sync server pulled the change in the background through a database connection of its
+  own, so the screens were not told, and "Sync now" found nothing left to pull. The push now
+  goes through the app's own connection; returning to the app and "Sync now" also read again.
+- Android widget: a tap is no longer thrown away now and then. The widget library dropped a
+  tap whenever the size it measured from the tap differed from the size the widget was drawn
+  at (launcher animations, a restart, a home-screen change) and only redrew the widget; it now
+  carries the tap out as well (`scripts/patch-android-widget.js`).
+- iPhone: when iOS refuses the Live Activity for a running timer (it then shows as a
+  notification), Settings says so with iOS's reason and a button to the iPhone settings (#49).
+
 ## [0.12.2] — 2026-11-25 — Small and large iPhone widget, forgotten sleep
 
 - Day sleep only ("Track night sleep" off): a sleep started during the day and still running

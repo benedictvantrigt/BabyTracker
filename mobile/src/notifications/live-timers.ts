@@ -8,3 +8,11 @@ import type { LiveTimer } from './live-timer-content';
 export async function syncLiveTimers(_timers: LiveTimer[], _channelId: string): Promise<boolean> {
   return false;
 }
+
+/**
+ * Why the last attempt to show live timers failed, as the system said it; null when it worked
+ * or was not tried. Shown in Settings, so a refusal can be seen and fixed (#49).
+ */
+export function liveTimerProblem(): string | null {
+  return null;
+}

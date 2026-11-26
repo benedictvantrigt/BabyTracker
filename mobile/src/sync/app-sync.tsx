@@ -262,7 +262,11 @@ export function SyncProvider({ children }: { children: ReactNode }) {
   const value = useMemo<SyncContextValue>(
     () => ({
       status,
-      syncNow: runSync,
+      syncNow: async () => {
+        await runSync();
+        // Also shows what a sync in the background already pulled.
+        repo.reread();
+      },
       createFamily: async (relayUrl) => attach(await createFamily(deps, relayUrl)),
       joinFamily: async (code) => attach(await joinFamily(deps, code)),
       leaveFamily: async () => {
@@ -286,7 +290,7 @@ export function SyncProvider({ children }: { children: ReactNode }) {
         attach(null);
       },
     }),
-    [status, runSync, attach, deps],
+    [status, runSync, attach, deps, repo],
   );
 
   return <SyncContext.Provider value={value}>{children}</SyncContext.Provider>;

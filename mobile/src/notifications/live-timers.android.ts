@@ -34,3 +34,8 @@ export async function syncLiveTimers(timers: LiveTimer[], channelId: string): Pr
   }
   return true;
 }
+
+/** Android shows plain notifications when Live Updates are off: see Settings. */
+export function liveTimerProblem(): string | null {
+  return null;
+}

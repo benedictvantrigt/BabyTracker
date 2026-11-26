@@ -6,6 +6,7 @@ import { AppState } from 'react-native';
 
 import type { Repo } from '@/db/repo';
 import { DAY, MINUTE, startOfLocalDay } from '@/domain/time';
+import { widgetTurns } from '@/domain/widget';
 
 import WidgetWake from '../../modules/widget-wake';
 import HomeWidget from './home-widget.ios';
@@ -51,7 +52,11 @@ async function render(repo: Repo, confirmed: string | null = null): Promise<void
   });
   const timeline = [at(now, confirmed)];
   if (confirmed) timeline.push(at(now + CONFIRM_MS, null));
-  for (let i = 1; i <= STEPS; i++) timeline.push(at(now + i * STEP_MS, null));
+  // Every quarter of an hour for a while, then midnight, the day start and the day end of
+  // the next two days: else the widget kept showing the night until the app was opened.
+  const steps = Array.from({ length: STEPS }, (_, i) => now + (i + 1) * STEP_MS);
+  const later = [...new Set([...steps, ...widgetTurns(settings, now)])].sort((a, b) => a - b);
+  for (const time of later) timeline.push(at(time, null));
   HomeWidget.updateTimeline(timeline);
 }
 

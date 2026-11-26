@@ -34,6 +34,7 @@ import {
 import type { Child, Settings } from '@/domain/types';
 import { useTheme } from '@/hooks/use-theme';
 import { useSync } from '@/sync/app-sync';
+import { liveTimerProblem } from '@/notifications/live-timers';
 import { requestNightAlarms } from '@/notifications/night-alarms';
 import {
   getPermissionState,
@@ -418,8 +419,12 @@ function PermissionsCard() {
 
   // Android 16+: timers show as Live Updates unless the user turned that off (#51).
   const liveUpdatesOff = Platform.OS === 'android' && TimerNotification?.canPostPromoted?.() === false;
+  // iPhone: why iOS refused the Live Activity for a running timer (#49).
+  const liveProblem = liveTimerProblem();
 
-  if (!state || (state.notifications && state.exactAlarms && !liveUpdatesOff)) return null;
+  if (!state || (state.notifications && state.exactAlarms && !liveUpdatesOff && !liveProblem)) {
+    return null;
+  }
 
   return (
     <Card>
@@ -463,6 +468,15 @@ function PermissionsCard() {
             label="Allow Live Updates"
             onPress={() => TimerNotification?.openPromotedSettings()}
           />
+        </>
+      )}
+      {liveProblem && (
+        <>
+          <ThemedText type="small">
+            iOS did not show the running timer as a Live Activity, so it shows as a notification.
+            Check that Live Activities are on for Napchime. iOS said: {liveProblem}
+          </ThemedText>
+          <Button label="Open iPhone Settings" onPress={() => Linking.openSettings()} />
         </>
       )}
     </Card>

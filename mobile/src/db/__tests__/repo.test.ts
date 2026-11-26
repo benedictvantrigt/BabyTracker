@@ -150,6 +150,14 @@ describe('Repo', () => {
     expect((await repo.getEntry(sleep.id))?.end).toBe(now());
   });
 
+  it('rereads as a remote change, so sync does not push again', async () => {
+    const { repo } = await setup();
+    const listener = jest.fn();
+    repo.subscribe(listener);
+    repo.reread();
+    expect(listener).toHaveBeenCalledWith({ remote: true });
+  });
+
   it('soft-deletes and restores, notifying subscribers', async () => {
     const { repo, child, now } = await setup();
     const listener = jest.fn();

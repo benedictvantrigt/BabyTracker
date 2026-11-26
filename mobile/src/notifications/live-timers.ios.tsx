@@ -102,6 +102,11 @@ function propsFor(t: LiveTimer): TimerActivityProps {
 }
 
 let shown = '';
+let problem: string | null = null;
+
+export function liveTimerProblem(): string | null {
+  return problem;
+}
 
 /**
  * Live Activities on the lock screen and in the Dynamic Island, one per running timer and one for
@@ -128,10 +133,13 @@ export async function syncLiveTimers(timers: LiveTimer[], _channelId: string): P
       else if (props) TimerActivity.start(props, undefined, stale);
     }
     shown = signature;
+    // Keep a refusal visible after the timer stopped, until one shows.
+    if (wanted.length) problem = null;
     return true;
-  } catch {
+  } catch (e) {
     // Live Activities switched off in Settings, or not supported: plain notifications instead.
     shown = '';
+    problem = e instanceof Error ? e.message : String(e);
     return false;
   }
 }

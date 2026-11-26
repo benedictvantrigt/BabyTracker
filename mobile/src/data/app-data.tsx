@@ -9,6 +9,7 @@ import {
   useState,
   type ReactNode,
 } from 'react';
+import { AppState } from 'react-native';
 
 import { setAppRepo } from '@/data/app-repo';
 import { Repo } from '@/db/repo';
@@ -36,7 +37,12 @@ export function AppDataProvider({ children: content }: { children: ReactNode }) 
   const repo = useMemo(() => new Repo(db, { uuid: randomUUID, now: Date.now }), [db]);
   useEffect(() => {
     setAppRepo(repo);
-    return () => setAppRepo(null);
+    // Back in the foreground: read again, in case a task in the background wrote meanwhile.
+    const sub = AppState.addEventListener('change', (s) => s === 'active' && repo.reread());
+    return () => {
+      setAppRepo(null);
+      sub.remove();
+    };
   }, [repo]);
   const [state, setState] = useState<{ settings: Settings; children: Child[]; loaded: boolean }>({
     settings: DEFAULT_SETTINGS,

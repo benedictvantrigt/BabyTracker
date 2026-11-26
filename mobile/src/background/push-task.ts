@@ -5,6 +5,7 @@ import * as Notifications from 'expo-notifications';
 import { openDatabaseAsync } from 'expo-sqlite';
 import * as TaskManager from 'expo-task-manager';
 
+import { getAppRepo } from '@/data/app-repo';
 import { Repo } from '@/db/repo';
 import { migrate } from '@/db/schema';
 import { isOnDuty } from '@/domain/duty-days';
@@ -32,10 +33,21 @@ function readMessage(data: Record<string, unknown>): Message {
   return { ...(data as Message), ...fromString };
 }
 
-async function handle(message: Message): Promise<boolean> {
+/**
+ * The app's repository when the app is running (in the background): what the push pulls then
+ * reaches its screens at once. With a repository of its own, the open app went on showing the
+ * old log, and "Sync now" found nothing new to pull, until it was restarted.
+ */
+async function pushRepo(): Promise<Repo> {
+  const app = getAppRepo();
+  if (app) return app;
   const db = await openDatabaseAsync('babytracker.db');
   await migrate(db);
-  const repo = new Repo(db, { uuid: randomUUID, now: Date.now });
+  return new Repo(db, { uuid: randomUUID, now: Date.now });
+}
+
+async function handle(message: Message): Promise<boolean> {
+  const repo = await pushRepo();
   const engine = await loadEngine({ repo, store: secureStore, random: getRandomBytes });
   if (!engine) return false;
 
