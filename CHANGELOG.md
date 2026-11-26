@@ -3,6 +3,13 @@
 All notable changes to Napchime. Versions follow [Semantic Versioning](https://semver.org/);
 before 1.0.0 a minor version marks a phase of the plan.
 
+## [Unreleased]
+
+- Widgets switch at midnight, the day start and the day end without the app being opened: they
+  kept showing the night in the morning. Android sets an alarm that redraws the widget (also
+  in Doze) and then removes a forgotten sleep timer; the iPhone widget gets its pictures for
+  those moments in advance.
+
 ## [0.12.2] — 2026-11-25 — Small and large iPhone widget, forgotten sleep
 
 - Day sleep only ("Track night sleep" off): a sleep started during the day and still running

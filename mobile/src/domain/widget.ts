@@ -2,7 +2,7 @@ import { diaperLabel, feedingLabel, latest, runningEntries } from './entries';
 import { isUntrackedNight, lastWake, nextDayStart, withoutForgottenSleeps } from './night-sleep';
 import { nextFeedAt, nextNapAt } from './reminders';
 import { scheduleStatus } from './sleep-schedule';
-import { formatClock } from './time';
+import { DAY, HOUR, atMinuteOfDay, formatClock, startOfLocalDay } from './time';
 import type { Child, Entry, Settings } from './types';
 
 /** One line of the widget: a headline and a smaller detail. */
@@ -126,4 +126,26 @@ export function isRepeatTap(
     // Just started (a second tap would stop it) or just stopped (it would start a new one).
     return e.kind === 'sleep' && (e.end === null ? recent(e.start) : recent(e.end));
   });
+}
+
+/**
+ * When the widget changes with nothing logged, in (now, now + span]: midnight ("today" starts
+ * over), the day start (night mode ends) and the day end (night mode starts, a forgotten sleep
+ * timer goes). The widget can't tell the time itself, so it is redrawn at these moments.
+ */
+export function widgetTurns(
+  settings: Pick<Settings, 'dayStartMinute' | 'dayEndMinute'>,
+  now: number,
+  span = 2 * DAY,
+): number[] {
+  const turns = new Set<number>();
+  for (let d = 0; d * DAY <= span + DAY; d++) {
+    // Noon of each day: a daylight saving shift can't move it into another day.
+    const noon = startOfLocalDay(now) + d * DAY + 12 * HOUR;
+    for (const minute of [0, settings.dayStartMinute, settings.dayEndMinute]) {
+      const at = atMinuteOfDay(noon, minute);
+      if (at > now && at <= now + span) turns.add(at);
+    }
+  }
+  return [...turns].sort((a, b) => a - b);
 }

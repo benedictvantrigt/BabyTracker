@@ -1,5 +1,5 @@
 /// <reference types="jest" />
-import { isRepeatTap, widgetSummary } from '../widget';
+import { isRepeatTap, widgetSummary, widgetTurns } from '../widget';
 
 import { at, entry, kid, settings } from './fixtures';
 
@@ -83,5 +83,38 @@ describe('isRepeatTap', () => {
   it('ignores deleted entries', () => {
     const undone = entry('diaper', at(10), at(10), wet, { deletedAt: at(10) + 500 });
     expect(isRepeatTap([undone], at(10) + 1_000, wet)).toBe(false);
+  });
+});
+
+describe('widgetTurns', () => {
+  it('lists midnight, the day start and the day end of the next two days', () => {
+    expect(widgetTurns(settings, at(21))).toEqual([
+      at(0, 0, 1),
+      at(7, 0, 1),
+      at(19, 30, 1),
+      at(0, 0, 2),
+      at(7, 0, 2),
+      at(19, 30, 2),
+    ]);
+  });
+
+  it('starts with what is still to come today', () => {
+    expect(widgetTurns(settings, at(8), 1 * 24 * 60 * 60_000)).toEqual([
+      at(19, 30),
+      at(0, 0, 1),
+      at(7, 0, 1),
+    ]);
+  });
+
+  it('keeps local times across a daylight saving change', () => {
+    // Clocks go back on 25 October 2026 (Europe/Amsterdam).
+    expect(widgetTurns(settings, at(21, 0, -2))).toEqual([
+      at(0, 0, -1),
+      at(7, 0, -1),
+      at(19, 30, -1),
+      at(0, 0, 0),
+      at(7, 0, 0),
+      at(19, 30, 0),
+    ]);
   });
 });

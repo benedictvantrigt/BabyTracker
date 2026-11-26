@@ -11,10 +11,12 @@ import {
 } from 'react-native-android-widget';
 
 import { Repo } from '@/db/repo';
+import { forgottenSleeps } from '@/domain/night-sleep';
 import { DAY, startOfLocalDay } from '@/domain/time';
-import { widgetSummary } from '@/domain/widget';
+import { widgetSummary, widgetTurns } from '@/domain/widget';
 import { widgetView, type WidgetLayout } from '@/domain/widget-layout';
 
+import WidgetRefresh from '../../modules/widget-refresh';
 import { updateHomeWidget } from './home-widget-sync';
 import { SUMMARY_WIDGET, SummaryWidget } from './summary-widget';
 import { afterWidgetWrite, feedingUri, handleClick, serial, widgetRepo } from './widget-actions';
@@ -68,11 +70,35 @@ const CONFIRM_MS = 2_500;
 
 const pause = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
+/**
+ * Redraws the widgets at midnight, the day start and the day end (WidgetRefresh): Android's
+ * own periodic update waits for hours in Doze, and the widget kept showing the night.
+ */
+async function scheduleRefresh(repo: Repo): Promise<void> {
+  WidgetRefresh?.schedule(widgetTurns(await repo.getSettings(), Date.now()));
+}
+
+/** Whether a sleep timer was left running past the day end (day sleep only): it goes then. */
+async function hasForgottenSleep(repo: Repo): Promise<boolean> {
+  const [settings, children] = await Promise.all([repo.getSettings(), repo.listChildren()]);
+  const child = children.find((c) => c.id === settings.activeChildId) ?? children[0];
+  if (!child) return false;
+  const now = Date.now();
+  const entries = await repo.listEntries(child.id, now - 2 * DAY);
+  return forgottenSleeps(entries, settings, now).length > 0;
+}
+
 async function widgetTaskHandler(props: WidgetTaskHandlerProps): Promise<void> {
   const { repo, inApp } = await widgetRepo();
   if (props.widgetAction === 'WIDGET_DELETED') {
     await repo.deleteWidgetLayout(props.widgetInfo.widgetId);
     return;
+  }
+  await scheduleRefresh(repo).catch(() => {});
+  if (props.widgetAction === 'WIDGET_UPDATE' && (await hasForgottenSleep(repo))) {
+    // The day end redraw: remove the forgotten timer, its live notification, and tell the
+    // partner phones, as the app would.
+    await afterWidgetWrite(repo, inApp).catch(() => {});
   }
   if (props.widgetAction === 'WIDGET_CLICK') {
     const { wrote, confirmed } = await serial(() =>
@@ -92,6 +118,7 @@ async function widgetTaskHandler(props: WidgetTaskHandlerProps): Promise<void> {
 export async function updateWidgets(repo: Repo): Promise<void> {
   if (Platform.OS === 'ios') return updateHomeWidget(repo);
   if (Platform.OS !== 'android') return;
+  await scheduleRefresh(repo).catch(() => {});
   await requestWidgetUpdate({
     widgetName: SUMMARY_WIDGET,
     renderWidget: (info) => renderSummary(repo, info),

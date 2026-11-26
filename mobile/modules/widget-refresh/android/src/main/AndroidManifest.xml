@@ -1,0 +1,8 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+  <application>
+    <!-- Redraws the widgets at the day start, the day end and midnight. Only our own alarm reaches it. -->
+    <receiver
+      android:name="expo.modules.widgetrefresh.WidgetRefreshReceiver"
+      android:exported="false" />
+  </application>
+</manifest>
