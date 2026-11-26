@@ -39,3 +39,7 @@ export async function syncLiveTimers(timers: LiveTimer[], channelId: string): Pr
 export function liveTimerProblem(): string | null {
   return null;
 }
+
+export function subscribeLiveTimerProblem(_listener: () => void): () => void {
+  return () => {};
+}

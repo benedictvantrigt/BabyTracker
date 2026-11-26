@@ -3,6 +3,17 @@
 All notable changes to Napchime. Versions follow [Semantic Versioning](https://semver.org/);
 before 1.0.0 a minor version marks a phase of the plan.
 
+## [0.12.4] — 2026-11-26 — Why the iPhone timer is not a Live Activity
+
+- iPhone Settings: the card with iOS's reason for refusing the Live Activity now shows. It
+  looked for the reason only when the screen drew, and the app asks iOS again as it comes to
+  the front, so the reason came in after the card had drawn (#49).
+- iPhone Settings, About: a line says what the last lock-screen timer update did: how many
+  timers, how many Live Activities iOS shows, or why the update failed. For finding out why the
+  timer shows only as a notification; it goes once Live Activities work (#49).
+- A failing night-feed alarm (AlarmKit) no longer keeps the lock-screen timers and the other
+  reminders from updating.
+
 ## [0.12.3] — 2026-11-26 — Widgets keep up, sync shows at once
 
 - Widgets switch at midnight, the day start and the day end without the app being opened: they

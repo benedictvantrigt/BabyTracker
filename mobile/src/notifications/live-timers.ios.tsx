@@ -12,6 +12,7 @@ import { Colors } from '@/constants/theme';
 import { formatClock } from '@/domain/time';
 
 import type { LiveTimer } from './live-timer-content';
+import { errorText, reportLiveTimers } from './timer-report';
 
 type TimerActivityProps = {
   title: string;
@@ -108,6 +109,20 @@ export function liveTimerProblem(): string | null {
   return problem;
 }
 
+const listeners = new Set<() => void>();
+
+/** For Settings: the refusal often arrives after the screen drew, as the app comes to the front. */
+export function subscribeLiveTimerProblem(listener: () => void): () => void {
+  listeners.add(listener);
+  return () => listeners.delete(listener);
+}
+
+function setProblem(next: string | null) {
+  if (next === problem) return;
+  problem = next;
+  listeners.forEach((l) => l());
+}
+
 /**
  * Live Activities on the lock screen and in the Dynamic Island, one per running timer and one for
  * the awake timer. The timer text counts on its own, so an activity only changes when a timer
@@ -120,7 +135,10 @@ export async function syncLiveTimers(timers: LiveTimer[], _channelId: string): P
     const wanted = sorted.map(propsFor);
     const activities = TimerActivity.getInstances();
     const signature = JSON.stringify(wanted);
-    if (signature === shown && activities.length === wanted.length) return true;
+    if (signature === shown && activities.length === wanted.length) {
+      reportLiveTimers(`${count(wanted.length, 'timer')}, unchanged; iOS shows ${count(activities.length, 'Live Activity')}`);
+      return true;
+    }
 
     for (let i = 0; i < Math.max(activities.length, wanted.length); i++) {
       const activity = activities[i];
@@ -133,13 +151,22 @@ export async function syncLiveTimers(timers: LiveTimer[], _channelId: string): P
       else if (props) TimerActivity.start(props, undefined, stale);
     }
     shown = signature;
+    reportLiveTimers(
+      `${count(wanted.length, 'timer')}; iOS shows ${count(TimerActivity.getInstances().length, 'Live Activity')}`,
+    );
     // Keep a refusal visible after the timer stopped, until one shows.
-    if (wanted.length) problem = null;
+    if (wanted.length) setProblem(null);
     return true;
   } catch (e) {
     // Live Activities switched off in Settings, or not supported: plain notifications instead.
     shown = '';
-    problem = e instanceof Error ? e.message : String(e);
+    setProblem(errorText(e));
+    reportLiveTimers(`iOS refused the Live Activity: ${errorText(e)}`);
     return false;
   }
+}
+
+function count(n: number, noun: string): string {
+  const plural = noun.endsWith('y') ? `${noun.slice(0, -1)}ies` : `${noun}s`;
+  return `${n} ${n === 1 ? noun : plural}`;
 }

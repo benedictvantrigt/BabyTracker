@@ -9,6 +9,7 @@ import type { Entry } from '@/domain/types';
 import { awakeTimerFor, sleepPlanText } from './live-timer-content';
 import { nightAlarmsReady, scheduleNightAlarms } from './night-alarms';
 import { syncNotifications } from './scheduler';
+import { errorText, reportTimerFailure } from './timer-report';
 
 /**
  * Brings this phone's notifications in line with the log: one ongoing notification per
@@ -21,6 +22,16 @@ import { syncNotifications } from './scheduler';
  * day end there (`forgottenSleeps`). Works without the UI (background push).
  */
 export async function refreshNotifications(repo: Repo, now = Date.now()): Promise<void> {
+  try {
+    await refresh(repo, now);
+    reportTimerFailure(null);
+  } catch (e) {
+    reportTimerFailure(`Updating notifications failed: ${errorText(e)}`);
+    throw e;
+  }
+}
+
+async function refresh(repo: Repo, now: number): Promise<void> {
   const [settings, children, sync] = await Promise.all([
     repo.getSettings(),
     repo.listChildren(),
@@ -38,9 +49,16 @@ export async function refreshNotifications(repo: Repo, now = Date.now()): Promis
   );
   // iOS 26+: night feeds ring as AlarmKit alarms (#7), scheduled here also when the other
   // reminders come by push; the pushed copy then shows quietly (#6).
-  const alarmKit =
-    settings.nightFeedAlarmKit && (await nightAlarmsReady(planned.some((r) => r.alarm)));
-  await scheduleNightAlarms(alarmKit ? planned.filter((r) => r.alarm) : []);
+  // A failing alarm must not keep the timers below from updating.
+  let alarmKit = false;
+  try {
+    alarmKit =
+      settings.nightFeedAlarmKit && (await nightAlarmsReady(planned.some((r) => r.alarm)));
+    await scheduleNightAlarms(alarmKit ? planned.filter((r) => r.alarm) : []);
+  } catch (e) {
+    alarmKit = false;
+    console.warn('Night alarms failed', e);
+  }
   const reminders = sync?.pushActive ? [] : planned.filter((r) => !(alarmKit && r.alarm));
   const onDuty = isOnDuty(settings, now);
   const running = onDuty
