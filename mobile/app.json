@@ -128,14 +128,14 @@
                 "initialLayout": "./src/widget/home-widget.ios.tsx",
                 "configuration": {
                   "title": "Napchime",
-                  "description": "Choose the rows the widget shows, and the buttons of the small widget",
+                  "description": "Feeding, Sleep, Diaper and Latest entries are for the medium and large widget; the small widget shows only its two buttons",
                   "parameters": {
                     "feeding": { "title": "Feeding", "type": "boolean", "default": true },
                     "sleep": { "title": "Sleep", "type": "boolean", "default": true },
                     "diaper": { "title": "Diaper", "type": "boolean", "default": true },
                     "showInfo": { "title": "Latest entries", "type": "boolean", "default": true },
                     "smallFirst": {
-                      "title": "Small: first button",
+                      "title": "Small widget: first button",
                       "type": "enum",
                       "default": "sleep",
                       "values": [
@@ -146,7 +146,7 @@
                       ]
                     },
                     "smallSecond": {
-                      "title": "Small: second button",
+                      "title": "Small widget: second button",
                       "type": "enum",
                       "default": "wet",
                       "values": [

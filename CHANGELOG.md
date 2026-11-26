@@ -9,6 +9,9 @@ before 1.0.0 a minor version marks a phase of the plan.
   kept showing the night in the morning. Android sets an alarm that redraws the widget (also
   in Doze) and then removes a forgotten sleep timer; the iPhone widget gets its pictures for
   those moments in advance.
+- iPhone widget, "Edit Widget": the button settings are called "Small widget: first / second
+  button", and the description says Feeding, Sleep, Diaper and Latest entries are for the
+  medium and large widget. Those switches did nothing on the small widget without saying so.
 
 ## [0.12.2] — 2026-11-25 — Small and large iPhone widget, forgotten sleep
 
