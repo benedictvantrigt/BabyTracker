@@ -108,6 +108,20 @@ export function liveTimerProblem(): string | null {
   return problem;
 }
 
+const listeners = new Set<() => void>();
+
+/** For Settings: the refusal often arrives after the screen drew, as the app comes to the front. */
+export function subscribeLiveTimerProblem(listener: () => void): () => void {
+  listeners.add(listener);
+  return () => listeners.delete(listener);
+}
+
+function setProblem(next: string | null) {
+  if (next === problem) return;
+  problem = next;
+  listeners.forEach((l) => l());
+}
+
 /**
  * Live Activities on the lock screen and in the Dynamic Island, one per running timer and one for
  * the awake timer. The timer text counts on its own, so an activity only changes when a timer
@@ -134,12 +148,12 @@ export async function syncLiveTimers(timers: LiveTimer[], _channelId: string): P
     }
     shown = signature;
     // Keep a refusal visible after the timer stopped, until one shows.
-    if (wanted.length) problem = null;
+    if (wanted.length) setProblem(null);
     return true;
   } catch (e) {
     // Live Activities switched off in Settings, or not supported: plain notifications instead.
     shown = '';
-    problem = e instanceof Error ? e.message : String(e);
+    setProblem(e instanceof Error ? e.message : String(e));
     return false;
   }
 }

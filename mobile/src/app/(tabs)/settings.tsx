@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, useSyncExternalStore } from 'react';
 import Constants from 'expo-constants';
 import { Alert, AppState, Linking, Platform, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 
@@ -34,7 +34,7 @@ import {
 import type { Child, Settings } from '@/domain/types';
 import { useTheme } from '@/hooks/use-theme';
 import { useSync } from '@/sync/app-sync';
-import { liveTimerProblem } from '@/notifications/live-timers';
+import { liveTimerProblem, subscribeLiveTimerProblem } from '@/notifications/live-timers';
 import { requestNightAlarms } from '@/notifications/night-alarms';
 import {
   getPermissionState,
@@ -420,7 +420,7 @@ function PermissionsCard() {
   // Android 16+: timers show as Live Updates unless the user turned that off (#51).
   const liveUpdatesOff = Platform.OS === 'android' && TimerNotification?.canPostPromoted?.() === false;
   // iPhone: why iOS refused the Live Activity for a running timer (#49).
-  const liveProblem = liveTimerProblem();
+  const liveProblem = useSyncExternalStore(subscribeLiveTimerProblem, liveTimerProblem);
 
   if (!state || (state.notifications && state.exactAlarms && !liveUpdatesOff && !liveProblem)) {
     return null;
