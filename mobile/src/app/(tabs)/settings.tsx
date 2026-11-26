@@ -35,6 +35,7 @@ import type { Child, Settings } from '@/domain/types';
 import { useTheme } from '@/hooks/use-theme';
 import { useSync } from '@/sync/app-sync';
 import { liveTimerProblem, subscribeLiveTimerProblem } from '@/notifications/live-timers';
+import { subscribeTimerReport, timerReport } from '@/notifications/timer-report';
 import { requestNightAlarms } from '@/notifications/night-alarms';
 import {
   getPermissionState,
@@ -196,6 +197,8 @@ function hereDescription(shared: boolean): string {
 
 /** App version and the privacy policy, which both stores require to be reachable in the app. */
 function AboutCard() {
+  // iPhone: what the last lock-screen timer update did (#49), until Live Activities work.
+  const report = useSyncExternalStore(subscribeTimerReport, timerReport);
   return (
     <Card testID="settings-about">
       <ThemedText type="smallBold" themeColor="textSecondary">
@@ -204,6 +207,11 @@ function AboutCard() {
       <ThemedText type="small" themeColor="textSecondary">
         {`Napchime ${Constants.expoConfig?.version ?? ''}`.trim()}
       </ThemedText>
+      {Platform.OS === 'ios' && (
+        <ThemedText type="small" themeColor="textSecondary" selectable>
+          {`Lock-screen timer: ${report || 'not updated since the app opened'}`}
+        </ThemedText>
+      )}
       <Button
         label="Privacy policy"
         onPress={() =>
