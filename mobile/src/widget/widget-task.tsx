@@ -94,7 +94,8 @@ async function widgetTaskHandler(props: WidgetTaskHandlerProps): Promise<void> {
     await repo.deleteWidgetLayout(props.widgetInfo.widgetId);
     return;
   }
-  await scheduleRefresh(repo).catch(() => {});
+  // Not for a tap: it would only make the tap's result show later.
+  if (props.widgetAction !== 'WIDGET_CLICK') await scheduleRefresh(repo).catch(() => {});
   if (props.widgetAction === 'WIDGET_UPDATE' && (await hasForgottenSleep(repo))) {
     // The day end redraw: remove the forgotten timer, its live notification, and tell the
     // partner phones, as the app would.

@@ -16,6 +16,10 @@ before 1.0.0 a minor version marks a phase of the plan.
   the sync server pulled the change in the background through a database connection of its
   own, so the screens were not told, and "Sync now" found nothing left to pull. The push now
   goes through the app's own connection; returning to the app and "Sync now" also read again.
+- Android widget: a tap is no longer thrown away now and then. The widget library dropped a
+  tap whenever the size it measured from the tap differed from the size the widget was drawn
+  at (launcher animations, a restart, a home-screen change) and only redrew the widget; it now
+  carries the tap out as well (`scripts/patch-android-widget.js`).
 - iPhone: when iOS refuses the Live Activity for a running timer (it then shows as a
   notification), Settings says so with iOS's reason and a button to the iPhone settings (#49).
 
