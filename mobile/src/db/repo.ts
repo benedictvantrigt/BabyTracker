@@ -167,6 +167,14 @@ export class Repo {
     for (const l of this.listeners) l({ remote });
   }
 
+  /**
+   * Tells the screens to read again: the database may have been written through another
+   * connection (a background task that opened its own), which this one did not hear about.
+   */
+  reread(): void {
+    this.changed(true);
+  }
+
   // Children
 
   async listChildren(): Promise<Child[]> {

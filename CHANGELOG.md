@@ -12,6 +12,10 @@ before 1.0.0 a minor version marks a phase of the plan.
 - iPhone widget, "Edit Widget": the button settings are called "Small widget: first / second
   button", and the description says Feeding, Sleep, Diaper and Latest entries are for the
   medium and large widget. Those switches did nothing on the small widget without saying so.
+- Sync: what a partner logged now shows on an open app without restarting it. A push from
+  the sync server pulled the change in the background through a database connection of its
+  own, so the screens were not told, and "Sync now" found nothing left to pull. The push now
+  goes through the app's own connection; returning to the app and "Sync now" also read again.
 - iPhone: when iOS refuses the Live Activity for a running timer (it then shows as a
   notification), Settings says so with iOS's reason and a button to the iPhone settings (#49).
 
