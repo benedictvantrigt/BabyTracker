@@ -2,7 +2,7 @@
   "expo": {
     "name": "Napchime",
     "slug": "napchime",
-    "version": "0.12.2",
+    "version": "0.12.3",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "napchime",
@@ -29,7 +29,7 @@
       },
       "predictiveBackGestureEnabled": false,
       "package": "com.napchime.app",
-      "versionCode": 19,
+      "versionCode": 20,
       "permissions": [
         "android.permission.SCHEDULE_EXACT_ALARM",
         "android.permission.POST_NOTIFICATIONS"

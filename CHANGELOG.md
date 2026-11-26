@@ -3,7 +3,7 @@
 All notable changes to Napchime. Versions follow [Semantic Versioning](https://semver.org/);
 before 1.0.0 a minor version marks a phase of the plan.
 
-## [Unreleased]
+## [0.12.3] — 2026-11-26 — Widgets keep up, sync shows at once
 
 - Widgets switch at midnight, the day start and the day end without the app being opened: they
   kept showing the night in the morning. Android sets an alarm that redraws the widget (also
