@@ -7,9 +7,9 @@ import { DAY } from '@/domain/time';
 import type { Entry } from '@/domain/types';
 
 import { awakeTimerFor, sleepPlanText } from './live-timer-content';
-import { nightAlarmsReady, scheduleNightAlarms } from './night-alarms';
+import { nightAlarmsAuthorized, nightAlarmsReady, scheduleNightAlarms } from './night-alarms';
 import { syncNotifications } from './scheduler';
-import { errorText, reportTimerFailure } from './timer-report';
+import { errorText, reportTimerFailure, reportTimerStep, withTimeout } from './timer-report';
 
 /**
  * Brings this phone's notifications in line with the log: one ongoing notification per
@@ -24,14 +24,16 @@ import { errorText, reportTimerFailure } from './timer-report';
 export async function refreshNotifications(repo: Repo, now = Date.now()): Promise<void> {
   try {
     await refresh(repo, now);
-    reportTimerFailure(null);
   } catch (e) {
     reportTimerFailure(`Updating notifications failed: ${errorText(e)}`);
     throw e;
+  } finally {
+    reportTimerStep(null);
   }
 }
 
 async function refresh(repo: Repo, now: number): Promise<void> {
+  reportTimerStep('reading the log');
   const [settings, children, sync] = await Promise.all([
     repo.getSettings(),
     repo.listChildren(),
@@ -48,18 +50,11 @@ async function refresh(repo: Repo, now: number): Promise<void> {
     (r) => reminderWantedHere(r.id, settings) && isOnDuty(settings, r.fireAt),
   );
   // iOS 26+: night feeds ring as AlarmKit alarms (#7), scheduled here also when the other
-  // reminders come by push; the pushed copy then shows quietly (#6).
-  // A failing alarm must not keep the timers below from updating.
-  let alarmKit = false;
-  try {
-    alarmKit =
-      settings.nightFeedAlarmKit && (await nightAlarmsReady(planned.some((r) => r.alarm)));
-    await scheduleNightAlarms(alarmKit ? planned.filter((r) => r.alarm) : []);
-  } catch (e) {
-    alarmKit = false;
-    console.warn('Night alarms failed', e);
-  }
-  const reminders = sync?.pushActive ? [] : planned.filter((r) => !(alarmKit && r.alarm));
+  // reminders come by push; the pushed copy then shows quietly (#6). The alarms come after
+  // the timers: asking for permission waits for the user, and iOS may not answer at all.
+  const alarmKit = settings.nightFeedAlarmKit && nightAlarmsAuthorized();
+  const remindersFor = (alarms: boolean) =>
+    sync?.pushActive ? [] : planned.filter((r) => !(alarms && r.alarm));
   const onDuty = isOnDuty(settings, now);
   const running = onDuty
     ? runningEntries(entries).filter(
@@ -72,7 +67,28 @@ async function refresh(repo: Repo, now: number): Promise<void> {
   // The lock-screen sleep timer goes at the day end even if the app does not run then.
   const runningSleep = running.find((e) => e.kind === 'sleep');
   const sleepUntil = runningSleep ? napCutoff(settings, runningSleep.start) : null;
-  await syncNotifications(reminders, running, child.name, awake, sleepPlan, sleepUntil);
+  const notify = (alarms: boolean) =>
+    syncNotifications(remindersFor(alarms), running, child.name, awake, sleepPlan, sleepUntil);
+  reportTimerStep('the lock-screen timers and reminders');
+  await notify(alarmKit);
+
+  reportTimerStep('the night-feed alarms');
+  try {
+    const wanted = planned.some((r) => r.alarm);
+    const ready =
+      settings.nightFeedAlarmKit &&
+      (await withTimeout(nightAlarmsReady(wanted), 120_000, 'Asking for alarms'));
+    await withTimeout(
+      scheduleNightAlarms(ready ? planned.filter((r) => r.alarm) : []),
+      15_000,
+      'Setting the night-feed alarms',
+    );
+    // Just allowed: the night feeds now ring as alarms, not as notifications as well.
+    if (ready !== alarmKit) await notify(ready);
+    reportTimerFailure(null);
+  } catch (e) {
+    reportTimerFailure(`Night-feed alarms: ${errorText(e)}`);
+  }
 }
 
 function isNightSleep(entry: Entry): boolean {

@@ -12,7 +12,10 @@ import { Colors } from '@/constants/theme';
 import { formatClock } from '@/domain/time';
 
 import type { LiveTimer } from './live-timer-content';
-import { errorText, reportLiveTimers } from './timer-report';
+import { errorText, reportLiveTimers, withTimeout } from './timer-report';
+
+/** How long to wait for iOS to update or end a Live Activity. */
+const ANSWER_MS = 5000;
 
 type TimerActivityProps = {
   title: string;
@@ -136,23 +139,43 @@ export async function syncLiveTimers(timers: LiveTimer[], _channelId: string): P
     const activities = TimerActivity.getInstances();
     const signature = JSON.stringify(wanted);
     if (signature === shown && activities.length === wanted.length) {
-      reportLiveTimers(`${count(wanted.length, 'timer')}, unchanged; iOS shows ${count(activities.length, 'Live Activity')}`);
+      reportLiveTimers(
+        `${count(wanted.length, 'timer')}, unchanged; iOS shows ${count(activities.length, 'Live Activity')}`,
+      );
       return true;
     }
 
+    reportLiveTimers(
+      `updating ${count(wanted.length, 'timer')}; iOS had ${count(activities.length, 'Live Activity')}`,
+    );
+    let replaced = 0;
     for (let i = 0; i < Math.max(activities.length, wanted.length); i++) {
       const activity = activities[i];
       const props = wanted[i];
       // The awake timer goes stale at the end of the day if the app has not removed it.
       const until = sorted[i]?.until;
       const stale = until != null ? new Date(until) : undefined;
-      if (activity && props) await activity.update(props, stale);
-      else if (activity) await activity.end('immediate');
-      else if (props) TimerActivity.start(props, undefined, stale);
+      if (activity && props) {
+        try {
+          const update = activity.update(props, stale);
+          await withTimeout(update, ANSWER_MS, 'Updating the Live Activity');
+        } catch {
+          // One iOS no longer answers for: replace it.
+          await withTimeout(activity.end('immediate'), ANSWER_MS, 'Ending').catch(() => {});
+          TimerActivity.start(props, undefined, stale);
+          replaced++;
+        }
+      } else if (activity) {
+        await withTimeout(activity.end('immediate'), ANSWER_MS, 'Ending the Live Activity');
+      } else if (props) {
+        TimerActivity.start(props, undefined, stale);
+      }
     }
     shown = signature;
     reportLiveTimers(
-      `${count(wanted.length, 'timer')}; iOS shows ${count(TimerActivity.getInstances().length, 'Live Activity')}`,
+      `${count(wanted.length, 'timer')}; iOS shows ` +
+        count(TimerActivity.getInstances().length, 'Live Activity') +
+        (replaced ? `; replaced ${replaced} that did not answer` : ''),
     );
     // Keep a refusal visible after the timer stopped, until one shows.
     if (wanted.length) setProblem(null);

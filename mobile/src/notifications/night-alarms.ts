@@ -30,6 +30,12 @@ export async function nightAlarmsReady(wanted: boolean): Promise<boolean> {
   return state === 'authorized';
 }
 
+/** Whether night feeds already ring as AlarmKit alarms here, without asking or waiting. */
+export function nightAlarmsAuthorized(): boolean {
+  if (!NightAlarm || !NightAlarm.isAvailable()) return false;
+  return NightAlarm.authorizationState() === 'authorized';
+}
+
 /** Replaces the scheduled night feed alarms; an empty list cancels them. */
 export async function scheduleNightAlarms(reminders: Reminder[]): Promise<void> {
   if (!NightAlarm || !NightAlarm.isAvailable()) return;
