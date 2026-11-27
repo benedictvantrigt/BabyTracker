@@ -2,7 +2,7 @@
   "expo": {
     "name": "Napchime",
     "slug": "napchime",
-    "version": "0.12.6",
+    "version": "0.13.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "napchime",

@@ -3,7 +3,7 @@
 All notable changes to Napchime. Versions follow [Semantic Versioning](https://semver.org/);
 before 1.0.0 a minor version marks a phase of the plan.
 
-## [0.12.6] — 2026-11-27 — Live Activities on iPhone, for real
+## [0.13.0] — 2026-11-27 — Live Activities on iPhone, buttons on the lock-screen timer, reflux timer
 
 - iPhone: running timers show as a Live Activity on the lock screen and in the Dynamic Island.
   They never did: the app bundler picked the shared `live-timers.ts`, which has no Live
@@ -11,6 +11,20 @@ before 1.0.0 a minor version marks a phase of the plan.
   for `.ts` files before any `.tsx` file. So the timer showed as a notification, with no error
   and nothing in Settings. The shared file is now `.tsx`, and a test fails when a platform file
   is hidden this way (#49).
+- Lock-screen timer buttons (#97): the sleep timer has Wake, the awake timer Sleep, a feeding
+  timer Stop. The tap runs without opening the app, does only what the button says (a partner
+  may have changed the sleep meanwhile) and ignores a double tap; then the timers, the widgets
+  and the partner phones catch up. Android: a button on the Live Update / timer notification.
+  iPhone: a button in the Live Activity.
+- iPhone: a timer a partner starts shows on the lock screen straight away (#98), also when
+  Napchime is closed (push-to-start, iOS 17.2+). iOS draws it before the app runs, so it
+  cannot be end-to-end encrypted: it says only "Asleep" or "Feeding" and the start time, never
+  the baby's name. Napchime replaces it with the full timer once it runs.
+- Reflux timer (#93): Settings, Feeding, "Reflux timer" with how long to keep the baby upright
+  (5–90 minutes, 30 by default), shared with the partner phones. It runs from the end of each
+  milk feed (not solids; while a feed still runs, as when switching sides, it waits) and shows
+  on the Today Feeding card, as a countdown on the lock screen, and as a notification when the
+  time is over. Off by default.
 
 ## [0.12.5] — 2026-11-27 — The lock-screen timer no longer waits forever
 
