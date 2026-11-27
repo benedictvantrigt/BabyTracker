@@ -53,10 +53,12 @@ name: Breast feeding timers switch sides, bottle feed with amount
 - takeScreenshot: 02-feeding-timeline
 # With "Time feeds" off, Left logs the feed now without a length (#53).
 - tapOn: 'Settings'
+# This phone sits at the bottom of a long screen; give the slower iOS simulator time.
 - scrollUntilVisible:
     element:
       id: 'toggle-feed-timer'
     centerElement: true
+    timeout: 60000
 - tapOn:
     id: 'toggle-feed-timer'
 - tapOn: 'Today'
