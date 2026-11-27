@@ -98,7 +98,8 @@ export async function syncNotifications(
   reminders: Reminder[],
   running: Entry[],
   childName: string,
-  awake: LiveTimer | null = null,
+  /** Timers that are no log entry: the awake timer, the reflux timer. */
+  others: LiveTimer[] = [],
   /** Until when the running sleep should last (`sleepPlanText`). */
   sleepPlan: string | null = null,
   /** When the sleep timer should disappear on its own (day end, day sleep only). */
@@ -111,7 +112,7 @@ export async function syncNotifications(
       ...liveTimerFor(e, childName, sleepPlan),
       ...(e.kind === 'sleep' && sleepUntil != null ? { until: sleepUntil } : {}),
     }));
-  if (awake) timers.push(awake);
+  timers.push(...others);
   // Live Activities need no notification permission, so these go first.
   const live = await syncLiveTimers(timers, CHANNEL_TIMERS).catch(() => false);
   if (!(await Notifications.getPermissionsAsync()).granted) return;

@@ -17,4 +17,6 @@ android {
 dependencies {
   // NotificationCompat.Builder.setRequestPromotedOngoing (Android 16 Live Updates).
   implementation 'androidx.core:core:1.17.0'
+  // HeadlessJsTaskService for the timer's button (#97); the version comes from React Native.
+  implementation 'com.facebook.react:react-android'
 }

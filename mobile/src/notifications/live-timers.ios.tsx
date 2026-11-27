@@ -1,17 +1,19 @@
-import { HStack, Image, type ImageProps, Spacer, Text, VStack } from '@expo/ui/swift-ui';
+import { Button, HStack, Image, type ImageProps, Spacer, Text, VStack } from '@expo/ui/swift-ui';
 import {
+  buttonStyle,
+  controlSize,
   font,
   foregroundStyle,
   frame,
   monospacedDigit,
   padding,
+  tint,
 } from '@expo/ui/swift-ui/modifiers';
 import { createLiveActivity } from 'expo-widgets';
 
-import { Colors } from '@/constants/theme';
 import { formatClock } from '@/domain/time';
 
-import type { LiveTimer } from './live-timer-content';
+import { TIMER_ACTION_LABEL, timerColor, type LiveTimer } from './live-timer-content';
 import { errorText, reportLiveTimers, withTimeout } from './timer-report';
 
 /** How long to wait for iOS to update or end a Live Activity. */
@@ -27,12 +29,19 @@ type TimerActivityProps = {
   start: number;
   icon: NonNullable<ImageProps['systemName']>;
   tint: string;
+  /**
+   * The button (#97): the action its tap carries out in the app (home-widget-sync.ios.ts), and
+   * its label. Empty for none: the props go through UserDefaults, which drop a null.
+   */
+  action: string;
+  actionLabel: string;
 };
 
 const ICON: Record<LiveTimer['kind'], TimerActivityProps['icon']> = {
   feeding: 'waterbottle.fill',
   sleep: 'moon.zzz.fill',
   awake: 'sun.max.fill',
+  reflux: 'figure.stand',
 };
 
 // Runs inside the widget extension, not the app: it may only use its props and the Expo UI
@@ -48,6 +57,14 @@ const TimerActivity = createLiveActivity<TimerActivityProps>('TimerActivity', (p
     />
   );
   const icon = (size: number) => <Image systemName={props.icon} size={size} color={props.tint} />;
+  const button = () =>
+    props.action ? (
+      <Button
+        target={props.action}
+        label={props.actionLabel}
+        modifiers={[buttonStyle('bordered'), tint(props.tint), controlSize('small')]}
+      />
+    ) : null;
   return {
     banner: (
       <HStack spacing={12} modifiers={[padding({ all: 16 })]}>
@@ -63,7 +80,10 @@ const TimerActivity = createLiveActivity<TimerActivityProps>('TimerActivity', (p
           </Text>
         </VStack>
         <Spacer />
-        {timer(34)}
+        <VStack alignment="trailing" spacing={6}>
+          {timer(34)}
+          {button()}
+        </VStack>
       </HStack>
     ),
     compactLeading: icon(16),
@@ -83,13 +103,17 @@ const TimerActivity = createLiveActivity<TimerActivityProps>('TimerActivity', (p
     ),
     expandedTrailing: timer(28),
     expandedBottom: (
-      <Text
-        modifiers={[
-          font({ textStyle: 'subheadline' }),
-          foregroundStyle({ type: 'hierarchical', style: 'secondary' }),
-        ]}>
-        {props.subtitle}
-      </Text>
+      <HStack>
+        <Text
+          modifiers={[
+            font({ textStyle: 'subheadline' }),
+            foregroundStyle({ type: 'hierarchical', style: 'secondary' }),
+          ]}>
+          {props.subtitle}
+        </Text>
+        <Spacer />
+        {button()}
+      </HStack>
     ),
   };
 });
@@ -101,7 +125,9 @@ function propsFor(t: LiveTimer): TimerActivityProps {
     // SwiftUI's timer style counts down to a future date and up from a past one.
     start: t.countdownTo ?? t.start,
     icon: ICON[t.kind],
-    tint: Colors.light[t.kind === 'awake' ? 'sleep' : t.kind],
+    tint: timerColor(t.kind),
+    action: t.action ?? '',
+    actionLabel: t.action ? TIMER_ACTION_LABEL[t.action] : '',
   };
 }
 

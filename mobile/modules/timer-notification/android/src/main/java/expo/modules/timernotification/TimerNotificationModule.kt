@@ -8,6 +8,9 @@ import android.content.Intent
 import android.graphics.Color
 import android.os.Build
 import android.provider.Settings
+import com.facebook.react.HeadlessJsTaskService
+import com.facebook.react.bridge.Arguments
+import com.facebook.react.jstasks.HeadlessJsTaskConfig
 import androidx.core.app.NotificationCompat
 import expo.modules.kotlin.exception.Exceptions
 import expo.modules.kotlin.modules.Module
@@ -28,6 +31,9 @@ class TimerNotificationRecord : Record {
   @Field val countdownTo: Double? = null
   /** When the notification removes itself if it has not been updated, in ms since the epoch. */
   @Field val until: Double? = null
+  /** A button (#97): its label and the action the headless task gets. */
+  @Field val actionLabel: String? = null
+  @Field val action: String? = null
 }
 
 /**
@@ -117,6 +123,11 @@ class TimerNotificationModule : Module() {
       .apply {
         timer.until?.let { setTimeoutAfter(maxOf(1L, it.toLong() - System.currentTimeMillis())) }
       }
+      .apply {
+        val label = timer.actionLabel
+        val action = timer.action
+        if (label != null && action != null) addAction(0, label, onAction(timer.id, action))
+      }
       .build()
 
   private fun openApp(): PendingIntent? {
@@ -124,6 +135,23 @@ class TimerNotificationModule : Module() {
     return PendingIntent.getActivity(
       context,
       0,
+      intent,
+      PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+    )
+  }
+
+  /**
+   * The button runs the headless JS task in TimerActionService, also while the app is closed.
+   * Android lets a notification action start a service from the background.
+   */
+  private fun onAction(id: String, action: String): PendingIntent {
+    val intent = Intent(context, TimerActionService::class.java)
+      .setAction(ACTION_TIMER_BUTTON)
+      .putExtra(EXTRA_ID, id)
+      .putExtra(EXTRA_ACTION, action)
+    return PendingIntent.getService(
+      context,
+      (id + action).hashCode(),
       intent,
       PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
     )
@@ -152,6 +180,8 @@ class TimerNotificationModule : Module() {
     const val NOTIFICATION_ID = 1
     const val ACTION_DISMISSED = "expo.modules.timernotification.DISMISSED"
     const val EXTRA_ID = "id"
+    const val ACTION_TIMER_BUTTON = "expo.modules.timernotification.BUTTON"
+    const val EXTRA_ACTION = "action"
     private const val PREFS = "timer-notification"
     private const val KEY_DISMISSED = "dismissed"
 
@@ -177,5 +207,23 @@ class TimerDismissedReceiver : BroadcastReceiver() {
     if (intent.action != TimerNotificationModule.ACTION_DISMISSED) return
     val id = intent.getStringExtra(TimerNotificationModule.EXTRA_ID) ?: return
     TimerNotificationModule.setDismissed(context, id, true)
+  }
+}
+
+/**
+ * Runs the JS task `NapchimeTimerAction` (src/notifications/timer-action.ts) for a tap on a
+ * timer's button (#97): Wake, Sleep or Stop. Also while the app is closed; when it is open the
+ * task runs in the app's JS. Only the notification's own PendingIntent reaches it (not exported).
+ */
+class TimerActionService : HeadlessJsTaskService() {
+  override fun getTaskConfig(intent: Intent?): HeadlessJsTaskConfig? {
+    if (intent?.action != TimerNotificationModule.ACTION_TIMER_BUTTON) return null
+    val action = intent.getStringExtra(TimerNotificationModule.EXTRA_ACTION) ?: return null
+    val data = Arguments.createMap().apply { putString("action", action) }
+    return HeadlessJsTaskConfig("NapchimeTimerAction", data, TASK_TIMEOUT_MS, true)
+  }
+
+  companion object {
+    private const val TASK_TIMEOUT_MS = 30_000L
   }
 }

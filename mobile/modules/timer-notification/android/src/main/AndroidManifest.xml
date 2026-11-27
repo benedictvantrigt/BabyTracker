@@ -6,5 +6,9 @@
     <receiver
       android:name="expo.modules.timernotification.TimerDismissedReceiver"
       android:exported="false" />
+    <!-- Runs the button on a timer (#97) as a headless JS task. Only our PendingIntent starts it. -->
+    <service
+      android:name="expo.modules.timernotification.TimerActionService"
+      android:exported="false" />
   </application>
 </manifest>

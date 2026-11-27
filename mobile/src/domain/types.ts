@@ -183,6 +183,10 @@ export interface Settings {
    * mode and Focus (per phone, not synced). Elsewhere the setting has no effect.
    */
   nightFeedAlarmKit: boolean;
+  /** Reflux timer (#93): keep the baby upright for a while after each milk feed. */
+  refluxTimer: boolean;
+  /** How long the baby stays upright after a feed, in minutes. */
+  refluxMinutes: number;
 }
 
 /** Reminder rules shared by the phones of a family; the rest of Settings is per phone. */
@@ -197,6 +201,8 @@ export const SHARED_SETTINGS = [
   'napReminders',
   'feedRemindersDay',
   'feedAlarmNight',
+  'refluxTimer',
+  'refluxMinutes',
 ] as const satisfies readonly (keyof Settings)[];
 
 export type SharedSettings = Pick<Settings, (typeof SHARED_SETTINGS)[number]>;
@@ -222,4 +228,6 @@ export const DEFAULT_SETTINGS: Settings = {
   sleepTimer: true,
   nightSleep: true,
   nightFeedAlarmKit: true,
+  refluxTimer: false,
+  refluxMinutes: 30,
 };

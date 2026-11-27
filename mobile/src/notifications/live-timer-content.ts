@@ -2,13 +2,34 @@ import { KIND_LABEL, entryTitle } from '@/domain/entries';
 import { MORNING_SLACK, lastWake } from '@/domain/night-sleep';
 import { scheduleStatus } from '@/domain/sleep-schedule';
 import { DAY, MINUTE, atMinuteOfDay, formatClock, isDaytime } from '@/domain/time';
+import { Colors } from '@/constants/theme';
+import type { RefluxWindow } from '@/domain/reflux';
 import type { Child, Entry, Settings } from '@/domain/types';
+
+/**
+ * The button on a timer outside the app (#97): Wake on the sleep timer, Sleep on the awake
+ * timer, Stop on a feeding timer. The tap runs without opening the app.
+ */
+export type TimerAction = 'wake' | 'sleep' | 'stopFeeding';
+
+export const TIMER_ACTION_LABEL: Record<TimerAction, string> = {
+  wake: 'Wake',
+  sleep: 'Sleep',
+  stopFeeding: 'Stop',
+};
+
+export function isTimerAction(value: unknown): value is TimerAction {
+  return typeof value === 'string' && value in TIMER_ACTION_LABEL;
+}
 
 /** What a running timer shows outside the app: notification, Live Activity or Live Update. */
 export interface LiveTimer {
   id: string;
-  /** 'awake' is the time between sleeps, counting down to the next nap or bedtime. */
-  kind: 'sleep' | 'feeding' | 'awake';
+  /**
+   * 'awake' is the time between sleeps, counting down to the next nap or bedtime; 'reflux' the
+   * upright time after a feed (#93), counting down.
+   */
+  kind: 'sleep' | 'feeding' | 'awake' | 'reflux';
   title: string;
   text: string;
   /** When the timer started, in milliseconds since the epoch. */
@@ -20,6 +41,8 @@ export interface LiveTimer {
   countdownTo?: number;
   /** When the timer goes stale and should disappear even if the app does not run (day end). */
   until?: number;
+  /** Its button, if any. */
+  action?: TimerAction;
 }
 
 /**
@@ -36,6 +59,7 @@ export function liveTimerFor(entry: Entry, childName: string, sleepPlan?: string
         ? sleepPlan
         : `${KIND_LABEL[entry.kind]} timer running since ${formatClock(entry.start)}`,
     start: entry.start,
+    action: entry.kind === 'sleep' ? 'wake' : 'stopFeeding',
   };
 }
 
@@ -121,5 +145,24 @@ export function awakeTimerFor(
     start: woke,
     countdownTo: target,
     until: dayEnd,
+    action: 'sleep',
+  };
+}
+
+/** Accent color of a timer outside the app: the color of the kind it belongs to. */
+export function timerColor(kind: LiveTimer['kind']): string {
+  return Colors.light[kind === 'awake' ? 'sleep' : kind === 'reflux' ? 'feeding' : kind];
+}
+
+/** The reflux timer outside the app: counts down the upright time, then goes (#93). */
+export function refluxTimerFor(window: RefluxWindow, childName: string): LiveTimer {
+  return {
+    id: `reflux-${window.feedId}-${window.until}`,
+    kind: 'reflux',
+    title: `Keep ${childName} upright`,
+    text: `Until ${formatClock(window.until)}`,
+    start: window.start,
+    countdownTo: window.until,
+    until: window.until,
   };
 }

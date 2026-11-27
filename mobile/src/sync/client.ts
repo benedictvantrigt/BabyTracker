@@ -16,6 +16,15 @@ export class RelayError extends Error {
 }
 
 /** Which due reminders the relay pushes to this phone (see the relay's reminder-filter.ts). */
+/**
+ * A timer this phone just started, as the relay sees it (#98): only its kind and start time,
+ * since iOS draws the Live Activity it starts before the app can decrypt anything.
+ */
+export interface LiveStart {
+  kind: 'sleep' | 'feeding';
+  start: number;
+}
+
 export interface ReminderFilter {
   /** Reminder ids this phone shows: some of nap, wake, bed and feed. */
   ids: string[];
@@ -79,8 +88,10 @@ export class RelayClient {
     changes: string[],
     epoch: number,
     nudge: 'high' | 'normal' = 'normal',
+    /** A sleep or feeding timer just started here: the relay starts it on partner iPhones (#98). */
+    liveStart?: LiveStart,
   ): Promise<{ lastSeq: number }> {
-    return this.request('POST', '/changes', { changes, epoch, nudge });
+    return this.request('POST', '/changes', { changes, epoch, nudge, liveStart });
   }
 
   /**
@@ -93,8 +104,16 @@ export class RelayClient {
     reminders: boolean,
     label?: string,
     reminderFilter?: ReminderFilter,
+    /** iPhone: the Live Activity push-to-start token (#98); left out where there is none. */
+    liveStartToken?: string,
   ): Promise<{ push: boolean }> {
-    return this.request('PUT', '/device', { pushToken, reminders, label, reminderFilter });
+    return this.request('PUT', '/device', {
+      pushToken,
+      reminders,
+      label,
+      reminderFilter,
+      liveStartToken,
+    });
   }
 
   /** Replaces the family's pending reminders; `basis` is the last change seq applied. */
