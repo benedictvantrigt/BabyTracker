@@ -3,6 +3,16 @@
 All notable changes to Napchime. Versions follow [Semantic Versioning](https://semver.org/);
 before 1.0.0 a minor version marks a phase of the plan.
 
+## [0.12.5] — 2026-11-27 — The lock-screen timer no longer waits forever
+
+- iPhone: updating the lock-screen timer and reminders could hang without an error, so no
+  Live Activity appeared and an old timer notification stayed (0.12.4 showed "not updated").
+  Every step that waits for iOS now has a time limit: a Live Activity iOS no longer answers
+  for is replaced, and the night-feed alarms (AlarmKit) are set after the timers instead of
+  before them, so asking for alarm permission no longer holds the timers up (#49).
+- iPhone Settings, About: the lock-screen timer line also says which step is busy, so a step
+  that still hangs shows by name.
+
 ## [0.12.4] — 2026-11-26 — Why the iPhone timer is not a Live Activity
 
 - iPhone Settings: the card with iOS's reason for refusing the Live Activity now shows. It
