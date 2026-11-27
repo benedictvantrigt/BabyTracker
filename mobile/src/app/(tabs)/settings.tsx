@@ -14,6 +14,7 @@ import {
   Card,
   DateTimeField,
   Field,
+  Segmented,
   Stepper,
   TimeOfDayField,
   ToggleRow,
@@ -58,6 +59,7 @@ export default function SettingsScreen() {
   // Settings that belong to a Today-screen card are hidden while that card is turned off.
   const sleepOn = isCardOn(settings.dashboardLayout, 'sleep');
   const feedingOn = isCardOn(settings.dashboardLayout, 'feeding');
+  const shared = sync.status.enabled;
 
   return (
     <TabScreen>
@@ -70,18 +72,12 @@ export default function SettingsScreen() {
 
         <PermissionsCard />
 
-        <Card testID="settings-on-duty">
-          <ThemedText type="smallBold" themeColor="textSecondary">
-            ON DUTY
-          </ThemedText>
-          <DutyDaysRow days={settings.dutyDays} onChange={(d) => update({ dutyDays: d })} />
-        </Card>
-
         {(sleepOn || feedingOn) && (
           <Card testID="settings-daytime">
             <ThemedText type="smallBold" themeColor="textSecondary">
-              DAYTIME
+              DAY
             </ThemedText>
+            {shared && <SharedNote />}
             <ThemedText type="small" themeColor="textSecondary">
               Sleep starting in this window counts as a nap. Outside it, feeding reminders become
               alarms.
@@ -104,12 +100,7 @@ export default function SettingsScreen() {
         )}
 
         {sleepOn && (
-          <SleepCard
-            child={activeChild}
-            settings={settings}
-            update={update}
-            shared={sync.status.enabled}
-          />
+          <SleepCard child={activeChild} settings={settings} update={update} shared={shared} />
         )}
 
         {feedingOn && (
@@ -117,6 +108,7 @@ export default function SettingsScreen() {
             <ThemedText type="smallBold" themeColor="textSecondary">
               FEEDING
             </ThemedText>
+            {shared && <SharedNote />}
             <Stepper
               label="Feed every"
               value={settings.feedIntervalMinutes}
@@ -127,16 +119,28 @@ export default function SettingsScreen() {
               onChange={(v) => update({ feedIntervalMinutes: v })}
             />
             <ToggleRow
-              label="Time feeds"
-              description={
-                settings.feedTimer
-                  ? 'Left and Right start a timer (this phone)'
-                  : 'Left and Right log the feed now, without a length (this phone)'
-              }
-              value={settings.feedTimer}
-              testID="toggle-feed-timer"
-              onChange={(v) => update({ feedTimer: v })}
+              label="Daytime reminder"
+              description="Notification when a feed is due during the day"
+              value={settings.feedRemindersDay}
+              testID="toggle-feed-day"
+              onChange={(v) => update({ feedRemindersDay: v })}
             />
+            <ToggleRow
+              label="Night alarm"
+              description="Alarm when a feed is due at night"
+              value={settings.feedAlarmNight}
+              onChange={(v) => update({ feedAlarmNight: v })}
+            />
+            {(settings.feedRemindersDay || settings.feedAlarmNight) &&
+              !settings.feedRemindersHere && (
+                <ToggleRow
+                  label="Feed reminders on this phone"
+                  description={OFF_HERE}
+                  value={settings.feedRemindersHere}
+                  testID="toggle-feed-here"
+                  onChange={(v) => update({ feedRemindersHere: v })}
+                />
+              )}
             <ToggleRow
               label="Reflux timer"
               description="After each milk feed: how long to keep the baby upright, on the Today screen and the lock screen"
@@ -155,47 +159,16 @@ export default function SettingsScreen() {
                 onChange={(v) => update({ refluxMinutes: v })}
               />
             )}
-            <ToggleRow
-              label="Daytime reminder"
-              description="Notification when a feed is due during the day"
-              value={settings.feedRemindersDay}
-              testID="toggle-feed-day"
-              onChange={(v) => update({ feedRemindersDay: v })}
-            />
-            <ToggleRow
-              label="Night alarm"
-              description="Alarm when a feed is due at night"
-              value={settings.feedAlarmNight}
-              onChange={(v) => update({ feedAlarmNight: v })}
-            />
-            {(settings.feedRemindersDay || settings.feedAlarmNight) &&
-              (sync.status.enabled || !settings.feedRemindersHere) && (
-                <ToggleRow
-                  label="Feed reminders on this phone"
-                  description={hereDescription(sync.status.enabled)}
-                  value={settings.feedRemindersHere}
-                  testID="toggle-feed-here"
-                  onChange={(v) => update({ feedRemindersHere: v })}
-                />
-              )}
-            {settings.feedAlarmNight && settings.feedRemindersHere && NightAlarm?.isAvailable() && (
-              <ToggleRow
-                label="Ring like an alarm clock"
-                description={
-                  NightAlarm.authorizationState() === 'denied'
-                    ? 'Not allowed: turn on Alarms for Napchime in the iPhone Settings app'
-                    : 'Night feeds ring as an alarm, also in silent mode and Focus (this phone)'
-                }
-                value={settings.nightFeedAlarmKit}
-                testID="toggle-night-alarmkit"
-                onChange={(v) => {
-                  update({ nightFeedAlarmKit: v });
-                  if (v) requestNightAlarms();
-                }}
-              />
-            )}
           </Card>
         )}
+
+        <ThisPhoneCard
+          settings={settings}
+          update={update}
+          shared={shared}
+          sleepOn={sleepOn}
+          feedingOn={feedingOn}
+        />
 
         <AboutCard />
       </ScrollView>
@@ -204,13 +177,99 @@ export default function SettingsScreen() {
 }
 
 /**
- * The rules for reminders are shared with a partner's phone; whether this phone shows them
- * is its own choice. Without a partner the switch only shows to turn a phone back on.
+ * Up to 0.13 each phone could switch nap or feed reminders off for itself; now My days does
+ * that. A switch left off still shows, so it can be turned back on.
  */
-function hereDescription(shared: boolean): string {
-  return shared
-    ? 'The rules above are shared with your partner; each phone chooses whether to show them'
-    : 'Off: the rules above stay, but this phone stays silent';
+const OFF_HERE = 'Off on this phone. Turn on to let My days, under This phone, decide instead';
+
+/** Under the heading of a card whose settings partner sync shares. */
+function SharedNote() {
+  return (
+    <ThemedText type="small" themeColor="textSecondary">
+      Shared with your partner’s phone.
+    </ThemedText>
+  );
+}
+
+/**
+ * Everything that is this phone's own choice, never synced: which days it reminds, how it
+ * records, and what it shows on the lock screen.
+ */
+function ThisPhoneCard({
+  settings,
+  update,
+  shared,
+  sleepOn,
+  feedingOn,
+}: {
+  settings: Settings;
+  update: (patch: Partial<Settings>) => void;
+  shared: boolean;
+  sleepOn: boolean;
+  feedingOn: boolean;
+}) {
+  const ringLikeAlarm =
+    feedingOn && settings.feedAlarmNight && settings.feedRemindersHere && NightAlarm?.isAvailable();
+  return (
+    <Card testID="settings-this-phone">
+      <ThemedText type="smallBold" themeColor="textSecondary">
+        THIS PHONE
+      </ThemedText>
+      {shared && (
+        <ThemedText type="small" themeColor="textSecondary">
+          Not shared: your partner’s phone has its own.
+        </ThemedText>
+      )}
+      <DutyDaysRow days={settings.dutyDays} onChange={(d) => update({ dutyDays: d })} />
+      {feedingOn && (
+        <ToggleRow
+          label="Time feeds"
+          description={
+            settings.feedTimer
+              ? 'Left and Right start a timer'
+              : 'Left and Right log the feed now, without a length'
+          }
+          value={settings.feedTimer}
+          testID="toggle-feed-timer"
+          onChange={(v) => update({ feedTimer: v })}
+        />
+      )}
+      {sleepOn && (
+        <ToggleRow
+          label="Lock-screen sleep timer"
+          description="While the baby sleeps: until when the nap or night should last"
+          value={settings.sleepTimer}
+          onChange={(v) => update({ sleepTimer: v })}
+          testID="toggle-sleep-timer"
+        />
+      )}
+      {sleepOn && (
+        <ToggleRow
+          label="Lock-screen awake timer"
+          description="During the day: time awake, counting down to the next nap or bedtime"
+          value={settings.awakeTimer}
+          onChange={(v) => update({ awakeTimer: v })}
+          testID="toggle-awake-timer"
+        />
+      )}
+      {ringLikeAlarm && (
+        <ToggleRow
+          label="Ring like an alarm clock"
+          description={
+            NightAlarm?.authorizationState() === 'denied'
+              ? 'Not allowed: turn on Alarms for Napchime in the iPhone Settings app'
+              : 'Night feeds ring as an alarm, also in silent mode and Focus'
+          }
+          value={settings.nightFeedAlarmKit}
+          testID="toggle-night-alarmkit"
+          onChange={(v) => {
+            update({ nightFeedAlarmKit: v });
+            if (v) requestNightAlarms();
+          }}
+        />
+      )}
+    </Card>
+  );
 }
 
 /** App version and the privacy policy, which both stores require to be reachable in the app. */
@@ -251,7 +310,7 @@ function SleepCard({
   child: Child | null;
   settings: Settings;
   update: (patch: Partial<Settings>) => void;
-  /** Partner sync is on: the reminder rules are shared, showing them is per phone. */
+  /** Partner sync is on: these settings are shared with the partner's phone. */
   shared: boolean;
 }) {
   const [now] = useState(() => Date.now());
@@ -266,14 +325,17 @@ function SleepCard({
       <ThemedText type="smallBold" themeColor="textSecondary">
         SLEEP
       </ThemedText>
-      <ToggleRow
-        label="Follow the age schedule"
-        description="Planned naps and bedtime for the baby's age, from the day start above"
-        value={settings.sleepSchedule}
-        onChange={(v) => update({ sleepSchedule: v })}
-        testID="toggle-schedule"
+      {shared && <SharedNote />}
+      <ThemedText>Plan naps by</ThemedText>
+      <Segmented
+        options={[
+          { value: 'schedule', label: 'Age schedule' },
+          { value: 'window', label: 'Awake window' },
+        ]}
+        value={settings.sleepSchedule ? 'schedule' : 'window'}
+        onChange={(v) => update({ sleepSchedule: v === 'schedule' })}
       />
-      {settings.sleepSchedule && (
+      {settings.sleepSchedule ? (
         <>
           <Stepper
             label="Stage"
@@ -300,18 +362,12 @@ function SleepCard({
             </ThemedText>
           )}
         </>
-      )}
-      {useSchedule ? (
-        <Stepper
-          label="Remind before nap"
-          value={settings.napLeadMinutes}
-          format={formatMinutes}
-          step={5}
-          min={0}
-          max={60}
-          onChange={(v) => update({ napLeadMinutes: v })}
-        />
       ) : (
+        <ThemedText type="small" themeColor="textSecondary">
+          A nap is due once the baby has been awake this long.
+        </ThemedText>
+      )}
+      {!useSchedule && (
         <Stepper
           label="Awake window"
           value={settings.awakeWindowMinutes}
@@ -323,6 +379,17 @@ function SleepCard({
         />
       )}
       <ToggleRow
+        label="Record night sleep"
+        description={
+          settings.nightSleep
+            ? 'Sleep is timed day and night'
+            : 'Only naps are timed: at night no timers run, the bedtime reminder stays'
+        }
+        value={settings.nightSleep}
+        onChange={(v) => update({ nightSleep: v })}
+        testID="toggle-night-sleep"
+      />
+      <ToggleRow
         label="Nap reminders"
         description={
           useSchedule
@@ -332,40 +399,26 @@ function SleepCard({
         value={settings.napReminders}
         onChange={(v) => update({ napReminders: v })}
       />
-      {settings.napReminders && (shared || !settings.napRemindersHere) && (
+      {settings.napReminders && useSchedule && (
+        <Stepper
+          label="Remind before nap"
+          value={settings.napLeadMinutes}
+          format={formatMinutes}
+          step={5}
+          min={0}
+          max={60}
+          onChange={(v) => update({ napLeadMinutes: v })}
+        />
+      )}
+      {settings.napReminders && !settings.napRemindersHere && (
         <ToggleRow
           label="Nap reminders on this phone"
-          description={hereDescription(shared)}
+          description={OFF_HERE}
           value={settings.napRemindersHere}
           onChange={(v) => update({ napRemindersHere: v })}
           testID="toggle-nap-here"
         />
       )}
-      <ToggleRow
-        label="Track night sleep"
-        description={
-          settings.nightSleep
-            ? 'Sleep is timed day and night (this phone)'
-            : 'Only naps are timed: at night no timers run, the bedtime reminder stays (this phone)'
-        }
-        value={settings.nightSleep}
-        onChange={(v) => update({ nightSleep: v })}
-        testID="toggle-night-sleep"
-      />
-      <ToggleRow
-        label="Sleep timer"
-        description="On the lock screen while the baby sleeps: until when the nap or night should last (this phone)"
-        value={settings.sleepTimer}
-        onChange={(v) => update({ sleepTimer: v })}
-        testID="toggle-sleep-timer"
-      />
-      <ToggleRow
-        label="Awake timer"
-        description="On the lock screen during the day: time awake, counting down to the next nap or bedtime (this phone)"
-        value={settings.awakeTimer}
-        onChange={(v) => update({ awakeTimer: v })}
-        testID="toggle-awake-timer"
-      />
     </Card>
   );
 }

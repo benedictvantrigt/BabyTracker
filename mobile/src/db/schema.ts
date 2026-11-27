@@ -57,6 +57,27 @@ const MIGRATIONS: string[] = [
     removed_at INTEGER
   );
   `,
+  // 0.14: duty days replace the "reminders on this phone" switches. A phone with both
+  // switched off goes off duty on every day instead, so it stays silent. One switched off
+  // stays in effect, and Settings shows it until it is turned back on.
+  `
+  CREATE TEMP TABLE both_off AS SELECT (COALESCE(
+      (SELECT value FROM settings WHERE key = 'napRemindersHere'),
+      (SELECT value FROM settings WHERE key = 'remindersOnThisPhone'),
+      'true'
+    ) = 'false'
+    AND COALESCE(
+      (SELECT value FROM settings WHERE key = 'feedRemindersHere'),
+      (SELECT value FROM settings WHERE key = 'remindersOnThisPhone'),
+      'true'
+    ) = 'false') AS yes;
+  DELETE FROM settings WHERE key = 'dutyDays' AND (SELECT yes FROM both_off);
+  INSERT INTO settings (key, value) SELECT 'dutyDays', '[]' WHERE (SELECT yes FROM both_off);
+  DELETE FROM settings
+  WHERE key IN ('napRemindersHere', 'feedRemindersHere', 'remindersOnThisPhone')
+    AND (SELECT yes FROM both_off);
+  DROP TABLE both_off;
+  `,
 ];
 
 export const SCHEMA_VERSION = MIGRATIONS.length;

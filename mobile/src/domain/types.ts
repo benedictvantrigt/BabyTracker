@@ -151,9 +151,15 @@ export interface Settings {
   feedAlarmNight: boolean;
   /** Today-screen cards: display order and which are turned off (per phone). */
   dashboardLayout: DashboardLayout;
-  /** Whether this phone shows the nap, wake and bedtime reminders (per phone, not synced). */
+  /**
+   * Whether this phone shows the nap, wake and bedtime reminders (per phone, not synced).
+   * Since 0.14 duty days do this; Settings only shows the switch while it is off.
+   */
   napRemindersHere: boolean;
-  /** Whether this phone shows the feed reminders and night alarms (per phone, not synced). */
+  /**
+   * Whether this phone shows the feed reminders and night alarms (per phone, not synced).
+   * Since 0.14 duty days do this; Settings only shows the switch while it is off.
+   */
   feedRemindersHere: boolean;
   /**
    * Left and Right on the Feeding card start a timer; when off they log the feed at one
@@ -173,8 +179,8 @@ export interface Settings {
    */
   sleepTimer: boolean;
   /**
-   * Whether this phone tracks night sleep (per phone, not synced). When off it tracks day
-   * sleep only: no sleep timer starts at night, the morning counts from the day start, and
+   * Whether the family tracks night sleep (shared since 0.14: it decides what either phone
+   * can record). When off it tracks day sleep only: no sleep timer starts at night, the morning counts from the day start, and
    * the Today screen leaves out night totals. Night entries already logged stay.
    */
   nightSleep: boolean;
@@ -203,6 +209,7 @@ export const SHARED_SETTINGS = [
   'feedAlarmNight',
   'refluxTimer',
   'refluxMinutes',
+  'nightSleep',
 ] as const satisfies readonly (keyof Settings)[];
 
 export type SharedSettings = Pick<Settings, (typeof SHARED_SETTINGS)[number]>;

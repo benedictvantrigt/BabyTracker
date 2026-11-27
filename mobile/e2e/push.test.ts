@@ -301,6 +301,7 @@ describe('push through the relay', () => {
       sleepSchedule: false,
       scheduleStage: 'm6',
       napLeadMinutes: 25,
+      nightSleep: false,
     });
     await (await engineOf(a)).sync();
     await (await engineOf(b)).sync();
@@ -310,6 +311,7 @@ describe('push through the relay', () => {
     assert.equal(s.sleepSchedule, false);
     assert.equal(s.scheduleStage, 'm6');
     assert.equal(s.napLeadMinutes, 25);
+    assert.equal(s.nightSleep, false);
     assert.equal(s.napRemindersHere, false);
     assert.equal(s.feedRemindersHere, true);
     assert.deepEqual(s.dashboardLayout.off, ['sleep']);
