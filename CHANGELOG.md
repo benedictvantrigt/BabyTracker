@@ -3,6 +3,15 @@
 All notable changes to Napchime. Versions follow [Semantic Versioning](https://semver.org/);
 before 1.0.0 a minor version marks a phase of the plan.
 
+## [0.12.6] — 2026-11-27 — Live Activities on iPhone, for real
+
+- iPhone: running timers show as a Live Activity on the lock screen and in the Dynamic Island.
+  They never did: the app bundler picked the shared `live-timers.ts`, which has no Live
+  Activities, over the iPhone version `live-timers.ios.tsx`, because it tries every platform
+  for `.ts` files before any `.tsx` file. So the timer showed as a notification, with no error
+  and nothing in Settings. The shared file is now `.tsx`, and a test fails when a platform file
+  is hidden this way (#49).
+
 ## [0.12.5] — 2026-11-27 — The lock-screen timer no longer waits forever
 
 - iPhone: updating the lock-screen timer and reminders could hang without an error, so no
