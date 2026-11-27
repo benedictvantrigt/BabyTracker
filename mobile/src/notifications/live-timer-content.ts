@@ -6,6 +6,22 @@ import { Colors } from '@/constants/theme';
 import type { RefluxWindow } from '@/domain/reflux';
 import type { Child, Entry, Settings } from '@/domain/types';
 
+/**
+ * The button on a timer outside the app (#97): Wake on the sleep timer, Sleep on the awake
+ * timer, Stop on a feeding timer. The tap runs without opening the app.
+ */
+export type TimerAction = 'wake' | 'sleep' | 'stopFeeding';
+
+export const TIMER_ACTION_LABEL: Record<TimerAction, string> = {
+  wake: 'Wake',
+  sleep: 'Sleep',
+  stopFeeding: 'Stop',
+};
+
+export function isTimerAction(value: unknown): value is TimerAction {
+  return typeof value === 'string' && value in TIMER_ACTION_LABEL;
+}
+
 /** What a running timer shows outside the app: notification, Live Activity or Live Update. */
 export interface LiveTimer {
   id: string;
@@ -25,6 +41,8 @@ export interface LiveTimer {
   countdownTo?: number;
   /** When the timer goes stale and should disappear even if the app does not run (day end). */
   until?: number;
+  /** Its button, if any. */
+  action?: TimerAction;
 }
 
 /**
@@ -41,6 +59,7 @@ export function liveTimerFor(entry: Entry, childName: string, sleepPlan?: string
         ? sleepPlan
         : `${KIND_LABEL[entry.kind]} timer running since ${formatClock(entry.start)}`,
     start: entry.start,
+    action: entry.kind === 'sleep' ? 'wake' : 'stopFeeding',
   };
 }
 
@@ -126,6 +145,7 @@ export function awakeTimerFor(
     start: woke,
     countdownTo: target,
     until: dayEnd,
+    action: 'sleep',
   };
 }
 

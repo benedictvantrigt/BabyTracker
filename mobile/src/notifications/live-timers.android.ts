@@ -1,6 +1,6 @@
 import TimerNotification from '../../modules/timer-notification';
 
-import { timerColor, type LiveTimer } from './live-timer-content';
+import { TIMER_ACTION_LABEL, timerColor, type LiveTimer } from './live-timer-content';
 
 /**
  * Ongoing notifications with a chronometer that counts up (running timers) or down to the next
@@ -28,6 +28,8 @@ export async function syncLiveTimers(timers: LiveTimer[], channelId: string): Pr
       color: timerColor(t.kind),
       countdownTo: t.countdownTo,
       until: t.until,
+      action: t.action,
+      actionLabel: t.action && TIMER_ACTION_LABEL[t.action],
     });
   }
   return true;

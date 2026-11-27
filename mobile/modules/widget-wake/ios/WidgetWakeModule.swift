@@ -6,6 +6,8 @@ import UIKit
 private let widgetTapNotification = Notification.Name("onExpoWidgetsUserInteraction")
 // iOS gives a background task about 30 seconds; let go a little before it would end it.
 private let holdSeconds: TimeInterval = 25
+// Where the Live Activity button's intent keeps its taps (scripts/patch-expo-widgets.js).
+private let liveTapsKey = "napchime_live_taps"
 
 /**
  * A home-screen widget tap runs its intent in the app, waking it in the background if needed.
@@ -46,6 +48,23 @@ public final class WidgetWakeModule: Module {
     Function("release") {
       DispatchQueue.main.async { self.end() }
     }
+
+    /**
+     * Live Activity button taps (#97) the intent kept in the app group (patch-expo-widgets.js),
+     * oldest first, each as { target, at }. Taking them removes them.
+     */
+    Function("takeLiveTaps") { () -> [[String: Any]] in
+      guard let defaults = Self.appGroup() else { return [] }
+      let taps = defaults.array(forKey: liveTapsKey) as? [[String: Any]] ?? []
+      defaults.removeObject(forKey: liveTapsKey)
+      return taps
+    }
+  }
+
+  private static func appGroup() -> UserDefaults? {
+    guard let group = Bundle.main.object(forInfoDictionaryKey: "ExpoWidgetsAppGroupIdentifier") as? String
+    else { return nil }
+    return UserDefaults(suiteName: group)
   }
 
   private func hold() {

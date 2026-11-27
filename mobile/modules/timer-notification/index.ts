@@ -13,6 +13,11 @@ export interface TimerNotificationInput {
   countdownTo?: number;
   /** When the notification removes itself if not updated, in milliseconds since the epoch. */
   until?: number;
+  /**
+   * A button (#97): its label, and the action the headless task `NapchimeTimerAction` gets.
+   */
+  actionLabel?: string;
+  action?: string;
 }
 
 interface TimerNotificationModule {

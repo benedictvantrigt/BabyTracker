@@ -7,11 +7,11 @@ import { AppState } from 'react-native';
 import type { Repo } from '@/db/repo';
 import { DAY, MINUTE, startOfLocalDay } from '@/domain/time';
 import { widgetTurns } from '@/domain/widget';
+import { runTimerAction } from '@/notifications/timer-action';
 
 import WidgetWake from '../../modules/widget-wake';
 import HomeWidget from './home-widget.ios';
 import {
-  HOME_WIDGET,
   homeWidgetProps,
   pendingTaps,
   tapAction,
@@ -29,6 +29,8 @@ const STEP_MS = 15 * MINUTE;
 const STEPS = 12;
 /** A tap that waited longer than this (the app could not run) is dropped, not logged late. */
 const MAX_TAP_AGE_MS = 6 * 60 * MINUTE;
+/** A Live Activity button tap (#97) older than this is dropped: Wake hours late is wrong. */
+const MAX_LIVE_TAP_AGE_MS = 10 * MINUTE;
 
 /** Taps this app process already carried out: their entries are written. */
 const handled = new Set<string>();
@@ -74,6 +76,11 @@ let draining = 0;
 async function drainTaps(): Promise<void> {
   draining++;
   try {
+    // Live Activity buttons (#97): Wake, Sleep, Stop, kept by the intent until the app ran.
+    for (const tap of WidgetWake?.takeLiveTaps() ?? []) {
+      if (typeof tap.at !== 'number' || Date.now() - tap.at > MAX_LIVE_TAP_AGE_MS) continue;
+      await runTimerAction(tap.target, tap.at).catch(() => false);
+    }
     const result = await serial(async () => {
       const taps = pendingTaps(await HomeWidget.getTimeline()).filter((t) => !handled.has(t.id));
       if (!taps.length) return null;
@@ -108,7 +115,8 @@ export function registerHomeWidget(): void {
   registered = true;
   const drain = () => drainTaps().catch((e) => console.warn('Widget taps failed', e));
   addUserInteractionListener((event) => {
-    if (event.source === HOME_WIDGET) drain();
+    // The home-screen widget, or a Live Activity's button (its source is the activity's id).
+    drain();
   });
   AppState.addEventListener('change', (state) => state === 'active' && drain());
   // Woken by a tap, or taps left from a time the app could not run.
