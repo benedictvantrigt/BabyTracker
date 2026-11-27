@@ -13,6 +13,7 @@ describe('liveTimerFor', () => {
       title: 'Micky is asleep',
       text: `Sleep timer running since ${formatClock(at(13, 5))}`,
       start: at(13, 5),
+      action: 'wake',
     });
   });
 
@@ -22,6 +23,7 @@ describe('liveTimerFor', () => {
       kind: 'feeding',
       title: 'Feeding · Left',
       start: at(9),
+      action: 'stopFeeding',
     });
   });
 });
@@ -42,6 +44,7 @@ describe('awakeTimerFor', () => {
       start: at(10, 12),
       countdownTo: at(11, 57),
       until: at(19, 30),
+      action: 'sleep',
     });
   });
 
