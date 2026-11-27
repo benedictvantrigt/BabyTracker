@@ -138,6 +138,24 @@ export default function SettingsScreen() {
               onChange={(v) => update({ feedTimer: v })}
             />
             <ToggleRow
+              label="Reflux timer"
+              description="After each milk feed: how long to keep the baby upright, on the Today screen and the lock screen"
+              value={settings.refluxTimer}
+              testID="toggle-reflux-timer"
+              onChange={(v) => update({ refluxTimer: v })}
+            />
+            {settings.refluxTimer && (
+              <Stepper
+                label="Keep upright"
+                value={settings.refluxMinutes}
+                format={formatMinutes}
+                step={5}
+                min={5}
+                max={90}
+                onChange={(v) => update({ refluxMinutes: v })}
+              />
+            )}
+            <ToggleRow
               label="Daytime reminder"
               description="Notification when a feed is due during the day"
               value={settings.feedRemindersDay}

@@ -3,10 +3,11 @@ import { isOnDuty } from '@/domain/duty-days';
 import { runningEntries } from '@/domain/entries';
 import { computeReminders, reminderWantedHere } from '@/domain/reminders';
 import { forgottenSleeps, napCutoff } from '@/domain/night-sleep';
+import { refluxReminder, refluxWindow } from '@/domain/reflux';
 import { DAY } from '@/domain/time';
 import type { Entry } from '@/domain/types';
 
-import { awakeTimerFor, sleepPlanText } from './live-timer-content';
+import { awakeTimerFor, refluxTimerFor, sleepPlanText, type LiveTimer } from './live-timer-content';
 import { nightAlarmsAuthorized, nightAlarmsReady, scheduleNightAlarms } from './night-alarms';
 import { syncNotifications } from './scheduler';
 import { errorText, reportTimerFailure, reportTimerStep, withTimeout } from './timer-report';
@@ -53,8 +54,17 @@ async function refresh(repo: Repo, now: number): Promise<void> {
   // reminders come by push; the pushed copy then shows quietly (#6). The alarms come after
   // the timers: asking for permission waits for the user, and iOS may not answer at all.
   const alarmKit = settings.nightFeedAlarmKit && nightAlarmsAuthorized();
-  const remindersFor = (alarms: boolean) =>
-    sync?.pushActive ? [] : planned.filter((r) => !(alarms && r.alarm));
+  // The reflux reminder is never pushed by the relay: each phone schedules it itself (#93).
+  const reflux = refluxWindow(entries, settings, now);
+  const refluxNote = reflux && refluxReminder(reflux, child.name);
+  const local =
+    refluxNote && reminderWantedHere(refluxNote.id, settings) && isOnDuty(settings, refluxNote.fireAt)
+      ? [refluxNote]
+      : [];
+  const remindersFor = (alarms: boolean) => [
+    ...(sync?.pushActive ? [] : planned.filter((r) => !(alarms && r.alarm))),
+    ...local,
+  ];
   const onDuty = isOnDuty(settings, now);
   const running = onDuty
     ? runningEntries(entries).filter(
@@ -63,12 +73,15 @@ async function refresh(repo: Repo, now: number): Promise<void> {
       )
     : [];
   const awake = onDuty ? awakeTimerFor(entries, child, settings, now) : null;
+  const others = [awake, onDuty && reflux ? refluxTimerFor(reflux, child.name) : null].filter(
+    (t): t is LiveTimer => t !== null,
+  );
   const sleepPlan = sleepPlanText(entries, child, settings, now);
   // The lock-screen sleep timer goes at the day end even if the app does not run then.
   const runningSleep = running.find((e) => e.kind === 'sleep');
   const sleepUntil = runningSleep ? napCutoff(settings, runningSleep.start) : null;
   const notify = (alarms: boolean) =>
-    syncNotifications(remindersFor(alarms), running, child.name, awake, sleepPlan, sleepUntil);
+    syncNotifications(remindersFor(alarms), running, child.name, others, sleepPlan, sleepUntil);
   reportTimerStep('the lock-screen timers and reminders');
   await notify(alarmKit);
 

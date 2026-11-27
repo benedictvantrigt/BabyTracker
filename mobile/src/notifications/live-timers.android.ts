@@ -1,8 +1,6 @@
 import TimerNotification from '../../modules/timer-notification';
 
-import { Colors } from '@/constants/theme';
-
-import type { LiveTimer } from './live-timer-content';
+import { timerColor, type LiveTimer } from './live-timer-content';
 
 /**
  * Ongoing notifications with a chronometer that counts up (running timers) or down to the next
@@ -27,7 +25,7 @@ export async function syncLiveTimers(timers: LiveTimer[], channelId: string): Pr
       text: t.text,
       start: t.start,
       channelId,
-      color: Colors.light[t.kind === 'awake' ? 'sleep' : t.kind],
+      color: timerColor(t.kind),
       countdownTo: t.countdownTo,
       until: t.until,
     });

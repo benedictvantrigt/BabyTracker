@@ -8,10 +8,9 @@ import {
 } from '@expo/ui/swift-ui/modifiers';
 import { createLiveActivity } from 'expo-widgets';
 
-import { Colors } from '@/constants/theme';
 import { formatClock } from '@/domain/time';
 
-import type { LiveTimer } from './live-timer-content';
+import { timerColor, type LiveTimer } from './live-timer-content';
 import { errorText, reportLiveTimers, withTimeout } from './timer-report';
 
 /** How long to wait for iOS to update or end a Live Activity. */
@@ -33,6 +32,7 @@ const ICON: Record<LiveTimer['kind'], TimerActivityProps['icon']> = {
   feeding: 'waterbottle.fill',
   sleep: 'moon.zzz.fill',
   awake: 'sun.max.fill',
+  reflux: 'figure.stand',
 };
 
 // Runs inside the widget extension, not the app: it may only use its props and the Expo UI
@@ -101,7 +101,7 @@ function propsFor(t: LiveTimer): TimerActivityProps {
     // SwiftUI's timer style counts down to a future date and up from a past one.
     start: t.countdownTo ?? t.start,
     icon: ICON[t.kind],
-    tint: Colors.light[t.kind === 'awake' ? 'sleep' : t.kind],
+    tint: timerColor(t.kind),
   };
 }
 

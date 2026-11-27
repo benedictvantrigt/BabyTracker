@@ -20,6 +20,7 @@ import {
   temperatureLabel,
 } from '@/domain/entries';
 import { isUntrackedNight, lastWake, nextDayStart } from '@/domain/night-sleep';
+import { refluxWindow } from '@/domain/reflux';
 import { nextFeedAt, nextNapAt } from '@/domain/reminders';
 import {
   isNewStage,
@@ -277,6 +278,7 @@ function formatTarget([min, max]: [number, number]): string {
 function FeedingCard({ child, settings, entries, now, repo, run, logged }: DashboardCardProps) {
   const lastFeed = latest(entries, 'feeding');
   const feedAt = nextFeedAt(entries, settings);
+  const reflux = refluxWindow(entries, settings, now);
   const startFeed = (method: FeedingMethod) =>
     run(async () => {
       const data = { type: 'breast_milk', method } as const;
@@ -300,6 +302,11 @@ function FeedingCard({ child, settings, entries, now, repo, run, logged }: Dashb
       {feedAt && (
         <ThemedText type="small" themeColor="textSecondary">
           Next due at {formatClock(feedAt)}
+        </ThemedText>
+      )}
+      {reflux && (
+        <ThemedText type="smallBold" testID="reflux-timer">
+          {`Keep upright until ${formatClock(reflux.until)} (${formatDuration(Math.max(reflux.until - now, MINUTE))} left)`}
         </ThemedText>
       )}
       <View style={styles.buttonRow}>

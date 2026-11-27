@@ -4,14 +4,18 @@ import { planDay, scheduleStatus, stageFor, type ScheduleStatus } from './sleep-
 import { DAY, MINUTE, formatClock, formatDuration, isDaytime } from './time';
 import type { Child, Entry, Settings } from './types';
 
-export type ReminderId = 'nap' | 'wake' | 'bed' | 'feed';
+/** `reflux` is scheduled on each phone only, never pushed by the relay (#93). */
+export type ReminderId = 'nap' | 'wake' | 'bed' | 'feed' | 'reflux';
 
-/** Whether this phone shows reminder `id`: nap, wake and bedtime, or feed, each switched here. */
+/**
+ * Whether this phone shows reminder `id`: nap, wake and bedtime, or feed and reflux, each
+ * switched here.
+ */
 export function reminderWantedHere(
   id: string,
   settings: Pick<Settings, 'napRemindersHere' | 'feedRemindersHere'>,
 ): boolean {
-  return id === 'feed' ? settings.feedRemindersHere : settings.napRemindersHere;
+  return id === 'feed' || id === 'reflux' ? settings.feedRemindersHere : settings.napRemindersHere;
 }
 
 /** What reminders need to know about the child. */
