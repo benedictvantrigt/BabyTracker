@@ -3,6 +3,18 @@
 All notable changes to Napchime. Versions follow [Semantic Versioning](https://semver.org/);
 before 1.0.0 a minor version marks a phase of the plan.
 
+## [0.14.1] — 2026-11-27 — Reminder switches per phone
+
+- Nap reminders, the daytime feed reminder and the night feed alarm are each phone's own
+  switches again, now under **This phone** (#106). 0.14.0 shared them, so one parent could
+  not take feed reminders without nap reminders. When a nap or feed is due stays shared:
+  schedule, awake window, "Remind before nap", feed interval.
+- Each phone hands the relay every reminder; the relay pushes each phone only the kinds it
+  switched on. A partner phone still on 0.14.0 or older sends daytime feed reminders as
+  night alarms, so until it updates they follow the night alarm switch.
+- A "reminders on this phone" switch that was still off turns the matching reminders off on
+  that phone.
+
 ## [0.14.0] — 2026-11-27 — Settings grouped by what is shared
 
 - Settings, reordered (#103): Day, Sleep and Feeding hold what partner sync shares, and say

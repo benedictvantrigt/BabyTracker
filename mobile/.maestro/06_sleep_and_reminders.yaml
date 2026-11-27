@@ -2,7 +2,7 @@ appId: com.napchime.app.acc
 name: Sleep timer, and leaves reminders scheduled for the alarm check
 ---
 - runFlow: subflows/onboard.yaml
-# Settings top to bottom: Sleep, Feeding, This phone.
+# Settings top to bottom: Sleep, then This phone.
 - tapOn: 'Settings'
 # Record night sleep: off and on again (on, so Start sleep shows whatever the CI clock says).
 - scrollUntilVisible:
@@ -15,15 +15,9 @@ name: Sleep timer, and leaves reminders scheduled for the alarm check
 - tapOn:
     id: 'toggle-night-sleep'
 - assertVisible: 'Sleep is timed day and night.*'
-# Daytime feed reminders on, so a feed reminder is scheduled whatever the CI clock says.
-- scrollUntilVisible:
-    element:
-      id: 'toggle-feed-day'
-- tapOn:
-    id: 'toggle-feed-day'
 - scrollUntilVisible:
     element: 'THIS PHONE'
-# My days: a day turns off and on again (all days on, so the reminders above still fire).
+# My days: a day turns off and on again (all days on, so the reminders below still fire).
 - scrollUntilVisible:
     element:
       id: 'duty-day-1'
@@ -32,6 +26,13 @@ name: Sleep timer, and leaves reminders scheduled for the alarm check
     id: 'duty-day-1'
 - tapOn:
     id: 'duty-day-1'
+# Daytime feed reminders on, so a feed reminder is scheduled whatever the CI clock says.
+- scrollUntilVisible:
+    element:
+      id: 'toggle-feed-day'
+    centerElement: true
+- tapOn:
+    id: 'toggle-feed-day'
 # Lock-screen timers switch per phone under This phone.
 - scrollUntilVisible:
     element:

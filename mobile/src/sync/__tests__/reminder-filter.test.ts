@@ -7,7 +7,8 @@ describe('reminderFilterFor', () => {
   it('tells the relay the kinds and duty days this phone wants', () => {
     const settings = {
       ...DEFAULT_SETTINGS,
-      feedRemindersHere: false,
+      feedRemindersDay: false,
+      feedAlarmNight: false,
       dutyDays: [1, 3] as (0 | 1 | 2 | 3 | 4 | 5 | 6)[],
       dayStartMinute: 420,
     };
@@ -17,8 +18,9 @@ describe('reminderFilterFor', () => {
       dayStartMinute: 420,
       timeZone: 'Europe/Amsterdam',
     });
-    expect(reminderFilterFor({ ...DEFAULT_SETTINGS, napRemindersHere: false }, null).ids).toEqual([
-      'feed',
-    ]);
+    const feeds = { ...DEFAULT_SETTINGS, napReminders: false, feedRemindersDay: true };
+    expect(reminderFilterFor(feeds, null).ids).toEqual(['feed', 'feedday']);
+    const nightOnly = { ...feeds, feedRemindersDay: false };
+    expect(reminderFilterFor(nightOnly, null).ids).toEqual(['feed']);
   });
 });

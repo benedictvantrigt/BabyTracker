@@ -4,18 +4,30 @@ import { planDay, scheduleStatus, stageFor, type ScheduleStatus } from './sleep-
 import { DAY, MINUTE, formatClock, formatDuration, isDaytime } from './time';
 import type { Child, Entry, Settings } from './types';
 
-/** `reflux` is scheduled on each phone only, never pushed by the relay (#93). */
-export type ReminderId = 'nap' | 'wake' | 'bed' | 'feed' | 'reflux';
+/**
+ * `feed` is the night feed alarm and `feedday` the daytime feed reminder (apart since 0.14.1;
+ * a phone of 0.14.0 or older sends both as `feed`). `reflux` is scheduled on each phone only,
+ * never pushed by the relay (#93).
+ */
+export type ReminderId = 'nap' | 'wake' | 'bed' | 'feed' | 'feedday' | 'reflux';
+
+/** The reminder switches, each phone's own (since 0.14.1). */
+export type ReminderSwitches = Pick<Settings, 'napReminders' | 'feedRemindersDay' | 'feedAlarmNight'>;
 
 /**
- * Whether this phone shows reminder `id`: nap, wake and bedtime, or feed and reflux, each
- * switched here.
+ * Whether this phone shows reminder `id`, by its own switches. Reflux follows the reflux
+ * timer, which is shared.
  */
-export function reminderWantedHere(
-  id: string,
-  settings: Pick<Settings, 'napRemindersHere' | 'feedRemindersHere'>,
-): boolean {
-  return id === 'feed' || id === 'reflux' ? settings.feedRemindersHere : settings.napRemindersHere;
+export function reminderWantedHere(id: string, settings: ReminderSwitches): boolean {
+  if (id === 'feed') return settings.feedAlarmNight;
+  if (id === 'feedday') return settings.feedRemindersDay;
+  if (id === 'reflux') return true;
+  return settings.napReminders;
+}
+
+/** Every reminder kind on: what a phone hands the relay, which pushes each phone its own kinds. */
+export function allReminders<T extends ReminderSwitches>(settings: T): T {
+  return { ...settings, napReminders: true, feedRemindersDay: true, feedAlarmNight: true };
 }
 
 /** What reminders need to know about the child. */
@@ -50,7 +62,7 @@ export function computeReminders(
   if (settings.napReminders && schedule) {
     reminders.push(...scheduleReminders(schedule, child, settings, asleep, now));
   } else if (settings.napReminders && !asleep) {
-    // Without night sleep tracked on this phone, the morning counts from the day start.
+    // Without night sleep tracked, the morning counts from the day start.
     const woke = awakeWindowFrom(live, settings, now);
     if (woke !== null) {
       const fireAt = woke + settings.awakeWindowMinutes * MINUTE;
@@ -73,7 +85,7 @@ export function computeReminders(
     const enabled = daytime ? settings.feedRemindersDay : settings.feedAlarmNight;
     if (fireAt > now && enabled) {
       reminders.push({
-        id: 'feed',
+        id: daytime ? 'feedday' : 'feed',
         fireAt,
         title: daytime ? 'Feeding due' : `Feed ${childName}`,
         body: `Last feed started at ${formatClock(feeding.start)} (${formatDuration(fireAt - feeding.start)} ago).`,

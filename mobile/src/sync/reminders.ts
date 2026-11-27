@@ -1,12 +1,18 @@
 import type { Repo } from '@/db/repo';
-import { computeReminders, reminderWantedHere, type ReminderId } from '@/domain/reminders';
+import {
+  allReminders,
+  computeReminders,
+  reminderWantedHere,
+  type ReminderId,
+  type ReminderSwitches,
+} from '@/domain/reminders';
 import type { Settings } from '@/domain/types';
 import { DAY } from '@/domain/time';
 
 import type { ReminderFilter } from './client';
 import type { SyncEngine } from './engine';
 
-const REMINDER_IDS: ReminderId[] = ['nap', 'wake', 'bed', 'feed'];
+const REMINDER_IDS: ReminderId[] = ['nap', 'wake', 'bed', 'feed', 'feedday'];
 
 /** The phone's IANA time zone, or null where the JS engine does not tell. */
 export function currentTimeZone(): string | null {
@@ -23,10 +29,7 @@ export function currentTimeZone(): string | null {
  * without asking the app).
  */
 export function reminderFilterFor(
-  settings: Pick<
-    Settings,
-    'napRemindersHere' | 'feedRemindersHere' | 'dutyDays' | 'dayStartMinute'
-  >,
+  settings: ReminderSwitches & Pick<Settings, 'dutyDays' | 'dayStartMinute'>,
   timeZone: string | null,
 ): ReminderFilter {
   return {
@@ -52,7 +55,8 @@ export interface ReminderPayload {
 export async function publishReminders(repo: Repo, engine: SyncEngine, now = Date.now()) {
   const state = await repo.getSyncState();
   if (!state) return;
-  const settings = await repo.getSettings();
+  // Every kind: each phone switches its own, and the relay pushes it only those.
+  const settings = allReminders(await repo.getSettings());
   const children = await repo.listChildren();
   const reminders = [];
   for (const [index, child] of children.entries()) {

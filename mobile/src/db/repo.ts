@@ -138,8 +138,6 @@ export interface SyncState {
 const SHARED_UPDATED_AT = 'sharedSettingsUpdatedAt';
 /** Settings key of the Today-screen layout up to 0.5 (visible card ids in order). */
 const LEGACY_DASHBOARD_KEY = 'dashboardCards';
-/** Up to 0.11 one switch for all reminders on this phone; now one per kind. */
-const LEGACY_REMINDERS_KEY = 'remindersOnThisPhone';
 /** Settings key of a home-screen widget's layout, followed by the widget id. */
 const WIDGET_LAYOUT_PREFIX = 'widgetLayout:';
 
@@ -400,12 +398,10 @@ export class Repo {
     );
     const settings: Settings = { ...DEFAULT_SETTINGS };
     let legacyDashboard: unknown;
-    let legacyReminders: unknown;
     for (const { key, value } of rows) {
       if (key in DEFAULT_SETTINGS)
         (settings as unknown as Record<string, unknown>)[key] = JSON.parse(value);
       else if (key === LEGACY_DASHBOARD_KEY) legacyDashboard = JSON.parse(value);
-      else if (key === LEGACY_REMINDERS_KEY) legacyReminders = JSON.parse(value);
     }
     // Up to 0.5 the layout was `dashboardCards`, the visible cards in order.
     const storedLayout = rows.some((r) => r.key === 'dashboardLayout');
@@ -413,11 +409,6 @@ export class Repo {
       storedLayout ? settings.dashboardLayout : (legacyDashboard ?? settings.dashboardLayout),
     );
     settings.dutyDays = normalizeDutyDays(settings.dutyDays);
-    if (legacyReminders === false) {
-      const stored = (key: keyof Settings) => rows.some((r) => r.key === key);
-      if (!stored('napRemindersHere')) settings.napRemindersHere = false;
-      if (!stored('feedRemindersHere')) settings.feedRemindersHere = false;
-    }
     return settings;
   }
 

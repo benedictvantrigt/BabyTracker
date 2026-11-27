@@ -119,29 +119,6 @@ export default function SettingsScreen() {
               onChange={(v) => update({ feedIntervalMinutes: v })}
             />
             <ToggleRow
-              label="Daytime reminder"
-              description="Notification when a feed is due during the day"
-              value={settings.feedRemindersDay}
-              testID="toggle-feed-day"
-              onChange={(v) => update({ feedRemindersDay: v })}
-            />
-            <ToggleRow
-              label="Night alarm"
-              description="Alarm when a feed is due at night"
-              value={settings.feedAlarmNight}
-              onChange={(v) => update({ feedAlarmNight: v })}
-            />
-            {(settings.feedRemindersDay || settings.feedAlarmNight) &&
-              !settings.feedRemindersHere && (
-                <ToggleRow
-                  label="Feed reminders on this phone"
-                  description={OFF_HERE}
-                  value={settings.feedRemindersHere}
-                  testID="toggle-feed-here"
-                  onChange={(v) => update({ feedRemindersHere: v })}
-                />
-              )}
-            <ToggleRow
               label="Reflux timer"
               description="After each milk feed: how long to keep the baby upright, on the Today screen and the lock screen"
               value={settings.refluxTimer}
@@ -176,12 +153,6 @@ export default function SettingsScreen() {
   );
 }
 
-/**
- * Up to 0.13 each phone could switch nap or feed reminders off for itself; now My days does
- * that. A switch left off still shows, so it can be turned back on.
- */
-const OFF_HERE = 'Off on this phone. Turn on to let My days, under This phone, decide instead';
-
 /** Under the heading of a card whose settings partner sync shares. */
 function SharedNote() {
   return (
@@ -192,8 +163,8 @@ function SharedNote() {
 }
 
 /**
- * Everything that is this phone's own choice, never synced: which days it reminds, how it
- * records, and what it shows on the lock screen.
+ * Everything that is this phone's own choice, never synced: which reminders it shows and on
+ * which days, how it records, and what it shows on the lock screen.
  */
 function ThisPhoneCard({
   settings,
@@ -208,8 +179,7 @@ function ThisPhoneCard({
   sleepOn: boolean;
   feedingOn: boolean;
 }) {
-  const ringLikeAlarm =
-    feedingOn && settings.feedAlarmNight && settings.feedRemindersHere && NightAlarm?.isAvailable();
+  const ringLikeAlarm = feedingOn && settings.feedAlarmNight && NightAlarm?.isAvailable();
   return (
     <Card testID="settings-this-phone">
       <ThemedText type="smallBold" themeColor="textSecondary">
@@ -221,6 +191,49 @@ function ThisPhoneCard({
         </ThemedText>
       )}
       <DutyDaysRow days={settings.dutyDays} onChange={(d) => update({ dutyDays: d })} />
+      {sleepOn && (
+        <ToggleRow
+          label="Nap reminders"
+          description="Before naps and bedtime, and when a nap should end"
+          value={settings.napReminders}
+          testID="toggle-nap-reminders"
+          onChange={(v) => update({ napReminders: v })}
+        />
+      )}
+      {feedingOn && (
+        <ToggleRow
+          label="Daytime feed reminder"
+          description="Notification when a feed is due during the day"
+          value={settings.feedRemindersDay}
+          testID="toggle-feed-day"
+          onChange={(v) => update({ feedRemindersDay: v })}
+        />
+      )}
+      {feedingOn && (
+        <ToggleRow
+          label="Night feed alarm"
+          description="Alarm when a feed is due at night"
+          value={settings.feedAlarmNight}
+          testID="toggle-feed-night"
+          onChange={(v) => update({ feedAlarmNight: v })}
+        />
+      )}
+      {ringLikeAlarm && (
+        <ToggleRow
+          label="Ring like an alarm clock"
+          description={
+            NightAlarm?.authorizationState() === 'denied'
+              ? 'Not allowed: turn on Alarms for Napchime in the iPhone Settings app'
+              : 'Night feeds ring as an alarm, also in silent mode and Focus'
+          }
+          value={settings.nightFeedAlarmKit}
+          testID="toggle-night-alarmkit"
+          onChange={(v) => {
+            update({ nightFeedAlarmKit: v });
+            if (v) requestNightAlarms();
+          }}
+        />
+      )}
       {feedingOn && (
         <ToggleRow
           label="Time feeds"
@@ -250,22 +263,6 @@ function ThisPhoneCard({
           value={settings.awakeTimer}
           onChange={(v) => update({ awakeTimer: v })}
           testID="toggle-awake-timer"
-        />
-      )}
-      {ringLikeAlarm && (
-        <ToggleRow
-          label="Ring like an alarm clock"
-          description={
-            NightAlarm?.authorizationState() === 'denied'
-              ? 'Not allowed: turn on Alarms for Napchime in the iPhone Settings app'
-              : 'Night feeds ring as an alarm, also in silent mode and Focus'
-          }
-          value={settings.nightFeedAlarmKit}
-          testID="toggle-night-alarmkit"
-          onChange={(v) => {
-            update({ nightFeedAlarmKit: v });
-            if (v) requestNightAlarms();
-          }}
         />
       )}
     </Card>
@@ -389,17 +386,7 @@ function SleepCard({
         onChange={(v) => update({ nightSleep: v })}
         testID="toggle-night-sleep"
       />
-      <ToggleRow
-        label="Nap reminders"
-        description={
-          useSchedule
-            ? 'Before each planned nap and bedtime, and when a nap should end'
-            : 'When the awake window has passed, during the day'
-        }
-        value={settings.napReminders}
-        onChange={(v) => update({ napReminders: v })}
-      />
-      {settings.napReminders && useSchedule && (
+      {useSchedule && (
         <Stepper
           label="Remind before nap"
           value={settings.napLeadMinutes}
@@ -408,15 +395,6 @@ function SleepCard({
           min={0}
           max={60}
           onChange={(v) => update({ napLeadMinutes: v })}
-        />
-      )}
-      {settings.napReminders && !settings.napRemindersHere && (
-        <ToggleRow
-          label="Nap reminders on this phone"
-          description={OFF_HERE}
-          value={settings.napRemindersHere}
-          onChange={(v) => update({ napRemindersHere: v })}
-          testID="toggle-nap-here"
         />
       )}
     </Card>
