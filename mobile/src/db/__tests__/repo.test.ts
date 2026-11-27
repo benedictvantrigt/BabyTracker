@@ -297,9 +297,11 @@ describe('Repo', () => {
 
   it('shares night sleep with the partner phones', async () => {
     const { repo } = await setup();
-    const before = await repo.outboxBatch(10);
+    const state = { familyId: 'f', relayUrl: 'https://relay.example', lastSeq: 0 };
+    await repo.startSync(state, false, [{ id: 'me', addedBy: null }]);
+    const before = await repo.outboxBatch(100);
     await repo.updateSettings({ nightSleep: false });
-    const after = await repo.outboxBatch(10);
+    const after = await repo.outboxBatch(100);
     expect(after.length).toBe(before.length + 1);
     expect(JSON.parse(after[after.length - 1].body).row.values.nightSleep).toBe(false);
   });
