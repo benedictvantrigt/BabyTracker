@@ -252,6 +252,58 @@ describe('Repo', () => {
     expect([after.napRemindersHere, after.feedRemindersHere]).toEqual([false, true]);
   });
 
+  describe('0.14: duty days replace the "reminders on this phone" switches', () => {
+    // Runs the last migration again over settings an older version left behind.
+    async function upgrade(settings: Record<string, unknown>) {
+      const { db, repo } = await setup();
+      for (const [key, value] of Object.entries(settings)) {
+        await db.runAsync('INSERT INTO settings (key, value) VALUES (?, ?)', [
+          key,
+          JSON.stringify(value),
+        ]);
+      }
+      await db.execAsync(`PRAGMA user_version = ${SCHEMA_VERSION - 1}`);
+      await migrate(db);
+      return repo.getSettings();
+    }
+
+    it('takes a phone with both switched off off duty', async () => {
+      const after = await upgrade({
+        napRemindersHere: false,
+        feedRemindersHere: false,
+        dutyDays: [1, 2],
+      });
+      expect(after.dutyDays).toEqual([]);
+      expect([after.napRemindersHere, after.feedRemindersHere]).toEqual([true, true]);
+    });
+
+    it('does the same for the single switch of 0.11 and older', async () => {
+      const after = await upgrade({ remindersOnThisPhone: false });
+      expect(after.dutyDays).toEqual([]);
+      expect([after.napRemindersHere, after.feedRemindersHere]).toEqual([true, true]);
+    });
+
+    it('keeps one switch that is off, and the duty days', async () => {
+      const after = await upgrade({ feedRemindersHere: false, dutyDays: [3] });
+      expect(after.dutyDays).toEqual([3]);
+      expect([after.napRemindersHere, after.feedRemindersHere]).toEqual([true, false]);
+    });
+
+    it('leaves a phone with the switches on alone', async () => {
+      const after = await upgrade({ napRemindersHere: true, dutyDays: [0, 6] });
+      expect(after.dutyDays).toEqual([0, 6]);
+    });
+  });
+
+  it('shares night sleep with the partner phones', async () => {
+    const { repo } = await setup();
+    const before = await repo.outboxBatch(10);
+    await repo.updateSettings({ nightSleep: false });
+    const after = await repo.outboxBatch(10);
+    expect(after.length).toBe(before.length + 1);
+    expect(JSON.parse(after[after.length - 1].body).row.values.nightSleep).toBe(false);
+  });
+
   it('keeps the duty days on this phone only', async () => {
     const { repo } = await setup();
     expect((await repo.getSettings()).dutyDays).toEqual([0, 1, 2, 3, 4, 5, 6]);

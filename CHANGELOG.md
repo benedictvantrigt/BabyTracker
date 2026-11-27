@@ -3,6 +3,19 @@
 All notable changes to Napchime. Versions follow [Semantic Versioning](https://semver.org/);
 before 1.0.0 a minor version marks a phase of the plan.
 
+## [0.14.0] — 2026-11-27 — Settings grouped by what is shared
+
+- Settings, reordered (#103): Day, Sleep and Feeding hold what partner sync shares, and say
+  so; a new **This phone** card holds what each phone chooses for itself: My days, Time
+  feeds, the lock-screen sleep and awake timers, and Ring like an alarm clock.
+- Sleep: plan naps by *Age schedule* or *Awake window*, one choice instead of a switch that
+  swapped the controls below it. "Remind before nap" shows under Nap reminders.
+- "Track night sleep" is now "Record night sleep" and is shared with the partner phones: it
+  decides what either phone can record, so the phones no longer disagree.
+- "Nap reminders on this phone" and "Feed reminders on this phone" are gone: My days decides
+  when a phone reminds. A phone that had both off is taken off duty on every day, so it stays
+  silent. A single one left off keeps working and shows until it is turned back on.
+
 ## [0.13.0] — 2026-11-27 — Live Activities on iPhone, buttons on the lock-screen timer, reflux timer
 
 - iPhone: running timers show as a Live Activity on the lock screen and in the Dynamic Island.
