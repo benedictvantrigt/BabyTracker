@@ -16,6 +16,7 @@ import {
   type RandomBytes,
 } from './crypto';
 import { encodeInvite } from './invite';
+import { liveStartIn } from './live-start';
 
 const PUSH_BATCH = 100;
 
@@ -163,11 +164,16 @@ export class SyncEngine {
       const batch = await this.repo.outboxBatch(PUSH_BATCH);
       if (batch.length === 0) break;
       const nudge = batch.some((b) => touchesTimer(b.body)) ? 'high' : 'normal';
+      const liveStart = liveStartIn(
+        batch.map((b) => b.body),
+        Date.now(),
+      );
       const send = () =>
         this.client.push(
           batch.map((b) => seal(this.familyKey.key, b.body, this.random, this.changeContext())),
           this.familyKey.epoch,
           nudge,
+          liveStart,
         );
       try {
         await send();

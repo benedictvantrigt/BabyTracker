@@ -18,6 +18,7 @@ import ReminderKey from '../../modules/reminder-key';
 
 import { useAppData } from '@/data/app-data';
 import { setAppSync } from '@/data/app-repo';
+import { liveStartToken, subscribeLiveStartToken } from '@/notifications/live-start';
 
 import type { FamilyDevice, SyncEngine } from './engine';
 import type { ReminderFilter } from './client';
@@ -197,6 +198,9 @@ export function SyncProvider({ children }: { children: ReactNode }) {
   // fires the token listener again: without this the two kept triggering each other and
   // sent hundreds of registrations a second while the app was open.
   const registered = useRef<string | null>(null);
+  // iPhone: the Live Activity push-to-start token (#98), so a partner's timer can start here.
+  const [startToken, setStartToken] = useState(liveStartToken);
+  useEffect(() => subscribeLiveStartToken(setStartToken), []);
   useEffect(() => {
     if (!status.enabled) return;
     let cancelled = false;
@@ -210,6 +214,7 @@ export function SyncProvider({ children }: { children: ReactNode }) {
         token,
         remindersHere,
         filterKey,
+        startToken,
       ]);
       if (cancelled || registered.current === key) return;
       registered.current = key;
@@ -219,6 +224,7 @@ export function SyncProvider({ children }: { children: ReactNode }) {
           remindersHere,
           current.sealLabel(deviceName()),
           JSON.parse(filterKey) as ReminderFilter,
+          startToken ?? undefined,
         );
         const active = Boolean(token) && push;
         await repo.setPushActive(active);
@@ -234,7 +240,7 @@ export function SyncProvider({ children }: { children: ReactNode }) {
       cancelled = true;
       subscription.remove();
     };
-  }, [status.enabled, remindersHere, filterKey, repo]);
+  }, [status.enabled, remindersHere, filterKey, startToken, repo]);
 
   useEffect(() => {
     loadEngine(deps).then(attach, () => attach(null));

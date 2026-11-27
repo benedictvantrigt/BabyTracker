@@ -118,6 +118,7 @@
       [
         "expo-widgets",
         {
+          "enablePushNotifications": true,
           "widgets": [
             {
               "name": "Summary",

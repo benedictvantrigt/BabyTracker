@@ -1,7 +1,15 @@
 import { DurableObject } from 'cloudflare:workers';
 
 import { sha256Hex, verifyRequest } from './auth';
-import { APNS_PREFIX, apnsConfigured, sendApns, type ApnsEnv } from './apns';
+import {
+  APNS_PREFIX,
+  apnsConfigured,
+  parseLiveStart,
+  sendApns,
+  sendLiveStarts,
+  type ApnsEnv,
+  type LiveStart,
+} from './apns';
 import { fcmConfigured, sendPushes, type FcmEnv, type PushMessage, type SendResult } from './fcm';
 import { parseReminderFilter, wantsReminder } from './reminder-filter';
 
@@ -107,6 +115,10 @@ export class Family extends DurableObject<PushEnv> {
       this.sql.exec('ALTER TABLE devices ADD COLUMN last_seen_at INTEGER');
       this.sql.exec('ALTER TABLE devices ADD COLUMN label TEXT');
       this.sql.exec('ALTER TABLE changes ADD COLUMN epoch INTEGER NOT NULL DEFAULT 0');
+    }
+    if (!columns.includes('live_start_token')) {
+      // iPhone push-to-start token for Live Activities (#98), hex; NULL: none.
+      this.sql.exec('ALTER TABLE devices ADD COLUMN live_start_token TEXT');
     }
     if (!columns.includes('reminder_filter')) {
       // Which reminders the phone wants (kinds, duty days); NULL: all of them.
@@ -248,6 +260,9 @@ export class Family extends DurableObject<PushEnv> {
     // high-priority messages that show nothing.
     const nudge = body.nudge === 'high' ? 'HIGH' : body.nudge === 'none' ? null : 'NORMAL';
     if (nudge) this.ctx.waitUntil(this.nudge(deviceId, nudge));
+    // A timer just started there: show it on the partner iPhones' lock screens (#98).
+    const liveStart = parseLiveStart(body.liveStart, now);
+    if (liveStart) this.ctx.waitUntil(this.liveStarts(deviceId, liveStart));
     return json({ lastSeq });
   }
 
@@ -356,7 +371,7 @@ export class Family extends DurableObject<PushEnv> {
 
     for (const id of remove) {
       this.sql.exec(
-        'UPDATE devices SET revoked_at = ?, push_token = NULL, label = NULL WHERE id = ? AND revoked_at IS NULL',
+        'UPDATE devices SET revoked_at = ?, push_token = NULL, live_start_token = NULL, label = NULL WHERE id = ? AND revoked_at IS NULL',
         now,
         id,
       );
@@ -416,8 +431,9 @@ export class Family extends DurableObject<PushEnv> {
     const last = this.lastActivity();
     if (last !== null && now - last >= FAMILY_TTL_MS) return false;
     this.sql.exec(
-      `UPDATE devices SET push_token = NULL
-       WHERE push_token IS NOT NULL AND COALESCE(last_seen_at, created_at) <= ?`,
+      `UPDATE devices SET push_token = NULL, live_start_token = NULL
+       WHERE (push_token IS NOT NULL OR live_start_token IS NOT NULL)
+         AND COALESCE(last_seen_at, created_at) <= ?`,
       now - PUSH_TOKEN_TTL_MS,
     );
     return true;
@@ -435,7 +451,7 @@ export class Family extends DurableObject<PushEnv> {
 
   private revoke(id: string, now: number): Response {
     this.sql.exec(
-      'UPDATE devices SET revoked_at = ?, push_token = NULL, label = NULL WHERE id = ? AND revoked_at IS NULL',
+      'UPDATE devices SET revoked_at = ?, push_token = NULL, live_start_token = NULL, label = NULL WHERE id = ? AND revoked_at IS NULL',
       now,
       id,
     );
@@ -454,6 +470,14 @@ export class Family extends DurableObject<PushEnv> {
       (typeof label !== 'string' || label.length > MAX_SEALED_BYTES)
     ) {
       return error('bad_label', 400);
+    }
+    const startToken = body.liveStartToken;
+    if (
+      startToken !== undefined &&
+      startToken !== null &&
+      (typeof startToken !== 'string' || !/^[0-9a-fA-F]{32,200}$/.test(startToken))
+    ) {
+      return error('bad_token', 400);
     }
     const reminders = body.reminders !== false;
     const filter = parseReminderFilter(body.reminderFilter);
@@ -481,6 +505,15 @@ export class Family extends DurableObject<PushEnv> {
       reminders ? 1 : 0,
       filterJson,
     ).rowsWritten > 0;
+    // Left out: unchanged (an Android phone, or an app from before #98). Written only on a change.
+    if (startToken !== undefined) {
+      this.sql.exec(
+        'UPDATE devices SET live_start_token = ? WHERE id = ? AND live_start_token IS NOT ?',
+        startToken,
+        deviceId,
+        startToken,
+      );
+    }
     // A label is sealed afresh on every registration, so it always differs: store it along
     // with a real change, or when the phone has none yet.
     const hasLabel = current?.label !== null && current?.label !== undefined;
@@ -610,6 +643,27 @@ export class Family extends DurableObject<PushEnv> {
         collapseKey: 'sync',
       })),
     );
+  }
+
+  /** Starts the timer's Live Activity on the other phones' iPhones (#98). */
+  private async liveStarts(sender: string, start: LiveStart): Promise<void> {
+    const tokens = this.sql
+      .exec(
+        `SELECT live_start_token FROM devices
+         WHERE revoked_at IS NULL AND live_start_token IS NOT NULL AND id IS NOT ?`,
+        sender,
+      )
+      .toArray()
+      .map((r) => r.live_start_token as string);
+    if (tokens.length === 0) return;
+    const results = await sendLiveStarts(this.env, tokens, start).catch(() =>
+      tokens.map((): SendResult => 'failed'),
+    );
+    tokens.forEach((token, i) => {
+      if (results[i] === 'invalid_token') {
+        this.sql.exec('UPDATE devices SET live_start_token = NULL WHERE live_start_token = ?', token);
+      }
+    });
   }
 
   /** Sends pushes (FCM, or APNs for iPhones) and forgets tokens reported as dead. */
