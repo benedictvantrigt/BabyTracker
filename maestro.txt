@@ -1,0 +1,55 @@
+
+Waiting for flows to complete...
+[Passed] Onboarding shows the default dashboard and the sleep plan (2m 44s)
+
+1/1 Flow Passed in 2m 45s
+
+
+Waiting for flows to complete...
+[Passed] Breast feeding timers switch sides, bottle feed with amount (3m 28s)
+
+1/1 Flow Passed in 3m 28s
+
+
+Waiting for flows to complete...
+[Passed] One-tap diapers with undo (2m 5s)
+
+1/1 Flow Passed in 2m 5s
+
+
+Waiting for flows to complete...
+[Passed] Timeline lists entries; edit and delete (3m 32s)
+
+1/1 Flow Passed in 3m 32s
+
+
+Waiting for flows to complete...
+[Passed] Turn off, reorder and reset dashboard cards (2m 27s)
+
+1/1 Flow Passed in 2m 27s
+
+
+Waiting for flows to complete...
+[Passed] Tummy time timer, temperature and growth (2m 37s)
+
+1/1 Flow Passed in 2m 37s
+
+
+Waiting for flows to complete...
+[Failed] Sleep timer, and leaves reminders scheduled for the alarm check (1m 40s)
+
+1/1 Flow Failed
+
+== 06_sleep_and_reminders: Simulator fault, running it once more ==
+
+Waiting for flows to complete...
+[Passed] Sleep timer, and leaves reminders scheduled for the alarm check (2m 39s)
+
+1/1 Flow Passed in 2m 40s
+
+
+Waiting for flows to complete...
+[Passed] Join a partner's family and sync both ways (1m 48s)
+
+1/1 Flow Passed in 1m 49s
+

@@ -1,0 +1,6 @@
+(node:46814) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+family FtiK5zKcbf80kvTVs09Lmw created; invite written
+(node:53581) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+{"devices":2,"entries":["diaper","feeding"],"diaperFromApp":true}

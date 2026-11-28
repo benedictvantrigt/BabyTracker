@@ -1,0 +1,37 @@
+
+ ⛅️ wrangler 4.152.0
+────────────────────
+Your Worker has access to the following bindings:
+Binding                                  Resource                  Mode
+env.FAMILY (Family)                      Durable Object            local
+env.APNS_TOPIC ("com.napchime.app")      Environment Variable      local
+
+⎔ Starting local server...
+[wrangler:info] Ready on http://127.0.0.1:8787
+[wrangler:info] GET /health 200 OK (462ms)
+[wrangler:info] POST /v1/families/FtiK5zKcbf80kvTVs09Lmw 201 Created (624ms)
+[wrangler:info] POST /v1/families/FtiK5zKcbf80kvTVs09Lmw/changes 200 OK (78ms)
+[wrangler:info] GET /v1/families/FtiK5zKcbf80kvTVs09Lmw/changes 200 OK (21ms)
+[wrangler:info] GET /v1/families/FtiK5zKcbf80kvTVs09Lmw/changes 200 OK (6ms)
+[wrangler:info] POST /v1/families/FtiK5zKcbf80kvTVs09Lmw/invites 201 Created (37ms)
+[wrangler:info] POST /v1/families/FtiK5zKcbf80kvTVs09Lmw/changes 200 OK (16ms)
+[wrangler:info] GET /v1/families/FtiK5zKcbf80kvTVs09Lmw/changes 200 OK (41ms)
+[wrangler:info] POST /v1/families/FtiK5zKcbf80kvTVs09Lmw/join 201 Created (8443ms)
+[wrangler:info] POST /v1/families/FtiK5zKcbf80kvTVs09Lmw/changes 200 OK (352ms)
+[wrangler:info] GET /v1/families/FtiK5zKcbf80kvTVs09Lmw/changes 200 OK (236ms)
+[wrangler:info] GET /v1/families/FtiK5zKcbf80kvTVs09Lmw/changes 200 OK (348ms)
+[wrangler:info] PUT /v1/families/FtiK5zKcbf80kvTVs09Lmw/reminders 200 OK (236ms)
+[wrangler:info] GET /v1/families/FtiK5zKcbf80kvTVs09Lmw/devices 200 OK (124ms)
+[wrangler:info] POST /v1/families/FtiK5zKcbf80kvTVs09Lmw/changes 200 OK (202ms)
+[wrangler:info] GET /v1/families/FtiK5zKcbf80kvTVs09Lmw/changes 200 OK (169ms)
+[wrangler:info] PUT /v1/families/FtiK5zKcbf80kvTVs09Lmw/reminders 200 OK (20ms)
+[wrangler:info] GET /v1/families/FtiK5zKcbf80kvTVs09Lmw/devices 200 OK (20ms)
+[wrangler:info] GET /v1/families/FtiK5zKcbf80kvTVs09Lmw/changes 200 OK (41ms)
+[wrangler:info] GET /v1/families/FtiK5zKcbf80kvTVs09Lmw/devices 200 OK (25ms)
+[wrangler:info] GET /v1/families/FtiK5zKcbf80kvTVs09Lmw/changes 200 OK (99ms)
+[wrangler:info] GET /v1/families/FtiK5zKcbf80kvTVs09Lmw/devices 200 OK (222ms)
+[wrangler:info] GET /v1/families/FtiK5zKcbf80kvTVs09Lmw/changes 200 OK (1631ms)
+[wrangler:info] GET /v1/families/FtiK5zKcbf80kvTVs09Lmw/devices 200 OK (134ms)
+[wrangler:info] GET /v1/families/FtiK5zKcbf80kvTVs09Lmw/changes 200 OK (12ms)
+[wrangler:info] GET /v1/families/FtiK5zKcbf80kvTVs09Lmw/devices 200 OK (5ms)
+[wrangler:warn] The Workers runtime crashed unexpectedly and is being restarted (crash #1). Any additional runtime output above may indicate the cause.

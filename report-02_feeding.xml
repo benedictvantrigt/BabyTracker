@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="iPhone 17 - iOS 27.2 - 79C39062-C95E-4A7E-AACE-1D4AE134039F" tests="1" failures="0" time="207.713" timestamp="2026-11-28T01:47:21">
+    <testcase id="Breast feeding timers switch sides, bottle feed with amount" name="Breast feeding timers switch sides, bottle feed with amount" classname="Breast feeding timers switch sides, bottle feed with amount" file="/Users/runner/work/BabyTracker/BabyTracker/mobile/.maestro/02_feeding.yaml" time="207.586" timestamp="2026-11-28T01:47:21" status="SUCCESS"/>
+  </testsuite>
+</testsuites>

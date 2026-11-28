@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="iPhone 17 - iOS 27.2 - 79C39062-C95E-4A7E-AACE-1D4AE134039F" tests="1" failures="0" time="164.553" timestamp="2026-11-28T01:42:16">
+    <testcase id="Onboarding shows the default dashboard and the sleep plan" name="Onboarding shows the default dashboard and the sleep plan" classname="Onboarding shows the default dashboard and the sleep plan" file="/Users/runner/work/BabyTracker/BabyTracker/mobile/.maestro/01_onboarding.yaml" time="164.194" timestamp="2026-11-28T01:42:16" status="SUCCESS"/>
+  </testsuite>
+</testsuites>

@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="iPhone 17 - iOS 27.2 - 79C39062-C95E-4A7E-AACE-1D4AE134039F" tests="1" failures="1" time="101.601" timestamp="2026-11-28T02:09:06">
+    <testcase id="Sleep timer, and leaves reminders scheduled for the alarm check" name="Sleep timer, and leaves reminders scheduled for the alarm check" classname="Sleep timer, and leaves reminders scheduled for the alarm check" file="/Users/runner/work/BabyTracker/BabyTracker/mobile/.maestro/06_sleep_and_reminders.yaml" time="100.015" timestamp="2026-11-28T02:09:07" status="ERROR">
+      <failure>Unknown error</failure>
+    </testcase>
+  </testsuite>
+</testsuites>

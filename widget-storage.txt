@@ -1,0 +1,28 @@
+== widget extension in build/Build/Products/Release-iphonesimulator/Napchimeacc.app ==
+build/Build/Products/Release-iphonesimulator/Napchimeacc.app/PlugIns
+build/Build/Products/Release-iphonesimulator/Napchimeacc.app/PlugIns/ExpoWidgetsTarget.appex
+build/Build/Products/Release-iphonesimulator/Napchimeacc.app/PlugIns/ExpoWidgetsTarget.appex/React-timing_privacy.bundle
+build/Build/Products/Release-iphonesimulator/Napchimeacc.app/PlugIns/ExpoWidgetsTarget.appex/_CodeSignature
+build/Build/Products/Release-iphonesimulator/Napchimeacc.app/PlugIns/ExpoWidgetsTarget.appex/Metadata.appintents
+build/Build/Products/Release-iphonesimulator/Napchimeacc.app/PlugIns/ExpoWidgetsTarget.appex/ExpoWidgetsTarget.debug.dylib
+build/Build/Products/Release-iphonesimulator/Napchimeacc.app/PlugIns/ExpoWidgetsTarget.appex/React-cxxreact_privacy.bundle
+build/Build/Products/Release-iphonesimulator/Napchimeacc.app/PlugIns/ExpoWidgetsTarget.appex/__preview.dylib
+build/Build/Products/Release-iphonesimulator/Napchimeacc.app/PlugIns/ExpoWidgetsTarget.appex/ExpoWidgets.bundle
+build/Build/Products/Release-iphonesimulator/Napchimeacc.app/PlugIns/ExpoWidgetsTarget.appex/ExpoWidgetsTarget
+build/Build/Products/Release-iphonesimulator/Napchimeacc.app/PlugIns/ExpoWidgetsTarget.appex/Info.plist
+build/Build/Products/Release-iphonesimulator/Napchimeacc.app/PlugIns/NotificationService.appex
+build/Build/Products/Release-iphonesimulator/Napchimeacc.app/PlugIns/NotificationService.appex/_CodeSignature
+build/Build/Products/Release-iphonesimulator/Napchimeacc.app/PlugIns/NotificationService.appex/NotificationService
+build/Build/Products/Release-iphonesimulator/Napchimeacc.app/PlugIns/NotificationService.appex/Info.plist
+build/Build/Products/Release-iphonesimulator/Napchimeacc.app/PlugIns/ExpoWidgetsTarget.appex/ExpoWidgets.bundle/ExpoWidgetsLayoutRegistry.json {'Summary': 6202}
+build/Build/Products/Release-iphonesimulator/Napchimeacc.app/ExpoWidgets.bundle/ExpoWidgetsLayoutRegistry.json {'Summary': 6202}
+build/Build/Products/Release-iphonesimulator/Napchimeacc.app/PlugIns/ExpoWidgetsTarget.appex/Info.plist group: group.com.napchime.app.acc
+build/Build/Products/Release-iphonesimulator/Napchimeacc.app/PlugIns/NotificationService.appex/Info.plist group: build/Build/Products/Release-iphonesimulator/Napchimeacc.app/PlugIns/NotificationService.appex/Info.plist: Could not extract value, error: No value at that key path or invalid key path: ExpoWidgetsAppGroupIdentifier
+app group: group.com.napchime.app.acc
+== app group: /Users/runner/Library/Developer/CoreSimulator/Devices/79C39062-C95E-4A7E-AACE-1D4AE134039F/data/Containers/Shared/AppGroup/CF83591A-4496-417E-97CE-C61524FCB137 ==
+/Users/runner/Library/Developer/CoreSimulator/Devices/79C39062-C95E-4A7E-AACE-1D4AE134039F/data/Containers/Shared/AppGroup/CF83591A-4496-417E-97CE-C61524FCB137/.com.apple.mobile_container_manager.metadata.plist
+/Users/runner/Library/Developer/CoreSimulator/Devices/79C39062-C95E-4A7E-AACE-1D4AE134039F/data/Containers/Shared/AppGroup/CF83591A-4496-417E-97CE-C61524FCB137/Library/Preferences/group.com.napchime.app.acc.plist
+__expo_widgets_Summary_layout: str 6202
+__expo_widgets_Summary_timeline: list 19
+  first entry: {"props": {"recent": [{"at": "02:17", "text": "Diaper \u00b7 Wet"}, {"at": "01:34", "text": "Feeding \u00b7 Left \u00b7 15m"}], "childName": "Micky", "totals": "1 feed \u00b7 0m sleep \u00b7 1 diaper", "dark": {"diaper": "#FFCA16", "secondary": "#B0B4BA", "feeding": "#F38CC4", "sleep": "#B1A9FF", "background": "#000000"}, "light": {"secondary": "#60646C", "feeding": "#D6409F", "diaper": "#AB6400", "sleep": "#6E56CF", "background": "#ffffff"}, "sleeping": false, "diaper": {"title": "Diaper 02:17", "detail": "Wet"}, "feedingUri": "napchime-acc://entry/feeding", "next": "nap 09:00 \u00b7 feed 05:
+__expo_widgets_live_activity_TimerActivity_layout: str 1605

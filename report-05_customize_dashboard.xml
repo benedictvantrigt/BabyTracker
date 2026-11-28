@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="iPhone 17 - iOS 27.2 - 79C39062-C95E-4A7E-AACE-1D4AE134039F" tests="1" failures="0" time="146.959" timestamp="2026-11-28T02:01:34">
+    <testcase id="Turn off, reorder and reset dashboard cards" name="Turn off, reorder and reset dashboard cards" classname="Turn off, reorder and reset dashboard cards" file="/Users/runner/work/BabyTracker/BabyTracker/mobile/.maestro/05_customize_dashboard.yaml" time="146.672" timestamp="2026-11-28T02:01:35" status="SUCCESS"/>
+  </testsuite>
+</testsuites>
