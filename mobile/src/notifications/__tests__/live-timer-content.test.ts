@@ -2,7 +2,12 @@
 import { formatClock } from '@/domain/time';
 import { at, entry, kid, settings } from '@/domain/__tests__/fixtures';
 
-import { awakeTimerFor, liveTimerFor, sleepPlanText } from '../live-timer-content';
+import {
+  activitySubtitle,
+  awakeTimerFor,
+  liveTimerFor,
+  sleepPlanText,
+} from '../live-timer-content';
 
 describe('liveTimerFor', () => {
   it('names a running sleep after the child', () => {
@@ -111,8 +116,17 @@ describe('sleepPlanText', () => {
     const nap = entry('sleep', at(9, 5), null, { nap: true });
     const text = sleepPlanText([night, nap], fourMonths, settings, at(9, 30));
     expect(text).toMatch(/^Nap until \d\d:\d\d$/);
-    // The sleep timer then shows just that.
+    // The sleep timer then shows just that, on an iPhone Live Activity too (#110).
     expect(liveTimerFor(nap, 'Micky', text).text).toBe(text);
+    expect(activitySubtitle(liveTimerFor(nap, 'Micky', text))).toBe(text);
+  });
+
+  it('says when a sleep or feed started on a Live Activity when there is no planned end', () => {
+    const nap = entry('sleep', at(9, 5), null, { nap: true });
+    const started = `Started ${formatClock(at(9, 5))}`;
+    expect(activitySubtitle(liveTimerFor(nap, 'Micky', null))).toBe(started);
+    const feed = entry('feeding', at(9, 5), null, { type: 'breast_milk', method: 'left' });
+    expect(activitySubtitle(liveTimerFor(feed, 'Micky', 'Nap until 10:00'))).toBe(started);
   });
 
   it('says a night lasts until the day starts, also without the schedule', () => {
