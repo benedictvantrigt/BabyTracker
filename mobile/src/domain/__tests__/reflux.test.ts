@@ -48,13 +48,12 @@ describe('refluxWindow', () => {
 });
 
 describe('refluxReminder', () => {
-  it('fires when the upright time is over, on phones that show feed reminders', () => {
+  it('fires when the upright time is over, whatever the feed reminder switches', () => {
     const window = refluxWindow([entry('feeding', at(12), at(12, 15), milk)], on, at(12, 20))!;
     const reminder = refluxReminder(window, 'Micky');
     expect(reminder).toMatchObject({ id: 'reflux', fireAt: at(12, 45), alarm: false });
     expect(reminder.body).toContain('Micky');
-    expect(reminderWantedHere('reflux', { napRemindersHere: true, feedRemindersHere: false })).toBe(
-      false,
-    );
+    const off = { napReminders: false, feedRemindersDay: false, feedAlarmNight: false };
+    expect(reminderWantedHere('reflux', off)).toBe(true);
   });
 });

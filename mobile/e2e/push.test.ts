@@ -292,7 +292,7 @@ describe('push through the relay', () => {
   it('shares reminder rules between phones but keeps per-phone choices', async () => {
     const [a, b] = await family();
     await b.repo.updateSettings({
-      napRemindersHere: false,
+      napReminders: false,
       dashboardLayout: { order: DEFAULT_DASHBOARD.order, off: ['sleep'] },
     });
     await a.repo.updateSettings({
@@ -307,13 +307,13 @@ describe('push through the relay', () => {
     await (await engineOf(b)).sync();
     const s = await b.repo.getSettings();
     assert.equal(s.awakeWindowMinutes, 120);
-    assert.equal(s.feedAlarmNight, false);
+    // Reminder switches are each phone's own (0.14.1): B keeps its night alarm.
+    assert.equal(s.feedAlarmNight, true);
     assert.equal(s.sleepSchedule, false);
     assert.equal(s.scheduleStage, 'm6');
     assert.equal(s.napLeadMinutes, 25);
     assert.equal(s.nightSleep, false);
-    assert.equal(s.napRemindersHere, false);
-    assert.equal(s.feedRemindersHere, true);
+    assert.equal(s.napReminders, false);
     assert.deepEqual(s.dashboardLayout.off, ['sleep']);
   });
 });

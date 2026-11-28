@@ -3,6 +3,7 @@
 import { nodeDb } from '../node-db';
 import { Repo, ValidationError } from '../repo';
 import { SCHEMA_VERSION, migrate } from '../schema';
+import type { Settings } from '@/domain/types';
 
 const memoryDb = () => nodeDb();
 
@@ -239,60 +240,78 @@ describe('Repo', () => {
     expect((await repo.getSettings()).dashboardLayout.off).toEqual([]);
   });
 
-  it('splits the reminder switch of 0.11 and older per kind', async () => {
+  // Runs the migrations from `version` on over settings an older version left behind.
+  async function upgrade(version: number, settings: Record<string, unknown>) {
     const { db, repo } = await setup();
-    await db.runAsync('INSERT INTO settings (key, value) VALUES (?, ?)', [
-      'remindersOnThisPhone',
-      'false',
-    ]);
-    const before = await repo.getSettings();
-    expect([before.napRemindersHere, before.feedRemindersHere]).toEqual([false, false]);
-    await repo.updateSettings({ feedRemindersHere: true });
-    const after = await repo.getSettings();
-    expect([after.napRemindersHere, after.feedRemindersHere]).toEqual([false, true]);
-  });
-
-  describe('0.14: duty days replace the "reminders on this phone" switches', () => {
-    // Runs the last migration again over settings an older version left behind.
-    async function upgrade(settings: Record<string, unknown>) {
-      const { db, repo } = await setup();
-      for (const [key, value] of Object.entries(settings)) {
-        await db.runAsync('INSERT INTO settings (key, value) VALUES (?, ?)', [
-          key,
-          JSON.stringify(value),
-        ]);
-      }
-      await db.execAsync(`PRAGMA user_version = ${SCHEMA_VERSION - 1}`);
-      await migrate(db);
-      return repo.getSettings();
+    for (const [key, value] of Object.entries(settings)) {
+      await db.runAsync('INSERT INTO settings (key, value) VALUES (?, ?)', [
+        key,
+        JSON.stringify(value),
+      ]);
     }
+    await db.execAsync(`PRAGMA user_version = ${version}`);
+    await migrate(db);
+    const rows = await db.getAllAsync<{ key: string }>('SELECT key FROM settings', []);
+    return { settings: await repo.getSettings(), keys: rows.map((r) => r.key) };
+  }
+  const switches = (s: Settings) => [s.napReminders, s.feedRemindersDay, s.feedAlarmNight];
+  const HERE_KEYS = ['napRemindersHere', 'feedRemindersHere', 'remindersOnThisPhone'];
 
+  describe('upgrading from 0.13: duty days replace the "reminders on this phone" switches', () => {
     it('takes a phone with both switched off off duty', async () => {
-      const after = await upgrade({
+      const { settings, keys } = await upgrade(5, {
         napRemindersHere: false,
         feedRemindersHere: false,
         dutyDays: [1, 2],
       });
-      expect(after.dutyDays).toEqual([]);
-      expect([after.napRemindersHere, after.feedRemindersHere]).toEqual([true, true]);
+      expect(settings.dutyDays).toEqual([]);
+      expect(switches(settings)).toEqual([true, false, true]);
+      expect(keys.filter((k) => HERE_KEYS.includes(k))).toEqual([]);
     });
 
     it('does the same for the single switch of 0.11 and older', async () => {
-      const after = await upgrade({ remindersOnThisPhone: false });
-      expect(after.dutyDays).toEqual([]);
-      expect([after.napRemindersHere, after.feedRemindersHere]).toEqual([true, true]);
+      const { settings } = await upgrade(5, { remindersOnThisPhone: false });
+      expect(settings.dutyDays).toEqual([]);
+      expect(switches(settings)).toEqual([true, false, true]);
     });
 
-    it('keeps one switch that is off, and the duty days', async () => {
-      const after = await upgrade({ feedRemindersHere: false, dutyDays: [3] });
-      expect(after.dutyDays).toEqual([3]);
-      expect([after.napRemindersHere, after.feedRemindersHere]).toEqual([true, false]);
+    it('turns the feed reminders off on a phone that only had those off', async () => {
+      const { settings, keys } = await upgrade(5, { feedRemindersHere: false, dutyDays: [3] });
+      expect(settings.dutyDays).toEqual([3]);
+      expect(switches(settings)).toEqual([true, false, false]);
+      expect(keys.filter((k) => HERE_KEYS.includes(k))).toEqual([]);
     });
 
     it('leaves a phone with the switches on alone', async () => {
-      const after = await upgrade({ napRemindersHere: true, dutyDays: [0, 6] });
-      expect(after.dutyDays).toEqual([0, 6]);
+      const { settings } = await upgrade(5, { napRemindersHere: true, dutyDays: [0, 6] });
+      expect(settings.dutyDays).toEqual([0, 6]);
+      expect(switches(settings)).toEqual([true, false, true]);
     });
+  });
+
+  describe('upgrading from 0.14.0: the reminder switches are per phone', () => {
+    it('turns nap reminders off on a phone that had them off here', async () => {
+      const { settings, keys } = await upgrade(6, {
+        napRemindersHere: false,
+        feedRemindersDay: true,
+      });
+      expect(switches(settings)).toEqual([false, true, true]);
+      expect(keys).not.toContain('napRemindersHere');
+    });
+
+    it('keeps what this phone had', async () => {
+      const { settings } = await upgrade(6, { napReminders: false, feedAlarmNight: false });
+      expect(switches(settings)).toEqual([false, false, false]);
+    });
+  });
+
+  it('keeps the reminder switches on this phone only', async () => {
+    const { repo } = await setup();
+    const state = { familyId: 'f', relayUrl: 'https://relay.example', lastSeq: 0 };
+    await repo.startSync(state, false, [{ id: 'me', addedBy: null }]);
+    const before = await repo.outboxBatch(100);
+    await repo.updateSettings({ napReminders: false, feedAlarmNight: false });
+    expect(await repo.outboxBatch(100)).toEqual(before);
   });
 
   it('shares night sleep with the partner phones', async () => {

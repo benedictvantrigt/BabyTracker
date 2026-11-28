@@ -192,7 +192,8 @@ export function SyncProvider({ children }: { children: ReactNode }) {
   // Register this phone for pushes (reminders and "partner changed something" nudges).
   // The relay pushes only the reminders this phone wants (kinds, duty days); the push task
   // checks again. A string, so the registration below reruns only when it changes.
-  const remindersHere = settings.napRemindersHere || settings.feedRemindersHere;
+  const remindersHere =
+    settings.napReminders || settings.feedRemindersDay || settings.feedAlarmNight;
   const filterKey = JSON.stringify(reminderFilterFor(settings, currentTimeZone()));
   // What was last sent, so the same registration goes out once. On iOS, fetching the token
   // fires the token listener again: without this the two kept triggering each other and

@@ -78,6 +78,33 @@ const MIGRATIONS: string[] = [
     AND (SELECT yes FROM both_off);
   DROP TABLE both_off;
   `,
+  // 0.14.1: nap reminders, daytime feed reminders and night feed alarms are each phone's own
+  // switches. A "reminders on this phone" switch still off turns the matching ones off here.
+  `
+  CREATE TEMP TABLE here_off AS SELECT
+    (COALESCE(
+      (SELECT value FROM settings WHERE key = 'napRemindersHere'),
+      (SELECT value FROM settings WHERE key = 'remindersOnThisPhone'),
+      'true'
+    ) = 'false') AS naps,
+    (COALESCE(
+      (SELECT value FROM settings WHERE key = 'feedRemindersHere'),
+      (SELECT value FROM settings WHERE key = 'remindersOnThisPhone'),
+      'true'
+    ) = 'false') AS feeds;
+  INSERT INTO settings (key, value) SELECT 'napReminders', 'false'
+    WHERE (SELECT naps FROM here_off)
+    ON CONFLICT(key) DO UPDATE SET value = excluded.value;
+  INSERT INTO settings (key, value) SELECT 'feedRemindersDay', 'false'
+    WHERE (SELECT feeds FROM here_off)
+    ON CONFLICT(key) DO UPDATE SET value = excluded.value;
+  INSERT INTO settings (key, value) SELECT 'feedAlarmNight', 'false'
+    WHERE (SELECT feeds FROM here_off)
+    ON CONFLICT(key) DO UPDATE SET value = excluded.value;
+  DELETE FROM settings
+  WHERE key IN ('napRemindersHere', 'feedRemindersHere', 'remindersOnThisPhone');
+  DROP TABLE here_off;
+  `,
 ];
 
 export const SCHEMA_VERSION = MIGRATIONS.length;

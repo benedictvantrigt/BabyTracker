@@ -8,13 +8,31 @@ const micky = kid('Micky');
 const m = kid('M');
 
 describe('reminderWantedHere', () => {
-  it('switches nap, wake and bedtime apart from feeds', () => {
-    const napsOnly = { napRemindersHere: true, feedRemindersHere: false };
-    expect(['nap', 'wake', 'bed', 'feed'].map((id) => reminderWantedHere(id, napsOnly))).toEqual(
-      [true, true, true, false],
-    );
-    const feedsOnly = { napRemindersHere: false, feedRemindersHere: true };
-    expect(['nap', 'feed'].map((id) => reminderWantedHere(id, feedsOnly))).toEqual([false, true]);
+  const ids = ['nap', 'wake', 'bed', 'feedday', 'feed'];
+  const off = { napReminders: false, feedRemindersDay: false, feedAlarmNight: false };
+
+  it('follows this phone\'s switch for each kind', () => {
+    expect(ids.map((id) => reminderWantedHere(id, { ...off, napReminders: true }))).toEqual([
+      true,
+      true,
+      true,
+      false,
+      false,
+    ]);
+    expect(ids.map((id) => reminderWantedHere(id, { ...off, feedRemindersDay: true }))).toEqual([
+      false,
+      false,
+      false,
+      true,
+      false,
+    ]);
+    expect(ids.map((id) => reminderWantedHere(id, { ...off, feedAlarmNight: true }))).toEqual([
+      false,
+      false,
+      false,
+      false,
+      true,
+    ]);
   });
 });
 
@@ -58,7 +76,7 @@ describe('computeReminders', () => {
     const day = [entry('feeding', at(8), at(8, 20), { type: 'breast_milk', method: 'left' })];
     expect(computeReminders(day, settings, m, at(9))).toEqual([]);
     const [daily] = computeReminders(day, { ...settings, feedRemindersDay: true }, m, at(9));
-    expect(daily).toMatchObject({ id: 'feed', fireAt: at(12), alarm: false });
+    expect(daily).toMatchObject({ id: 'feedday', fireAt: at(12), alarm: false });
   });
 
   it('counts the feed interval from the start of the latest feed', () => {

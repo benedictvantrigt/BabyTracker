@@ -146,21 +146,14 @@ export interface Settings {
   /** Daytime window, as minutes after local midnight. Outside it is "night". */
   dayStartMinute: number;
   dayEndMinute: number;
+  /** Nap, wake and bedtime reminders on this phone (per phone since 0.14.1, not synced). */
   napReminders: boolean;
+  /** Feed reminders during the day on this phone (per phone since 0.14.1, not synced). */
   feedRemindersDay: boolean;
+  /** Feed alarms at night on this phone (per phone since 0.14.1, not synced). */
   feedAlarmNight: boolean;
   /** Today-screen cards: display order and which are turned off (per phone). */
   dashboardLayout: DashboardLayout;
-  /**
-   * Whether this phone shows the nap, wake and bedtime reminders (per phone, not synced).
-   * Since 0.14 duty days do this; Settings only shows the switch while it is off.
-   */
-  napRemindersHere: boolean;
-  /**
-   * Whether this phone shows the feed reminders and night alarms (per phone, not synced).
-   * Since 0.14 duty days do this; Settings only shows the switch while it is off.
-   */
-  feedRemindersHere: boolean;
   /**
    * Left and Right on the Feeding card start a timer; when off they log the feed at one
    * moment, without a length (per phone, not synced).
@@ -204,9 +197,6 @@ export const SHARED_SETTINGS = [
   'feedIntervalMinutes',
   'dayStartMinute',
   'dayEndMinute',
-  'napReminders',
-  'feedRemindersDay',
-  'feedAlarmNight',
   'refluxTimer',
   'refluxMinutes',
   'nightSleep',
@@ -227,8 +217,6 @@ export const DEFAULT_SETTINGS: Settings = {
   feedRemindersDay: false,
   feedAlarmNight: true,
   dashboardLayout: DEFAULT_DASHBOARD,
-  napRemindersHere: true,
-  feedRemindersHere: true,
   feedTimer: true,
   dutyDays: [0, 1, 2, 3, 4, 5, 6],
   awakeTimer: true,
