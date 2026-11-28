@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState, useSyncExternalStore } from 'react';
 import Constants from 'expo-constants';
+import * as Device from 'expo-device';
 import { Alert, AppState, Linking, Platform, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 
 import NightAlarm from '../../../modules/night-alarm';
@@ -19,10 +20,11 @@ import {
   TimeOfDayField,
   ToggleRow,
 } from '@/components/ui';
-import { PRIVACY_POLICY_URL } from '@/constants/links';
+import { FEEDBACK_EMAIL, PLAY_STORE_URL, PRIVACY_POLICY_URL } from '@/constants/links';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useAction, useAppData } from '@/data/app-data';
 import { isCardOn } from '@/domain/dashboard';
+import { feedbackMailto } from '@/domain/feedback';
 import { SCHEDULE_STAGES, planDay, stageFor } from '@/domain/sleep-schedule';
 import {
   DAY,
@@ -147,6 +149,8 @@ export default function SettingsScreen() {
           feedingOn={feedingOn}
         />
 
+        <SupportCard />
+
         <AboutCard />
       </ScrollView>
     </TabScreen>
@@ -263,6 +267,42 @@ function ThisPhoneCard({
           value={settings.awakeTimer}
           onChange={(v) => update({ awakeTimer: v })}
           testID="toggle-awake-timer"
+        />
+      )}
+    </Card>
+  );
+}
+
+/** Feedback and a store rating (#105). A tip jar follows once the store products exist. */
+function SupportCard() {
+  const sendFeedback = () => {
+    const url = feedbackMailto(FEEDBACK_EMAIL, {
+      version: Constants.expoConfig?.version ?? null,
+      platform: Platform.OS,
+      osVersion: Device.osVersion,
+      model: Device.modelName,
+    });
+    Linking.openURL(url).catch(() =>
+      Alert.alert('No email app found', `Send your feedback to ${FEEDBACK_EMAIL}.`),
+    );
+  };
+  return (
+    <Card testID="settings-support">
+      <ThemedText type="smallBold" themeColor="textSecondary">
+        SUPPORT NAPCHIME
+      </ThemedText>
+      <ThemedText type="small" themeColor="textSecondary">
+        Missing something, or did something go wrong? We read every message.
+      </ThemedText>
+      <Button label="Send feedback" onPress={sendFeedback} />
+      {Platform.OS === 'android' && (
+        <Button
+          label="Rate Napchime"
+          onPress={() =>
+            Linking.openURL(PLAY_STORE_URL).catch(() =>
+              Alert.alert('Could not open Google Play', PLAY_STORE_URL),
+            )
+          }
         />
       )}
     </Card>
