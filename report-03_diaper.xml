@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="test" tests="1" failures="0" time="45.386" timestamp="2026-11-28T14:01:44">
+    <testcase id="One-tap diapers with undo" name="One-tap diapers with undo" classname="One-tap diapers with undo" file="/home/runner/work/BabyTracker/BabyTracker/mobile/.maestro/03_diaper.yaml" time="45.364" timestamp="2026-11-28T14:01:44" status="SUCCESS"/>
+  </testsuite>
+</testsuites>

@@ -1,0 +1,35 @@
+
+ ⛅️ wrangler 4.152.0
+────────────────────
+Your Worker has access to the following bindings:
+Binding                                  Resource                  Mode
+env.FAMILY (Family)                      Durable Object            local
+env.APNS_TOPIC ("com.napchime.app")      Environment Variable      local
+
+⎔ Starting local server...
+[wrangler:info] Ready on http://127.0.0.1:8787
+[wrangler:info] GET /health 200 OK (15ms)
+[wrangler:info] POST /v1/families/M94xSa1wOjJpdYKLyV7ulg 201 Created (27ms)
+[wrangler:info] POST /v1/families/M94xSa1wOjJpdYKLyV7ulg/changes 200 OK (12ms)
+[wrangler:info] GET /v1/families/M94xSa1wOjJpdYKLyV7ulg/changes 200 OK (5ms)
+[wrangler:info] GET /v1/families/M94xSa1wOjJpdYKLyV7ulg/changes 200 OK (9ms)
+[wrangler:info] POST /v1/families/M94xSa1wOjJpdYKLyV7ulg/invites 201 Created (6ms)
+[wrangler:info] POST /v1/families/M94xSa1wOjJpdYKLyV7ulg/changes 200 OK (6ms)
+[wrangler:info] GET /v1/families/M94xSa1wOjJpdYKLyV7ulg/changes 200 OK (5ms)
+[wrangler:info] POST /v1/families/M94xSa1wOjJpdYKLyV7ulg/join 201 Created (9ms)
+[wrangler:info] POST /v1/families/M94xSa1wOjJpdYKLyV7ulg/changes 200 OK (6ms)
+[wrangler:info] GET /v1/families/M94xSa1wOjJpdYKLyV7ulg/changes 200 OK (6ms)
+[wrangler:info] PUT /v1/families/M94xSa1wOjJpdYKLyV7ulg/device 200 OK (84ms)
+[wrangler:info] GET /v1/families/M94xSa1wOjJpdYKLyV7ulg/changes 200 OK (18ms)
+[wrangler:info] PUT /v1/families/M94xSa1wOjJpdYKLyV7ulg/reminders 200 OK (33ms)
+[wrangler:info] GET /v1/families/M94xSa1wOjJpdYKLyV7ulg/changes 200 OK (17ms)
+[wrangler:info] GET /v1/families/M94xSa1wOjJpdYKLyV7ulg/devices 200 OK (11ms)
+[wrangler:info] GET /v1/families/M94xSa1wOjJpdYKLyV7ulg/devices 200 OK (7ms)
+[wrangler:info] POST /v1/families/M94xSa1wOjJpdYKLyV7ulg/changes 200 OK (7ms)
+[wrangler:info] GET /v1/families/M94xSa1wOjJpdYKLyV7ulg/changes 200 OK (5ms)
+[wrangler:info] PUT /v1/families/M94xSa1wOjJpdYKLyV7ulg/reminders 200 OK (7ms)
+[wrangler:info] GET /v1/families/M94xSa1wOjJpdYKLyV7ulg/devices 200 OK (4ms)
+[wrangler:info] GET /v1/families/M94xSa1wOjJpdYKLyV7ulg/changes 200 OK (9ms)
+[wrangler:info] GET /v1/families/M94xSa1wOjJpdYKLyV7ulg/devices 200 OK (8ms)
+[wrangler:info] GET /v1/families/M94xSa1wOjJpdYKLyV7ulg/changes 200 OK (15ms)
+[wrangler:info] GET /v1/families/M94xSa1wOjJpdYKLyV7ulg/devices 200 OK (9ms)

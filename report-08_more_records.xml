@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="test" tests="1" failures="0" time="76.293" timestamp="2026-11-28T14:05:03">
+    <testcase id="Tummy time timer, temperature and growth" name="Tummy time timer, temperature and growth" classname="Tummy time timer, temperature and growth" file="/home/runner/work/BabyTracker/BabyTracker/mobile/.maestro/08_more_records.yaml" time="76.266" timestamp="2026-11-28T14:05:04" status="SUCCESS"/>
+  </testsuite>
+</testsuites>

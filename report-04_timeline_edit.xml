@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="test" tests="1" failures="0" time="73.942" timestamp="2026-11-28T14:02:37">
+    <testcase id="Timeline lists entries; edit and delete" name="Timeline lists entries; edit and delete" classname="Timeline lists entries; edit and delete" file="/home/runner/work/BabyTracker/BabyTracker/mobile/.maestro/04_timeline_edit.yaml" time="73.91" timestamp="2026-11-28T14:02:37" status="SUCCESS"/>
+  </testsuite>
+</testsuites>
