@@ -43,6 +43,16 @@ export interface LiveTimer {
   until?: number;
   /** Its button, if any. */
   action?: TimerAction;
+  /** True when `text` says until when a running sleep should last (from `sleepPlanText`). */
+  planned?: boolean;
+}
+
+/**
+ * The line under the title on an iPhone Live Activity: what a countdown counts to, until when
+ * a sleep should last (#110), else when the timer started.
+ */
+export function activitySubtitle(t: LiveTimer): string {
+  return t.countdownTo != null || t.planned ? t.text : `Started ${formatClock(t.start)}`;
 }
 
 /**
@@ -50,6 +60,7 @@ export interface LiveTimer {
  * when the baby should sleep; without it the text says when the timer started.
  */
 export function liveTimerFor(entry: Entry, childName: string, sleepPlan?: string | null): LiveTimer {
+  const planned = entry.kind === 'sleep' && !!sleepPlan;
   return {
     id: entry.id,
     kind: entry.kind === 'sleep' ? 'sleep' : 'feeding',
@@ -60,6 +71,7 @@ export function liveTimerFor(entry: Entry, childName: string, sleepPlan?: string
         : `${KIND_LABEL[entry.kind]} timer running since ${formatClock(entry.start)}`,
     start: entry.start,
     action: entry.kind === 'sleep' ? 'wake' : 'stopFeeding',
+    ...(planned ? { planned } : {}),
   };
 }
 

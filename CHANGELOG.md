@@ -3,6 +3,11 @@
 All notable changes to Napchime. Versions follow [Semantic Versioning](https://semver.org/);
 before 1.0.0 a minor version marks a phase of the plan.
 
+## [Unreleased]
+
+- iPhone: the lock-screen sleep timer says until when the baby should sleep ("Nap until
+  11:30", "Night until 07:00"), as on Android, instead of when it started (#110).
+
 ## [0.14.1] — 2026-11-27 — Reminder switches per phone
 
 - Nap reminders, the daytime feed reminder and the night feed alarm are each phone's own

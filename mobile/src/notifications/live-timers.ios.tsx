@@ -11,9 +11,12 @@ import {
 } from '@expo/ui/swift-ui/modifiers';
 import { createLiveActivity } from 'expo-widgets';
 
-import { formatClock } from '@/domain/time';
-
-import { TIMER_ACTION_LABEL, timerColor, type LiveTimer } from './live-timer-content';
+import {
+  TIMER_ACTION_LABEL,
+  activitySubtitle,
+  timerColor,
+  type LiveTimer,
+} from './live-timer-content';
 import { errorText, reportLiveTimers, withTimeout } from './timer-report';
 
 /** How long to wait for iOS to update or end a Live Activity. */
@@ -121,7 +124,7 @@ const TimerActivity = createLiveActivity<TimerActivityProps>('TimerActivity', (p
 function propsFor(t: LiveTimer): TimerActivityProps {
   return {
     title: t.title,
-    subtitle: t.countdownTo != null ? t.text : `Started ${formatClock(t.start)}`,
+    subtitle: activitySubtitle(t),
     // SwiftUI's timer style counts down to a future date and up from a past one.
     start: t.countdownTo ?? t.start,
     icon: ICON[t.kind],
